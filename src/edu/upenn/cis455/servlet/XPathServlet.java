@@ -10,6 +10,12 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
 import javax.servlet.http.*;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
 @SuppressWarnings("serial")
 public class XPathServlet extends HttpServlet {
@@ -22,16 +28,55 @@ public class XPathServlet extends HttpServlet {
 	@Override
 	public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		/* TODO: Implement user interface for XPath engine here */
+		PrintWriter out = response.getWriter();		
 		URL sourceUrl = new URL(request.getParameter("url"));
 		String sourceFileName = sourceUrl.getFile();
 		File sourceFile = new File(BASE_PATH+sourceFileName);
 		sourceFile.mkdirs();
 		Path destinationPath = new File(BASE_PATH+sourceFileName).toPath();
 		Files.copy(sourceUrl.openStream(), destinationPath, StandardCopyOption.REPLACE_EXISTING);
-		byte [] fileBytes = Files.readAllBytes(destinationPath);
+		byte[] fileBytes = Files.readAllBytes(destinationPath);
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		DocumentBuilder db;
+		
+		String xPathParam = request.getParameter("xPath");
+		
+		if(xPathParam == null || xPathParam.isEmpty())
+		{
+			//error case
+			out.print("Invalid xPath");
+		}
+		else
+		{
+			//get all the xPaths
+			
+			out.print("Null xpath");
+		}
+		
+		try 
+		{
+			db = dbf.newDocumentBuilder();
+			Document document = db.parse(sourceFile);
+			document.normalize();
+			
+		} 
+		catch (ParserConfigurationException e) 
+		{
+			out.print(e.toString());
+		} 
+		catch (SAXException e)
+		{
+			out.print(e.toString());
+		} 
+		catch (Exception e)
+		{
+			out.print(e.toString());
+		} 
+		
+		//out.print(new String(fileBytes));
+
 		deleteFileAndParents(destinationPath);
-		PrintWriter out = response.getWriter();		
-		out.print(new String(fileBytes));
+		
 		
 		response.flushBuffer();
 		
