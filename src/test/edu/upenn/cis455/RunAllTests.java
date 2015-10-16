@@ -8,8 +8,9 @@ public class RunAllTests extends TestCase {
 	public static Test suite() {
 		try {
 			Class[] testClasses = {
-			/* TODO: Add the names of your unit test classes here */
-			// Class.forName("your.class.name.here")
+			test.edu.upenn.cis455.XPathEngineTest.class,
+			test.edu.upenn.cis455.DomParserTest.class,
+			test.edu.upenn.cis455.ServletTest.class
 			};
 
 			return new TestSuite(testClasses);

@@ -6,5 +6,7 @@
 	<classpathentry kind="lib" path="lib/servlet-api.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/je-6.2.31.jar"/>
+	<classpathentry kind="lib" path="/home/cis455/Downloads/mockito-all-1.9.5.jar"/>
+	<classpathentry kind="lib" path="/home/cis455/git/cis455homework2milestone1/lib/easymock-3.4.jar"/>
 	<classpathentry kind="output" path="target/classes/"/>
 </classpath>
