@@ -17,7 +17,29 @@
     <property name="resources.dir" location="${build.dir}${file.separator}resources"/>
     <property name="conf.dir"      location="${build.dir}${file.separator}conf"/>
 
-    <target name="compile-xpathengine" description="Compiles the XPath engine">
+	<target name="compile-http" description="Compiles the HTTP classes">
+	        <mkdir dir="${classes.dir}"/>
+	        <javac srcdir="src/edu/upenn/cis455/http" destdir="${classes.dir}" debug="on" deprecation="off" optimize="on" includeAntRuntime="no">
+	            <classpath>
+	                <fileset dir="${inputlib.dir}">
+	                    <include name="*.jar"/>
+	                </fileset>
+	            </classpath>
+	        </javac>
+	</target>
+	
+    <target name="compile-xpath" depends="compile-http" description="Compiles the XPath classes">
+        <mkdir dir="${classes.dir}"/>
+        <javac srcdir="src/edu/upenn/cis455/xpath" destdir="${classes.dir}" debug="on" deprecation="off" optimize="on" includeAntRuntime="no">
+            <classpath>
+                <fileset dir="${inputlib.dir}">
+                    <include name="*.jar"/>
+                </fileset>
+            </classpath>
+        </javac>
+    </target>
+	
+    <target name="compile-xpathengine" depends="compile-xpath" description="Compiles the XPath engine">
         <mkdir dir="${classes.dir}"/>
         <javac srcdir="src/edu/upenn/cis455/xpathengine" destdir="${classes.dir}" debug="on" deprecation="off" optimize="on" includeAntRuntime="no">
             <classpath>

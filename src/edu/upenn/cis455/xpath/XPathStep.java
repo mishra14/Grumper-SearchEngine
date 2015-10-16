@@ -8,9 +8,8 @@ public class XPathStep {
 	private ArrayList<XPathTest> tests;
 	private XPathStep nextStep;
 	private int afterStep;
-	
-	public XPathStep()
-	{
+
+	public XPathStep() {
 	}
 
 	public String getNodeName() {
@@ -37,7 +36,6 @@ public class XPathStep {
 		this.nextStep = nextStep;
 	}
 
-	
 	public int getAfterStep() {
 		return afterStep;
 	}
@@ -52,9 +50,4 @@ public class XPathStep {
 				+ ", \nnextStep=" + nextStep + ", afterStep=" + afterStep + "]";
 	}
 
-	
-	
-	
-	
-	
 }
