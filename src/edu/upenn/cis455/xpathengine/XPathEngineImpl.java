@@ -9,6 +9,12 @@ import edu.upenn.cis455.xpath.DomParser;
 import edu.upenn.cis455.xpath.XPath;
 import edu.upenn.cis455.xpath.XPathParser;
 
+/**
+ * This class implements the methods for XPathEngine interface
+ * 
+ * @author cis455
+ *
+ */
 public class XPathEngineImpl implements XPathEngine {
 
 	private String[] xPathStrings;
@@ -18,6 +24,9 @@ public class XPathEngineImpl implements XPathEngine {
 		// Do NOT add arguments to the constructor!!
 	}
 
+	/**
+	 * Set the xpaths
+	 */
 	public void setXPaths(String[] xPathArray) {
 		xPathStrings = xPathArray;
 		xPaths = new XPath[xPathStrings.length];
@@ -28,6 +37,9 @@ public class XPathEngineImpl implements XPathEngine {
 		}
 	}
 
+	/**
+	 * check if i'th xpath is valid
+	 */
 	public boolean isValid(int i) {
 		if (i >= xPaths.length || i < 0 || !xPaths[i].isValid()) {
 			return false;
@@ -36,6 +48,9 @@ public class XPathEngineImpl implements XPathEngine {
 		}
 	}
 
+	/**
+	 * evaluate the document against all xpaths
+	 */
 	public boolean[] evaluate(Document document) {
 		if (xPaths == null || xPaths.length == 0) {
 			return null;
@@ -51,11 +66,17 @@ public class XPathEngineImpl implements XPathEngine {
 		return result;
 	}
 
+	/**
+	 * always return false
+	 */
 	@Override
 	public boolean isSAX() {
 		return false;
 	}
 
+	/**
+	 * always return null
+	 */
 	@Override
 	public boolean[] evaluateSAX(InputStream document, DefaultHandler handler) {
 		return null;

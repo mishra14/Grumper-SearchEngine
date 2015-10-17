@@ -37,6 +37,9 @@ public class XPath {
 		System.out.println(this.xPath);
 	}
 
+	/**
+	 * This method tokenizes an xpath based on special symbols
+	 */
 	public void tokenize() {
 		int last = 0;
 		tokens = new ArrayList<String>();

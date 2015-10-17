@@ -2,6 +2,12 @@ package edu.upenn.cis455.xpath;
 
 import java.util.ArrayList;
 
+/**
+ * This class holds data for an XPath step object
+ * 
+ * @author cis455
+ *
+ */
 public class XPathStep {
 
 	private String nodeName;

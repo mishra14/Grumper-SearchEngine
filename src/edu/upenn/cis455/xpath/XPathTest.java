@@ -1,5 +1,11 @@
 package edu.upenn.cis455.xpath;
 
+/**
+ * This class holds a XPath Test object
+ * 
+ * @author cis455
+ *
+ */
 public class XPathTest {
 
 	private boolean isStep;

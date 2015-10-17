@@ -11,9 +11,20 @@ import edu.upenn.cis455.http.HttpClient;
 import edu.upenn.cis455.xpathengine.XPathEngine;
 import edu.upenn.cis455.xpathengine.XPathEngineFactory;
 
+/**
+ * xPath servlet class generates a UI for user to enter a url and xpaths and
+ * validates the document at the url against the xpaths
+ * 
+ * @author cis455
+ *
+ */
 @SuppressWarnings("serial")
 public class XPathServlet extends HttpServlet {
 
+	/**
+	 * This method fetches the document from the given url and validates the
+	 * xpaths
+	 */
 	@Override
 	public void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws IOException {
@@ -47,9 +58,11 @@ public class XPathServlet extends HttpServlet {
 			}
 		}
 		response.flushBuffer();
-
 	}
 
+	/**
+	 * This method generates an html form for the user to enter url and xpaths
+	 */
 	@Override
 	public void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws IOException {
@@ -62,7 +75,6 @@ public class XPathServlet extends HttpServlet {
 				+ "<br><br>" + "<input type=\"submit\" value=\"submit\">"
 				+ "</form><br><br>" + "Ankit Mishra<br>" + "mankit<br>"
 				+ "</body></html>");
-
 		response.flushBuffer();
 	}
 

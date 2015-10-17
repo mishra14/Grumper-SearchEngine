@@ -19,12 +19,8 @@ import edu.upenn.cis455.xpath.XPathParser;
 
 /**
  * This class tests the Dom parsing logic by fetching the following document
- * from w3school website - 
- * <note> 
- * 	<to>Tove</to> 
- * 	<from>Jani</from>
- * 	<heading>Reminder</heading> 
- * 	<body>Don't forget me this weekend!</body>
+ * from w3school website - <note> <to>Tove</to> <from>Jani</from>
+ * <heading>Reminder</heading> <body>Don't forget me this weekend!</body>
  * </note>
  * 
  * Then it tests 2 xpaths against the document i.e. one valid and one invalid
@@ -32,11 +28,11 @@ import edu.upenn.cis455.xpath.XPathParser;
  * @author cis455
  *
  */
-public class DomParserTest extends  TestCase
-{
+public class DomParserTest extends TestCase {
 
 	/**
 	 * This method tests the case with valid xpath
+	 * 
 	 * @throws UnknownHostException
 	 * @throws IOException
 	 * @throws SAXException
@@ -54,9 +50,10 @@ public class DomParserTest extends  TestCase
 		boolean result = DomParser.parseDom(document, xPath);
 		assertEquals(result, true);
 	}
-	
+
 	/**
 	 * This method tests the case with invalid xpath
+	 * 
 	 * @throws UnknownHostException
 	 * @throws IOException
 	 * @throws SAXException

@@ -5,8 +5,21 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+/**
+ * This class is used to parse a document and validate it against an xpath
+ * 
+ * @author cis455
+ *
+ */
 public class DomParser {
 
+	/**
+	 * parse the document against the xpath
+	 * 
+	 * @param document
+	 * @param xPath
+	 * @return
+	 */
 	public static boolean parseDom(Document document, XPath xPath) {
 		boolean result = false;
 		if (!(xPath == null || document == null)) {
@@ -17,6 +30,13 @@ public class DomParser {
 		return result;
 	}
 
+	/**
+	 * validate an XPathStep object against the document node root
+	 * 
+	 * @param root
+	 * @param rootStep
+	 * @return
+	 */
 	private static boolean validateStep(Node root, XPathStep rootStep) {
 		boolean result = false;
 		System.out.println("Root - " + root.getNodeName());
@@ -52,6 +72,14 @@ public class DomParser {
 		}
 		return result;
 	}
+
+	/**
+	 * validate the given XPathTest object against the document Node root
+	 * 
+	 * @param root
+	 * @param test
+	 * @return
+	 */
 
 	private static boolean validateTest(Node root, XPathTest test) {
 		boolean result = false;

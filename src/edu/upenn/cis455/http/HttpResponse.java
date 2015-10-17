@@ -6,20 +6,21 @@ import java.util.Map;
 
 /**
  * Httpresponse class to hold http response data
+ * 
  * @author cis455
  *
  */
-public class HttpResponse 
-{
+public class HttpResponse {
 	private String protocol;
 	private String version;
 	private String responseCode;
 	private String responseCodeString;
 	private Map<String, ArrayList<String>> headers;
 	private String data;
-	
+
 	public HttpResponse(String protocol, String version, String responseCode,
-			String responseCodeString, Map<String, ArrayList<String>> headers, String data) {
+			String responseCodeString, Map<String, ArrayList<String>> headers,
+			String data) {
 		super();
 		this.protocol = protocol;
 		this.version = version;
@@ -28,7 +29,7 @@ public class HttpResponse
 		this.headers = headers;
 		this.data = data;
 	}
-	
+
 	public HttpResponse(String protocol, String version, String responseCode,
 			String responseCodeString, Map<String, ArrayList<String>> headers) {
 		super();
@@ -38,7 +39,7 @@ public class HttpResponse
 		this.responseCodeString = responseCodeString;
 		this.headers = headers;
 	}
-	
+
 	public HttpResponse() {
 		this.protocol = "";
 		this.version = "";
@@ -48,59 +49,52 @@ public class HttpResponse
 		this.data = "";
 	}
 
-	public String getResponseString()
-	{
+	public String getResponseString() {
 		StringBuilder response = new StringBuilder();
-		response.append(protocol+"/"+version+" "+responseCode+" "+responseCodeString+"\r\n");
-		if(headers!=null)
-		{
-			for(Map.Entry<String, ArrayList<String>> header : headers.entrySet())
-			{
+		response.append(protocol + "/" + version + " " + responseCode + " "
+				+ responseCodeString + "\r\n");
+		if (headers != null) {
+			for (Map.Entry<String, ArrayList<String>> header : headers
+					.entrySet()) {
 				StringBuilder headerString = new StringBuilder();
-				for( int i=0;i<header.getValue().size();i++)
-				{
+				for (int i = 0; i < header.getValue().size(); i++) {
 					headerString.append(header.getValue().get(i));
-					if(i<header.getValue().size()-1)
-					{
+					if (i < header.getValue().size() - 1) {
 						headerString.append(", ");
 					}
 				}
-				response.append(header.getKey()+":"+headerString.toString()+"\r\n");
+				response.append(header.getKey() + ":" + headerString.toString()
+						+ "\r\n");
 			}
 		}
 		response.append("\r\n");
-		if(data!=null)
-		{
+		if (data != null) {
 			response.append(data);
 		}
 		return response.toString();
 	}
-	
-	public String getResponseStringHeadersOnly()
-	{
+
+	public String getResponseStringHeadersOnly() {
 		StringBuilder response = new StringBuilder();
-		response.append(protocol+"/"+version+" "+responseCode+" "+responseCodeString+"\r\n");
-		if(headers!=null)
-		{
-			for(Map.Entry<String, ArrayList<String>> header : headers.entrySet())
-			{
+		response.append(protocol + "/" + version + " " + responseCode + " "
+				+ responseCodeString + "\r\n");
+		if (headers != null) {
+			for (Map.Entry<String, ArrayList<String>> header : headers
+					.entrySet()) {
 				StringBuilder headerString = new StringBuilder();
-				for( int i=0;i<header.getValue().size();i++)
-				{
+				for (int i = 0; i < header.getValue().size(); i++) {
 					headerString.append(header.getValue().get(i));
-					if(i<header.getValue().size()-1)
-					{
+					if (i < header.getValue().size() - 1) {
 						headerString.append(", ");
 					}
 				}
-				response.append(header.getKey()+":"+headerString.toString()+"\r\n");
+				response.append(header.getKey() + ":" + headerString.toString()
+						+ "\r\n");
 			}
 		}
 		response.append("\r\n");
 		return response.toString();
 	}
-	
-	
 
 	@Override
 	public String toString() {
@@ -164,5 +158,5 @@ public class HttpResponse
 		this.headers.clear();
 		this.data = "";
 	}
-	
+
 }
