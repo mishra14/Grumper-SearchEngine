@@ -8,7 +8,9 @@ Did you complete any extra-credit tasks? If so, which ones?
   NO
 
 Any special instructions for building and running your solution?
-  (include detailed instructions, or write 'None')
+  Please use sudo while building.
+  You can use ./fullTest.sh to run the servlet into jetty if jetty is installed at /usr/share/jetty/webapps
+  Run the servlet at the url - http://localhost:8080/servlet/xpath
 
 Did you personally write _all_ the code you are submitting
 (other than code from the course web page)?

@@ -58,6 +58,7 @@ public class XPathServlet extends HttpServlet {
 			}
 		}
 		response.flushBuffer();
+
 	}
 
 	/**
