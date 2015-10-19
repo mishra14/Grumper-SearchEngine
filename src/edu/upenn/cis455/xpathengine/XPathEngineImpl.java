@@ -7,7 +7,6 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import edu.upenn.cis455.xpath.DomParser;
 import edu.upenn.cis455.xpath.XPath;
-import edu.upenn.cis455.xpath.XPathParser;
 
 /**
  * This class implements the methods for XPathEngine interface
@@ -32,8 +31,6 @@ public class XPathEngineImpl implements XPathEngine {
 		xPaths = new XPath[xPathStrings.length];
 		for (int i = 0; i < xPathStrings.length; i++) {
 			xPaths[i] = new XPath(xPathStrings[i]);
-			xPaths[i].tokenize();
-			XPathParser.parseXPath(xPaths[i]);
 		}
 	}
 

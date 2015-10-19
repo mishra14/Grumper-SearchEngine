@@ -1,11 +1,14 @@
 package edu.upenn.cis455.xpath;
 
+import com.sleepycat.persist.model.Persistent;
+
 /**
  * This class holds a XPath Test object
  * 
  * @author cis455
  *
  */
+@Persistent
 public class XPathTest {
 
 	private boolean isStep;

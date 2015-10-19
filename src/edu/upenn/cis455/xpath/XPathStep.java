@@ -2,12 +2,15 @@ package edu.upenn.cis455.xpath;
 
 import java.util.ArrayList;
 
+import com.sleepycat.persist.model.Persistent;
+
 /**
  * This class holds data for an XPath step object
  * 
  * @author cis455
  *
  */
+@Persistent
 public class XPathStep {
 
 	private String nodeName;

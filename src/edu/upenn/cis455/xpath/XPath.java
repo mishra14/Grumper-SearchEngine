@@ -2,6 +2,9 @@ package edu.upenn.cis455.xpath;
 
 import java.util.ArrayList;
 
+import com.sleepycat.persist.model.Entity;
+import com.sleepycat.persist.model.PrimaryKey;
+
 /**
  * This class is used to tokenize and parse the xpath expressions based on the
  * following grammar -
@@ -12,8 +15,10 @@ import java.util.ArrayList;
  * @author Ankit
  *
  */
+@Entity
 public class XPath {
 
+	@PrimaryKey
 	private String xPath;
 	private ArrayList<String> tokens;
 	private XPathStep rootStep;
@@ -22,6 +27,9 @@ public class XPath {
 	/*
 	 * Unique symbols in an xPath - /, (, ), [, ], =, @, ",
 	 */
+	public XPath()
+	{
+	}
 	public XPath(String xPath) {
 		StringBuilder xPathBuilder = new StringBuilder();
 		int quotes = 0;
@@ -34,6 +42,8 @@ public class XPath {
 			xPathBuilder.append(xPath.charAt(i));
 		}
 		this.xPath = xPathBuilder.toString();// xPath.replace(" ", "");
+		tokenize();
+		XPathParser.parseXPath(this);
 		System.out.println(this.xPath);
 	}
 
@@ -129,5 +139,11 @@ public class XPath {
 	public void setValid(boolean isValid) {
 		this.isValid = isValid;
 	}
-
+	@Override
+	public String toString() {
+		return "XPath [xPath=" + xPath + ", tokens=" + tokens + ", rootStep="
+				+ rootStep + ", isValid=" + isValid + "]";
+	}
+	
+	
 }
