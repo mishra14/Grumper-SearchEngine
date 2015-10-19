@@ -7,14 +7,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.net.Socket;
 import java.net.URL;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
+import javax.net.ssl.HttpsURLConnection;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -23,18 +19,22 @@ import org.w3c.dom.Document;
 import org.w3c.tidy.Tidy;
 import org.xml.sax.SAXException;
 
+/**
+ * This class creates an HttpsClient that can fetch documents from a given https url
+ * 
+ * @author cis455
+ *
+ */
 public class HttpsClient {
+	
 	private URL sourceUrl;
-	private int port;
-	private String host;
-	private Socket socket;
-
+	private static final String CONTENT_TYPE_HEADER = "Content-Type";
+	private static final String XML = "xml";
+	private static final String HTML = "html";
+	private static final String DEFAULT_ENCODING = "utf-8";
+	
 	public HttpsClient(URL url) throws UnknownHostException, IOException {
 		sourceUrl = url;
-		host = sourceUrl.getHost();
-		port = sourceUrl.getPort() == -1 ? sourceUrl.getDefaultPort()
-				: sourceUrl.getPort();
-		socket = new Socket(host, port);
 	}
 
 	/**
@@ -51,30 +51,28 @@ public class HttpsClient {
 		Document document = null;
 		sendRequest();
 		HttpResponse response = parseResponse();
-		System.out.println(response);
+		//System.out.println(response);
 		if (response.getResponseCode().equals("200")
-				&& response.getHeaders().containsKey("content-type")) {
-			if (response.getHeaders().get("content-type").get(0)
-					.contains("html")) {
-				System.out.println("HTML detected");
+				&& response.getHeaders().containsKey(CONTENT_TYPE_HEADER)) {
+			if (response.getHeaders().get(CONTENT_TYPE_HEADER).get(0)
+					.contains(HTML)) {
 				String html = response.getData();
 				Tidy tidy = new Tidy();
-				tidy.setInputEncoding("UTF-8");
-				tidy.setOutputEncoding("UTF-8");
+				tidy.setInputEncoding(DEFAULT_ENCODING);
+				tidy.setOutputEncoding(DEFAULT_ENCODING);
 				tidy.setWraplen(Integer.MAX_VALUE);
 				tidy.setPrintBodyOnly(true);
 				tidy.setXmlOut(true);
 				tidy.setSmartIndent(true);
 				ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(
-						html.getBytes("UTF-8"));
+						html.getBytes(DEFAULT_ENCODING));
 				ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 				document = tidy.parseDOM(byteArrayInputStream,
 						byteArrayOutputStream);
-			} else if (response.getHeaders().get("content-type").get(0)
-					.contains("xml")) {
-				System.out.println("XML detected");
+			} else if (response.getHeaders().get(CONTENT_TYPE_HEADER).get(0)
+					.contains(XML)) {
 				InputStream documentInputStream = new ByteArrayInputStream(
-						response.getData().getBytes("UTF-8"));
+						response.getData().getBytes(DEFAULT_ENCODING));
 				DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory
 						.newInstance();
 				DocumentBuilder documentBuilder = documentBuilderFactory
@@ -88,28 +86,47 @@ public class HttpsClient {
 	}
 
 	public void sendRequest() throws IOException {
-		PrintWriter clientSocketOut = new PrintWriter(new OutputStreamWriter(
-				socket.getOutputStream()));
-		clientSocketOut.print("GET " + sourceUrl + " HTTP/1.0\r\n");
-		clientSocketOut.print("User-Agent: cis455crawler\r\n");
-		clientSocketOut.print("Accept: text/html,application/xml\r\n");
-		clientSocketOut.print("\r\n");
-		clientSocketOut.flush();
+		HttpsURLConnection connection = (HttpsURLConnection) sourceUrl
+				.openConnection();
+		connection.setDoOutput(true);
+		OutputStreamWriter outputStreamWriter = new OutputStreamWriter(connection.getOutputStream());
+		outputStreamWriter.write("GET " + sourceUrl + " HTTPS/1.0\r\n");
+		outputStreamWriter.write("User-Agent: cis455crawler\r\n");
+		outputStreamWriter.write("Accept: text/html,application/xml\r\n");
+		outputStreamWriter.write("\r\n");
+		outputStreamWriter.flush();
+		outputStreamWriter.close();
 	}
 
 	public HttpResponse parseResponse() throws IOException {
-		InputStream socketInputStream = socket.getInputStream();
+		HttpsURLConnection connection = (HttpsURLConnection) sourceUrl
+				.openConnection();
+		connection.setDoInput(true);
 		InputStreamReader socketInputStreamReader = new InputStreamReader(
-				socketInputStream);
+				connection.getInputStream());
 		BufferedReader socketBufferedReader = new BufferedReader(
 				socketInputStreamReader);
-		System.out.println("before reading");
 		HttpResponse response = parseResponse(socketBufferedReader);
-		System.out.println("after reading");
+		response.setResponseCode(""+connection.getResponseCode());
+		//get the first line - 
+		if( connection.getHeaderFields()!=null && connection.getHeaderFields().get(null) !=null && connection.getHeaderFields().get(null).get(0)!=null)
+		{
+			String[] firstLineSplit = connection.getHeaderFields().get(null).get(0).split(" ");
+			if (firstLineSplit.length < 3) {
+				return null;
+			}
+			if (firstLineSplit[0].trim().split("/").length < 2) {
+				return null;
+			}
+			response.setProtocol((firstLineSplit[0].trim().split("/")[0]));
+			response.setVersion((firstLineSplit[0].trim().split("/")[1]));
+			response.setResponseCode(firstLineSplit[1].trim());
+			response.setResponseCodeString(firstLineSplit[2].trim());
+		}
+
+		response.setHeaders(connection.getHeaderFields());
 		socketBufferedReader.close();
 		socketInputStreamReader.close();
-		socketInputStream.close();
-		socket.close();
 		return response;
 	}
 
@@ -122,45 +139,12 @@ public class HttpsClient {
 	 */
 	public HttpResponse parseResponse(BufferedReader in) throws IOException {
 		HttpResponse response = new HttpResponse();
-		String line = in.readLine();
-		if (line != null) {
-			String[] firstLineSplit = line.trim().split(" ", 3);
-			if (firstLineSplit.length < 3) {
-				return null;
-			}
-			if (firstLineSplit[0].trim().split("/").length < 2) {
-				return null;
-			}
-			response.setProtocol((firstLineSplit[0].trim().split("/")[0]));
-			response.setVersion((firstLineSplit[0].trim().split("/")[1]));
-			response.setResponseCode(firstLineSplit[1].trim());
-			response.setResponseCodeString(firstLineSplit[2].trim());
-			Map<String, ArrayList<String>> headers = new HashMap<String, ArrayList<String>>();
-			while ((line = in.readLine()) != null) {
-				if (line.equals("")) {
-					break;
-				}
-				String[] lineSplit = line.trim().split(":", 2);
-				if (lineSplit.length == 2) {
-					if (headers.containsKey(lineSplit[0].toLowerCase().trim())) {
-						headers.get(lineSplit[0]).add(lineSplit[1].trim());
-					} else {
-						ArrayList<String> values = new ArrayList<String>();
-						values.add(lineSplit[1].trim());
-						headers.put(lineSplit[0].toLowerCase().trim(), values);
-					}
-
-				}
-			}
-			StringBuilder responseBody = new StringBuilder();
-			while ((line = in.readLine()) != null) {
-				responseBody.append(line + "\r\n");
-			}
-			response.setHeaders(headers);
-			response.setData(responseBody.toString());
-		} else {
-			return null;
+		String line;
+		StringBuilder responseBody = new StringBuilder();
+		while ((line = in.readLine()) != null) {
+			responseBody.append(line + "\r\n");
 		}
+		response.setData(responseBody.toString());
 		return response;
 	}
 

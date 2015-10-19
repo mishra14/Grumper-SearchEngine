@@ -13,6 +13,7 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -34,7 +35,11 @@ public class HttpClient {
 	private int port;
 	private String host;
 	private Socket socket;
-
+	private static final String CONTENT_TYPE_HEADER = "content-type";
+	private static final String XML = "xml";
+	private static final String HTML = "html";
+	private static final String DEFAULT_ENCODING = "utf-8";
+	
 	public HttpClient(URL url) throws UnknownHostException, IOException {
 		sourceUrl = url;
 		host = sourceUrl.getHost();
@@ -57,30 +62,28 @@ public class HttpClient {
 		Document document = null;
 		sendRequest();
 		HttpResponse response = parseResponse();
-		System.out.println(response);
+		//System.out.println(response);
 		if (response.getResponseCode().equals("200")
-				&& response.getHeaders().containsKey("content-type")) {
-			if (response.getHeaders().get("content-type").get(0)
-					.contains("html")) {
-				System.out.println("HTML detected");
+				&& response.getHeaders().containsKey(CONTENT_TYPE_HEADER)) {
+			if (response.getHeaders().get(CONTENT_TYPE_HEADER).get(0)
+					.contains(HTML)) {
 				String html = response.getData();
 				Tidy tidy = new Tidy();
-				tidy.setInputEncoding("UTF-8");
-				tidy.setOutputEncoding("UTF-8");
+				tidy.setInputEncoding(DEFAULT_ENCODING);
+				tidy.setOutputEncoding(DEFAULT_ENCODING);
 				tidy.setWraplen(Integer.MAX_VALUE);
 				tidy.setPrintBodyOnly(true);
 				tidy.setXmlOut(true);
 				tidy.setSmartIndent(true);
 				ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(
-						html.getBytes("UTF-8"));
+						html.getBytes(DEFAULT_ENCODING));
 				ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 				document = tidy.parseDOM(byteArrayInputStream,
 						byteArrayOutputStream);
-			} else if (response.getHeaders().get("content-type").get(0)
-					.contains("xml")) {
-				System.out.println("XML detected");
+			} else if (response.getHeaders().get(CONTENT_TYPE_HEADER).get(0)
+					.contains(XML)) {
 				InputStream documentInputStream = new ByteArrayInputStream(
-						response.getData().getBytes("UTF-8"));
+						response.getData().getBytes(DEFAULT_ENCODING));
 				DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory
 						.newInstance();
 				DocumentBuilder documentBuilder = documentBuilderFactory
@@ -109,9 +112,7 @@ public class HttpClient {
 				socketInputStream);
 		BufferedReader socketBufferedReader = new BufferedReader(
 				socketInputStreamReader);
-		System.out.println("before reading");
 		HttpResponse response = parseResponse(socketBufferedReader);
-		System.out.println("after reading");
 		socketBufferedReader.close();
 		socketInputStreamReader.close();
 		socketInputStream.close();
@@ -141,7 +142,7 @@ public class HttpClient {
 			response.setVersion((firstLineSplit[0].trim().split("/")[1]));
 			response.setResponseCode(firstLineSplit[1].trim());
 			response.setResponseCodeString(firstLineSplit[2].trim());
-			Map<String, ArrayList<String>> headers = new HashMap<String, ArrayList<String>>();
+			Map<String, List<String>> headers = new HashMap<String, List<String>>();
 			while ((line = in.readLine()) != null) {
 				if (line.equals("")) {
 					break;

@@ -1,7 +1,7 @@
 package edu.upenn.cis455.http;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -15,11 +15,11 @@ public class HttpResponse {
 	private String version;
 	private String responseCode;
 	private String responseCodeString;
-	private Map<String, ArrayList<String>> headers;
+	private Map<String, List<String>> headers;
 	private String data;
 
 	public HttpResponse(String protocol, String version, String responseCode,
-			String responseCodeString, Map<String, ArrayList<String>> headers,
+			String responseCodeString, Map<String, List<String>> headers,
 			String data) {
 		super();
 		this.protocol = protocol;
@@ -31,7 +31,7 @@ public class HttpResponse {
 	}
 
 	public HttpResponse(String protocol, String version, String responseCode,
-			String responseCodeString, Map<String, ArrayList<String>> headers) {
+			String responseCodeString, Map<String, List<String>> headers) {
 		super();
 		this.protocol = protocol;
 		this.version = version;
@@ -45,7 +45,7 @@ public class HttpResponse {
 		this.version = "";
 		this.responseCode = "";
 		this.responseCodeString = "";
-		this.headers = new HashMap<String, ArrayList<String>>();
+		this.headers = new HashMap<String, List<String>>();
 		this.data = "";
 	}
 
@@ -54,7 +54,7 @@ public class HttpResponse {
 		response.append(protocol + "/" + version + " " + responseCode + " "
 				+ responseCodeString + "\r\n");
 		if (headers != null) {
-			for (Map.Entry<String, ArrayList<String>> header : headers
+			for (Map.Entry<String, List<String>> header : headers
 					.entrySet()) {
 				StringBuilder headerString = new StringBuilder();
 				for (int i = 0; i < header.getValue().size(); i++) {
@@ -79,7 +79,7 @@ public class HttpResponse {
 		response.append(protocol + "/" + version + " " + responseCode + " "
 				+ responseCodeString + "\r\n");
 		if (headers != null) {
-			for (Map.Entry<String, ArrayList<String>> header : headers
+			for (Map.Entry<String, List<String>> header : headers
 					.entrySet()) {
 				StringBuilder headerString = new StringBuilder();
 				for (int i = 0; i < header.getValue().size(); i++) {
@@ -136,12 +136,12 @@ public class HttpResponse {
 		this.responseCodeString = responseCodeString;
 	}
 
-	public Map<String, ArrayList<String>> getHeaders() {
+	public Map<String, List<String>> getHeaders() {
 		return headers;
 	}
 
-	public void setHeaders(Map<String, ArrayList<String>> headers) {
-		this.headers = headers;
+	public void setHeaders(Map<String, List<String>> map) {
+		this.headers = map;
 	}
 
 	public String getData() {

@@ -33,4 +33,10 @@ public class Queue<T> {
 								// array list
 	}
 
+	public synchronized void enqueueAll(ArrayList<T> list) {
+		for (T t : list) {
+			enqueue(t);			//add all elements from the list
+		}
+	}
+
 }

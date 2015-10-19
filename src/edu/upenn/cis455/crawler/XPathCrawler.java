@@ -3,12 +3,14 @@ package edu.upenn.cis455.crawler;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import edu.upenn.cis455.storage.DBWrapper;
 
 public class XPathCrawler {
 	private static Queue<URL> queue = new Queue<URL>();
 	private static ArrayList<XPathCrawlerThread> threads = new ArrayList<XPathCrawlerThread>();
+	private static HashSet<URL> seenUrls = new HashSet<URL>();
 	private static URL startingUrl;
 	private static String dbPath;
 	private static int maxSize;
@@ -33,8 +35,7 @@ public class XPathCrawler {
 			System.exit(-1);
 		} else {
 			try {
-				startingUrl = new URL(
-						"https://dbappserv.cis.upenn.edu/crawltest.html");// args[0]);
+				startingUrl = new URL("https://dbappserv.cis.upenn.edu/crawltest.html");//args[0]);//
 				DBWrapper.openDBWrapper(args[1]);
 				maxSize = Integer.valueOf(args[2]);
 				if (args.length == 4) {
@@ -113,5 +114,18 @@ public class XPathCrawler {
 	public static void setRun(boolean run) {
 		XPathCrawler.run = run;
 	}
+
+	public static ArrayList<XPathCrawlerThread> getThreads() {
+		return threads;
+	}
+
+	public static void setThreads(ArrayList<XPathCrawlerThread> threads) {
+		XPathCrawler.threads = threads;
+	}
+
+	public static HashSet<URL> getSeenUrls() {
+		return seenUrls;
+	}
+	
 
 }
