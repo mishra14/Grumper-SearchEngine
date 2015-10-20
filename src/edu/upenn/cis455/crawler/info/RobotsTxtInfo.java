@@ -102,4 +102,38 @@ public class RobotsTxtInfo {
 	public boolean crawlContainAgent(String key) {
 		return crawlDelays.containsKey(key);
 	}
+
+	public static RobotsTxtInfo parseRobotsTxt(String robots) throws NumberFormatException{
+		RobotsTxtInfo info = new RobotsTxtInfo();
+		String[] lines = robots.split(System.getProperty("line.separator"));
+		String userAgent = null;
+		String disallow = null;
+		String allow = null;
+		int delay = -1;
+		for(String line : lines)
+		{
+			line =line.trim();
+			if(line.startsWith("User-agent") && line.contains(":"))
+			{
+				userAgent = line.split(":")[1].trim();
+				info.addUserAgent(userAgent);
+			}
+			else if(line.startsWith("Disallow") && line.contains(":") && userAgent != null)
+			{
+				disallow = line.split(":")[1].trim();
+				info.addDisallowedLink(userAgent, disallow);
+			}
+			else if(line.startsWith("Allow") && line.contains(":") && userAgent != null)
+			{
+				allow = line.split(":")[1].trim();
+				info.addAllowedLink(userAgent, allow);
+			}
+			else if(line.startsWith("Crawl-delay") && line.contains(":") && userAgent != null)
+			{
+				delay = Integer.valueOf(line.split(":")[1].trim());
+				info.addCrawlDelay(userAgent, delay);
+			}
+		}
+		return info;
+	}
 }

@@ -4,6 +4,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
+
+import edu.upenn.cis455.crawler.info.RobotsTxtInfo;
 import edu.upenn.cis455.storage.DBWrapper;
 
 public class XPathCrawler {
@@ -28,6 +30,28 @@ public class XPathCrawler {
 	 *            of files to get before stopping
 	 */
 	public static void main(String[] args) {
+		String robotsTxt = "# These defaults shouldn't apply to your crawler\n"
+				+ "User-agent: *\n"
+				+ "Disallow: /crawltest/marie/\n"
+				+ "Crawl-delay: 10\n"
+				+ "# Below is the directive your crawler should use:\n"
+				+ "User-agent: cis455crawler\n"
+				+ "Disallow: /crawltest/marie/private/\n"
+				+ "Disallow: /crawltest/foo/\n"
+				+ "Disallow: /infrastructure/\n"
+				+ "Disallow: /maven/\n"
+				+ "Disallow: /ppod/\n"
+				+ "Crawl-delay: 5\n"
+				+ "# This should be ignored by your crawler\n"
+				+ "User-agent: evilcrawler\n"
+				+ "Disallow: /\n";
+		
+		RobotsTxtInfo info = RobotsTxtInfo.parseRobotsTxt(robotsTxt);
+		info.print();
+		
+		
+		
+
 		if (args.length < 3 || args.length > 4) {
 			System.out.println("Invalid arguments");
 			System.out.println("Ankit Mishra");
