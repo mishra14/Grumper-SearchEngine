@@ -4,7 +4,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
-
 import edu.upenn.cis455.storage.DBWrapper;
 
 public class XPathCrawler {
@@ -14,8 +13,9 @@ public class XPathCrawler {
 	private static URL startingUrl;
 	private static String dbPath;
 	private static int maxSize;
-	private static int maxCount; // synchronized - but the call should be in syn
-									// block
+	private static int maxCount = -1; // default value = -1// synchronized - but
+										// the call should be in syn
+										// block
 	private static boolean run = true; // synchronized
 	private static final int THREAD_COUNT = 5;
 
@@ -35,14 +35,15 @@ public class XPathCrawler {
 			System.exit(-1);
 		} else {
 			try {
-				startingUrl = new URL("https://dbappserv.cis.upenn.edu/crawltest.html");//args[0]);//
+				startingUrl = new URL(args[0]);
 				DBWrapper.openDBWrapper(args[1]);
-				maxSize = Integer.valueOf(args[2]);
+				maxSize = Integer.valueOf(args[2]) * 1024;
 				if (args.length == 4) {
 					try {
 						maxCount = Integer.valueOf(args[3]);
 					} catch (NumberFormatException e) {
-						System.out.println("Invalid max document count - " + e);
+						System.out.println("Invalid max document count - ");
+						e.printStackTrace();
 					}
 				}
 				// start the crawler threads
@@ -53,17 +54,24 @@ public class XPathCrawler {
 				}
 				// add the starting url to the queue
 				queue.enqueue(startingUrl);
-
+				// wait for threads to end before stopping
+				for (int i = 0; i < THREAD_COUNT; i++) {
+					threads.get(i).join();
+				}
 			} catch (MalformedURLException e) {
-				System.out.println("Invalid starting url - " + e);
+				System.out.println("Invalid starting url - ");
+				e.printStackTrace();
 			} catch (NumberFormatException e) {
-				System.out.println("Invalid max file size - " + e);
+				System.out.println("Invalid max file size - ");
+				e.printStackTrace();
 			} catch (Exception e) {
-				System.out.println("Invalid db Path - " + e);
+				System.out.println("Invalid db Path - ");
+				e.printStackTrace();
 			}
 		}
 
 		// finally close db store
+		
 		DBWrapper.closeDBWrapper();
 	}
 
@@ -126,6 +134,5 @@ public class XPathCrawler {
 	public static HashSet<URL> getSeenUrls() {
 		return seenUrls;
 	}
-	
 
 }

@@ -3,11 +3,14 @@ package edu.upenn.cis455.servlet;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URL;
+
 import javax.servlet.http.*;
 import javax.xml.parsers.ParserConfigurationException;
-import org.w3c.dom.Document;
+
 import org.xml.sax.SAXException;
-import edu.upenn.cis455.http.HttpClient;
+
+import edu.upenn.cis455.bean.DocumentRecord;
+import edu.upenn.cis455.crawler.HttpClient;
 import edu.upenn.cis455.xpathengine.XPathEngine;
 import edu.upenn.cis455.xpathengine.XPathEngineFactory;
 
@@ -39,12 +42,12 @@ public class XPathServlet extends HttpServlet {
 		} else {
 			try {
 				HttpClient httpClient = new HttpClient(sourceUrl);
-				Document document = httpClient.getDocument();
+				DocumentRecord document = httpClient.getDocument();
 				// get all the xPaths
 				String[] xPaths = xPathParam.split(";");
 				XPathEngine engine = XPathEngineFactory.getXPathEngine();
 				engine.setXPaths(xPaths);
-				boolean[] result = engine.evaluate(document);
+				boolean[] result = engine.evaluate(document.getDocument());
 				for (int i = 0; i < result.length; i++) {
 					out.println(xPaths[i] + ":"
 							+ ((result[i]) ? "Success" : "Faliure"));

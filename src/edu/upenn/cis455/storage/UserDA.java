@@ -1,7 +1,8 @@
 package edu.upenn.cis455.storage;
 
 import com.sleepycat.persist.PrimaryIndex;
-import edu.upenn.cis455.user.User;
+
+import edu.upenn.cis455.bean.User;
 
 public class UserDA {
 

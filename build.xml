@@ -17,18 +17,19 @@
     <property name="resources.dir" location="${build.dir}${file.separator}resources"/>
     <property name="conf.dir"      location="${build.dir}${file.separator}conf"/>
 
-	<target name="compile-http" description="Compiles the HTTP classes">
-	        <mkdir dir="${classes.dir}"/>
-	        <javac srcdir="src/edu/upenn/cis455/http" destdir="${classes.dir}" debug="on" deprecation="off" optimize="on" includeAntRuntime="no">
-	            <classpath>
-	                <fileset dir="${inputlib.dir}">
-	                    <include name="*.jar"/>
-	                </fileset>
-	            </classpath>
-	        </javac>
-	</target>
 	
-    <target name="compile-xpath" depends="compile-http" description="Compiles the XPath classes">
+    <target name="compile-bean" description="compiles the user bean class">
+        <mkdir dir="${classes.dir}"/>
+        <javac srcdir="src/edu/upenn/cis455/bean" destdir="${classes.dir}" debug="on" deprecation="off" optimize="on" includeAntRuntime="no">
+            <classpath>
+                <fileset dir="${inputlib.dir}">
+                    <include name="*.jar"/>
+                </fileset>
+            </classpath>
+        </javac>
+    </target>
+	
+    <target name="compile-xpath" depends="compile-bean" description="Compiles the XPath classes">
         <mkdir dir="${classes.dir}"/>
         <javac srcdir="src/edu/upenn/cis455/xpath" destdir="${classes.dir}" debug="on" deprecation="off" optimize="on" includeAntRuntime="no">
             <classpath>
@@ -38,19 +39,9 @@
             </classpath>
         </javac>
     </target>
+
 	
-    <target name="compile-xpathengine" description="compiles the user bean class">
-        <mkdir dir="${classes.dir}"/>
-        <javac srcdir="src/edu/upenn/cis455/user" destdir="${classes.dir}" debug="on" deprecation="off" optimize="on" includeAntRuntime="no">
-            <classpath>
-                <fileset dir="${inputlib.dir}">
-                    <include name="*.jar"/>
-                </fileset>
-            </classpath>
-        </javac>
-    </target>
-	
-	<target name="compile-user" depends="compile-xpath" description="Compiles the XPath engine">
+	<target name="compile-xpathengine" depends="compile-xpath" description="Compiles the XPath engine">
         <mkdir dir="${classes.dir}"/>
         <javac srcdir="src/edu/upenn/cis455/xpathengine" destdir="${classes.dir}" debug="on" deprecation="off" optimize="on" includeAntRuntime="no">
             <classpath>
@@ -61,7 +52,7 @@
         </javac>
     </target>
 	
-    <target name="compile-storage" depends="compile-xpathengine, compile-user" description="Compiles the storage system">
+    <target name="compile-storage" depends="compile-xpathengine" description="Compiles the storage system">
         <mkdir dir="${classes.dir}"/>
         <javac srcdir="src/edu/upenn/cis455/storage" destdir="${classes.dir}" debug="on" deprecation="off" optimize="on" includeAntRuntime="no">
             <classpath>

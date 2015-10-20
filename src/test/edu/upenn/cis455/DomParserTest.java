@@ -9,10 +9,10 @@ import javax.xml.parsers.ParserConfigurationException;
 import junit.framework.TestCase;
 
 import org.junit.Test;
-import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-import edu.upenn.cis455.http.HttpClient;
+import edu.upenn.cis455.bean.DocumentRecord;
+import edu.upenn.cis455.crawler.HttpClient;
 import edu.upenn.cis455.xpath.DomParser;
 import edu.upenn.cis455.xpath.XPath;
 import edu.upenn.cis455.xpath.XPathParser;
@@ -46,8 +46,8 @@ public class DomParserTest extends TestCase {
 		XPathParser.parseXPath(xPath);
 		URL sourceUrl = new URL("http://www.w3schools.com/xml/note.xml");
 		HttpClient httpClient = new HttpClient(sourceUrl);
-		Document document = httpClient.getDocument();
-		boolean result = DomParser.parseDom(document, xPath);
+		DocumentRecord document = httpClient.getDocument();
+		boolean result = DomParser.parseDom(document.getDocument(), xPath);
 		assertEquals(result, true);
 	}
 
@@ -68,8 +68,8 @@ public class DomParserTest extends TestCase {
 		XPathParser.parseXPath(xPath);
 		URL sourceUrl = new URL("http://www.w3schools.com/xml/note.xml");
 		HttpClient httpClient = new HttpClient(sourceUrl);
-		Document document = httpClient.getDocument();
-		boolean result = DomParser.parseDom(document, xPath);
+		DocumentRecord document = httpClient.getDocument();
+		boolean result = DomParser.parseDom(document.getDocument(), xPath);
 		assertEquals(result, false);
 	}
 }

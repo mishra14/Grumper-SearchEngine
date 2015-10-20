@@ -16,17 +16,20 @@ public class DBWrapper {
 	private static EntityStore store;
 
 	public static void openDBWrapper(String path) throws Exception {
+		System.out.println("DB at - "+path);
 		File dbFile = new File(path);
 		if (!dbFile.isDirectory()) {
 			if (!dbFile.mkdirs()) {
 				throw new Exception("DB File make dir failed");
-
 			}
+			System.out.println("Created new DB Dir at - "+path);
 		}
 		EnvironmentConfig envConfig = new EnvironmentConfig();
 		StoreConfig storeConfig = new StoreConfig();
 		envConfig.setAllowCreate(true);
 		storeConfig.setAllowCreate(true);
+		envConfig.setTransactional(true);
+		storeConfig.setTransactional(true);
 		env = new Environment(dbFile, envConfig);
 		store = new EntityStore(env, "Crawler Store", storeConfig);
 	}
