@@ -14,10 +14,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.xml.parsers.ParserConfigurationException;
+
 import org.xml.sax.SAXException;
 
 import edu.upenn.cis455.bean.DocumentRecord;
+import edu.upenn.cis455.crawler.info.RobotsTxtInfo;
 
 /**
  * This class creates an HttpClient that can fetch documents from a given url
@@ -60,8 +63,9 @@ public class HttpClient {
 		DocumentRecord documentRecord = null;
 		// first send head
 		HttpResponse response = sendHead();
-		//System.out.println(sourceUrl + " - " + response);
+		// System.out.println(sourceUrl + " - " + response);
 		if (response != null && response.getHeaders() != null
+				&& response.getResponseCode().equals("200")
 				&& response.getHeaders().containsKey(CONTENT_LENGTH_HEADER)
 				&& response.getHeaders().containsKey(CONTENT_TYPE_HEADER)) {
 			String contentType = response.getHeaders().get(CONTENT_TYPE_HEADER)
@@ -81,10 +85,12 @@ public class HttpClient {
 				System.out.println("max size - " + XPathCrawler.getMaxSize());
 				return documentRecord;
 			}
+		} else {
+			return documentRecord;
 		}
 		socket = new Socket(host, port);
 		// then send get
-		response = sendRequest();
+		response = sendFileRequest();
 		// System.out.println(response);
 
 		if (response != null && response.getResponseCode() != null
@@ -112,6 +118,28 @@ public class HttpClient {
 		return documentRecord;
 	}
 
+	public RobotsTxtInfo getRobotsTxt() throws IOException {
+		RobotsTxtInfo info = null;
+		HttpResponse response = sendRobotsTxtRequest();
+		System.out.println(sourceUrl + " - " + response);
+		if (response != null && response.getData() != null
+				&& response.getResponseCode().equals("200")) {
+			info = RobotsTxtInfo.parseRobotsTxt(response.getData());
+		}
+		return info;
+	}
+
+	public HttpResponse sendRobotsTxtRequest() throws IOException {
+		PrintWriter clientSocketOut = new PrintWriter(new OutputStreamWriter(
+				socket.getOutputStream()));
+		clientSocketOut.print("GET " + sourceUrl + " HTTP/1.0\r\n");
+		clientSocketOut.print("User-Agent: cis455crawler\r\n");
+		clientSocketOut.print("Accept: text/plain\r\n");
+		clientSocketOut.print("\r\n");
+		clientSocketOut.flush();
+		return parseResponse();
+	}
+
 	private HttpResponse sendHead() throws IOException {
 		PrintWriter clientSocketOut = new PrintWriter(new OutputStreamWriter(
 				socket.getOutputStream()));
@@ -122,12 +150,13 @@ public class HttpClient {
 		return parseResponse();
 	}
 
-	public HttpResponse sendRequest() throws IOException {
+	public HttpResponse sendFileRequest() throws IOException {
 		PrintWriter clientSocketOut = new PrintWriter(new OutputStreamWriter(
 				socket.getOutputStream()));
 		clientSocketOut.print("GET " + sourceUrl + " HTTP/1.0\r\n");
 		clientSocketOut.print("User-Agent: cis455crawler\r\n");
-		clientSocketOut.print("Accept: text/html,application/xml\r\n");
+		clientSocketOut
+				.print("Accept: text/html,application/xml, text/xml, application/rdf+xml, application/xslt+xml, application/mathml+xml, application/xml-dtd,application/xml-external-parsed-entity, text/xml-external-parsed-entity,\r\n");
 		clientSocketOut.print("\r\n");
 		clientSocketOut.flush();
 		return parseResponse();

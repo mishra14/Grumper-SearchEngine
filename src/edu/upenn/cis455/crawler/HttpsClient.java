@@ -8,11 +8,14 @@ import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.Date;
+
 import javax.net.ssl.HttpsURLConnection;
 import javax.xml.parsers.ParserConfigurationException;
+
 import org.xml.sax.SAXException;
 
 import edu.upenn.cis455.bean.DocumentRecord;
+import edu.upenn.cis455.crawler.info.RobotsTxtInfo;
 
 /**
  * This class creates an HttpsClient that can fetch documents from a given https
@@ -48,9 +51,9 @@ public class HttpsClient {
 		boolean isHtml = false;
 		boolean isXml = false;
 		DocumentRecord documentRecord = null;
-		// first send head
+		// send head request
 		HttpResponse response = sendHead();
-		//System.out.println(sourceUrl + " - " + response);
+		// System.out.println(sourceUrl + " - " + response);
 		if (response != null && response.getHeaders() != null
 				&& response.getHeaders().containsKey(CONTENT_LENGTH_HEADER)
 				&& response.getHeaders().containsKey(CONTENT_TYPE_HEADER)) {
@@ -72,7 +75,7 @@ public class HttpsClient {
 			}
 		}
 		// then send get
-		response = sendRequest();
+		response = sendFileRequest();
 		// System.out.println(response);
 
 		if (response != null && response.getResponseCode().equals("200")
@@ -99,6 +102,16 @@ public class HttpsClient {
 		return documentRecord;
 	}
 
+	public RobotsTxtInfo getRobotsTxt() throws IOException {
+		RobotsTxtInfo info = null;
+		HttpResponse response = sendRobotsTxtRequest();
+		if (response != null && response.getData() != null
+				&& response.getResponseCode().equals("200")) {
+			info = RobotsTxtInfo.parseRobotsTxt(response.getData());
+		}
+		return info;
+	}
+
 	public HttpResponse sendHead() throws IOException {
 
 		HttpsURLConnection connection = (HttpsURLConnection) sourceUrl
@@ -117,7 +130,7 @@ public class HttpsClient {
 		return httpResponse;
 	}
 
-	public HttpResponse sendRequest() throws IOException {
+	public HttpResponse sendFileRequest() throws IOException {
 		HttpsURLConnection connection = (HttpsURLConnection) sourceUrl
 				.openConnection();
 		connection.setDoOutput(true);
@@ -126,7 +139,25 @@ public class HttpsClient {
 				connection.getOutputStream());
 		// outputStreamWriter.write("GET " + sourceUrl + " HTTPS/1.0\r\n");
 		outputStreamWriter.write("User-Agent: cis455crawler\r\n");
-		outputStreamWriter.write("Accept: text/html,application/xml\r\n");
+		outputStreamWriter
+				.write("Accept: text/html,application/xml, text/xml, application/rdf+xml, application/xslt+xml, application/mathml+xml, application/xml-dtd,application/xml-external-parsed-entity, text/xml-external-parsed-entity,\r\n");
+		outputStreamWriter.write("\r\n");
+		outputStreamWriter.flush();
+		outputStreamWriter.close();
+		HttpResponse httpResponse = parseResponse(connection);
+		connection.disconnect();
+		return httpResponse;
+	}
+
+	public HttpResponse sendRobotsTxtRequest() throws IOException {
+		HttpsURLConnection connection = (HttpsURLConnection) sourceUrl
+				.openConnection();
+		connection.setDoOutput(true);
+		connection.setRequestMethod("GET");
+		OutputStreamWriter outputStreamWriter = new OutputStreamWriter(
+				connection.getOutputStream());
+		outputStreamWriter.write("User-Agent: cis455crawler\r\n");
+		outputStreamWriter.write("Accept: text/plain\r\n");
 		outputStreamWriter.write("\r\n");
 		outputStreamWriter.flush();
 		outputStreamWriter.close();

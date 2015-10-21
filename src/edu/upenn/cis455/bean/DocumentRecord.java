@@ -84,7 +84,8 @@ public class DocumentRecord {
 		return null;
 	}
 
-	public Document getDocument() throws ParserConfigurationException, SAXException, IOException {
+	public Document getDocument() throws ParserConfigurationException,
+			SAXException, IOException {
 		Document document = null;
 		if (isHtml() && documentString != null) {
 			Tidy tidy = new Tidy();
@@ -100,7 +101,8 @@ public class DocumentRecord {
 			document = tidy.parseDOM(byteArrayInputStream,
 					byteArrayOutputStream);
 		} else if (isXml() && documentString != null) {
-			InputStream documentInputStream = new ByteArrayInputStream(documentString.getBytes(DEFAULT_ENCODING));
+			InputStream documentInputStream = new ByteArrayInputStream(
+					documentString.getBytes(DEFAULT_ENCODING));
 			DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory
 					.newInstance();
 			DocumentBuilder documentBuilder = documentBuilderFactory
@@ -118,7 +120,5 @@ public class DocumentRecord {
 				+ documentString + ", html=" + html + ", xml=" + xml
 				+ ", lastCrawled=" + lastCrawled + "]";
 	}
-
-	
 
 }

@@ -1,23 +1,29 @@
 package edu.upenn.cis455.crawler;
 
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+
+import com.sleepycat.je.rep.vlsn.VLSNIndex.WaitTimeOutException;
 
 import edu.upenn.cis455.crawler.info.RobotsTxtInfo;
 import edu.upenn.cis455.storage.DBWrapper;
 
 public class XPathCrawler {
 	private static Queue<URL> queue = new Queue<URL>();
+	private static HashMap<String, RobotsTxtInfo> robotTxts = new HashMap<String, RobotsTxtInfo>();
 	private static ArrayList<XPathCrawlerThread> threads = new ArrayList<XPathCrawlerThread>();
 	private static HashSet<URL> seenUrls = new HashSet<URL>();
 	private static URL startingUrl;
 	private static String dbPath;
 	private static int maxSize;
-	private static int maxCount = -1; // default value = -1// synchronized - but
-										// the call should be in syn
-										// block
+	private static Integer maxCount = new Integer(-1); // default value = -1//
+														// synchronized - but
+	// the call should be in syn
+	// block
 	private static boolean run = true; // synchronized
 	private static final int THREAD_COUNT = 5;
 
@@ -28,30 +34,9 @@ public class XPathCrawler {
 	 *            arg 0 - url of the starting page arg 1 - directory of the db
 	 *            storage arg 2 - max file size in MB arg 4 - (optional) number
 	 *            of files to get before stopping
+	 * @throws URISyntaxException
 	 */
 	public static void main(String[] args) {
-		String robotsTxt = "# These defaults shouldn't apply to your crawler\n"
-				+ "User-agent: *\n"
-				+ "Disallow: /crawltest/marie/\n"
-				+ "Crawl-delay: 10\n"
-				+ "# Below is the directive your crawler should use:\n"
-				+ "User-agent: cis455crawler\n"
-				+ "Disallow: /crawltest/marie/private/\n"
-				+ "Disallow: /crawltest/foo/\n"
-				+ "Disallow: /infrastructure/\n"
-				+ "Disallow: /maven/\n"
-				+ "Disallow: /ppod/\n"
-				+ "Crawl-delay: 5\n"
-				+ "# This should be ignored by your crawler\n"
-				+ "User-agent: evilcrawler\n"
-				+ "Disallow: /\n";
-		
-		RobotsTxtInfo info = RobotsTxtInfo.parseRobotsTxt(robotsTxt);
-		info.print();
-		
-		
-		
-
 		if (args.length < 3 || args.length > 4) {
 			System.out.println("Invalid arguments");
 			System.out.println("Ankit Mishra");
@@ -78,6 +63,25 @@ public class XPathCrawler {
 				}
 				// add the starting url to the queue
 				queue.enqueue(startingUrl);
+				while (isRun()) {
+					if (queue.getSize() == 0) {
+						boolean shouldEndCrawl = true;
+						for (XPathCrawlerThread thread : threads) {
+							if (thread.getState().equals(Thread.State.RUNNABLE)) {
+								shouldEndCrawl = false;
+								break;
+							}
+						}
+						if (shouldEndCrawl) {
+							System.out
+									.println("Stopping crawler : Nothing to crawl");
+							setRun(false);
+						}
+					}
+				}
+				for (XPathCrawlerThread thread : threads) {
+					thread.interrupt();
+				}
 				// wait for threads to end before stopping
 				for (int i = 0; i < THREAD_COUNT; i++) {
 					threads.get(i).join();
@@ -95,7 +99,7 @@ public class XPathCrawler {
 		}
 
 		// finally close db store
-		
+
 		DBWrapper.closeDBWrapper();
 	}
 
@@ -131,19 +135,19 @@ public class XPathCrawler {
 		XPathCrawler.maxSize = maxSize;
 	}
 
-	public static int getMaxCount() {
+	public static Integer getMaxCount() {
 		return maxCount;
 	}
 
-	public static void setMaxCount(int maxCount) {
+	public static void setMaxCount(Integer maxCount) {
 		XPathCrawler.maxCount = maxCount;
 	}
 
-	public static boolean isRun() {
+	public synchronized static boolean isRun() {
 		return run;
 	}
 
-	public static void setRun(boolean run) {
+	public synchronized static void setRun(boolean run) {
 		XPathCrawler.run = run;
 	}
 
@@ -155,8 +159,20 @@ public class XPathCrawler {
 		XPathCrawler.threads = threads;
 	}
 
+	public static HashMap<String, RobotsTxtInfo> getRobotTxts() {
+		return robotTxts;
+	}
+
+	public static void setRobotTxts(HashMap<String, RobotsTxtInfo> robotTxts) {
+		XPathCrawler.robotTxts = robotTxts;
+	}
+
 	public static HashSet<URL> getSeenUrls() {
 		return seenUrls;
+	}
+
+	public static void setSeenUrls(HashSet<URL> seenUrls) {
+		XPathCrawler.seenUrls = seenUrls;
 	}
 
 }

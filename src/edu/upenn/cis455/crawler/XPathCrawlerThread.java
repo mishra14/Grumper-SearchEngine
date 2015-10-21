@@ -4,23 +4,27 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+
 import javax.xml.parsers.ParserConfigurationException;
+
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+
 import edu.upenn.cis455.bean.DocumentRecord;
+import edu.upenn.cis455.crawler.info.RobotsTxtInfo;
 import edu.upenn.cis455.storage.DocumentRecordDA;
 
 public class XPathCrawlerThread extends Thread {
 
 	private static final String HTTP = "http";
 	private static final String HTTPS = "https";
-	private ArrayList<URL> urls;
 	private int id;
+	private static final String CRAWLER_AGENT = "cis455crawler";
+	private static final String ALL_AGENT = "*";
 
 	public XPathCrawlerThread(int id) {
 		this.id = id;
-		urls = new ArrayList<URL>();
 	}
 
 	public void run() {
@@ -41,7 +45,8 @@ public class XPathCrawlerThread extends Thread {
 							if (XPathCrawler.isRun()) {
 								System.out
 										.println("InterruptedException while wating on url queue on thread - "
-												+ id + " - " + e);
+												+ id + " - ");
+								e.printStackTrace();
 							}
 						}
 					}
@@ -52,68 +57,82 @@ public class XPathCrawlerThread extends Thread {
 					synchronized (XPathCrawler.getSeenUrls()) {
 						XPathCrawler.getSeenUrls().add(url);
 					}
-					
+
 					try {
-						// fetch that document
-						DocumentRecord documentRecord = null;
-						System.out.println("Thread " + id + " obtained url - "
-								+ url);
-						if (url.getProtocol().equalsIgnoreCase(HTTP)) {
-							HttpClient httpClient = new HttpClient(url);
-							documentRecord = httpClient.getDocument();
-						} else if (url.getProtocol().equalsIgnoreCase(HTTPS)) {
-							HttpsClient httpsClient = new HttpsClient(url);
-							documentRecord = httpsClient.getDocument();
-						}
-
-						if (documentRecord != null && documentRecord.getDocument() != null) {
-							urls.clear(); // remove previous urls
-							System.out.println(url + " : downloaded");
-							if(DocumentRecordDA.getDocument(url.toString())!=null)
-							{
-								System.out.println(url + " : Already Exists");
+						boolean shouldCrawl = true;
+						// check for robots.txt in the local map
+						RobotsTxtInfo info = getRobotsTxt(url);
+						if (info != null
+								&& (info.containsUserAgent(CRAWLER_AGENT) || info
+										.containsUserAgent(ALL_AGENT))) {
+							// System.out.println("info - " + info);
+							ArrayList<String> disallowedUrls;
+							if (info.containsUserAgent(CRAWLER_AGENT)) {
+								disallowedUrls = info
+										.getDisallowedLinks(CRAWLER_AGENT);
+							} else {
+								disallowedUrls = info
+										.getDisallowedLinks(ALL_AGENT);
 							}
-							//store document in db
-							//System.out.println("Storing Document Record - "+documentRecord+"\n"+DocumentRecordDA.putDocument(documentRecord));
-							DocumentRecordDA.putDocument(documentRecord);
-							System.out.println(url + " : Stored");
-							// read all the url from the document
-							NodeList urlNodes = documentRecord.getDocument()
-									.getElementsByTagName("a");
-							for (int i = 0; i < urlNodes.getLength(); i++) {
-								Node urlNode = urlNodes.item(i);
-								if (urlNode.getAttributes() != null
-										&& urlNode.getAttributes()
-												.getNamedItem("href") != null) {
-									String urlString = urlNode.getAttributes()
-											.getNamedItem("href")
-											.getNodeValue();
-									if (urlString.startsWith("http://")
-											|| urlString.startsWith("https://")) {
-										urls.add(new URL(urlString));
-									} else {
-										urls.add(new URL(url, urlString));
+							System.out.println("disallowed links - "
+									+ disallowedUrls);
+							for (String disallowed : disallowedUrls) {
+								String disallowedUrl = url.getProtocol()
+										+ "://" + url.getHost() + disallowed;
+								String urlToCompare = url.toString();
+								if (!(urlToCompare.endsWith(".xml") || urlToCompare
+										.endsWith(".html"))) {
+									urlToCompare = urlToCompare.concat("/");
+								}
+								if (urlToCompare.startsWith(disallowedUrl)) {
+									// we should not crawl this url
+									System.out.println(url + " : disallowed");
+									shouldCrawl = false;
+									break;
+								}
+							}
+						}
+						if (shouldCrawl) {
+							// fetch that document
+							DocumentRecord documentRecord = getDocumentRecord(url);
+							if (documentRecord != null) {
+								// process document
+								ArrayList<URL> urls = extractUrls(
+										documentRecord, url);
+								// System.out.println("URLS - "+urls);
 
+								if (urls.size() > 0) { // check for seen urls
+									synchronized (XPathCrawler.getSeenUrls()) {
+										urls.removeAll(XPathCrawler
+												.getSeenUrls());
+									}
+									// add all the read url into the back of the
+									// queue
+									synchronized (XPathCrawler.getQueue()) {
+										XPathCrawler.getQueue()
+												.enqueueAll(urls);
+									}
+								}
+
+							} else {
+								System.out
+										.println(url + " : error in download");
+							}
+							synchronized (XPathCrawler.getMaxCount()) {
+								int count = XPathCrawler.getMaxCount();
+								if (count >= 0) {
+									count--;
+									XPathCrawler.setMaxCount(count);
+									if (count <= 0) {
+										// max count reached
+										System.out
+												.println("Max Count reached : Crawler stopping");
+										XPathCrawler.setRun(false);
 									}
 								}
 							}
-							
-							// System.out.println("URLS - "+urls);
-							if (urls.size() > 0) {
-								// check for seen urls
-								synchronized (XPathCrawler.getSeenUrls()) {
-									urls.removeAll(XPathCrawler.getSeenUrls());
-								}
-								// add all the read url into the back of the
-								// queue
-								synchronized (XPathCrawler.getQueue()) {
-									XPathCrawler.getQueue().enqueueAll(urls);
-								}
-							}
-							// try to fetch the next url
-						} else {
-							System.out.println(url + " : error in download");
 						}
+						// try to fetch the next url
 					} catch (UnknownHostException e) {
 						System.out
 								.println("UnknownHostException while opening socket - "
@@ -141,5 +160,88 @@ public class XPathCrawlerThread extends Thread {
 				}
 			}
 		}
+	}
+
+	public RobotsTxtInfo getRobotsTxt(URL url) throws UnknownHostException,
+			IOException {
+		RobotsTxtInfo info = null;
+		synchronized (XPathCrawler.getRobotTxts()) {
+			if (XPathCrawler.getRobotTxts().containsKey(url.getHost())) {
+				// robots.txt found use this to check for disallowed url
+				info = XPathCrawler.getRobotTxts().get(url.getHost());
+				System.out.println(url + " : robots.txt already fetched");
+			} else {
+				URL robotsUrl = new URL(new URL(url.getProtocol() + "://"
+						+ url.getHost()), "robots.txt");
+				// robots.txt does not exist; fetch it
+				if (url.getProtocol().equalsIgnoreCase(HTTP)) {
+
+					HttpClient httpClient = new HttpClient(robotsUrl);
+					info = httpClient.getRobotsTxt();
+					System.out.println("Obtained new robots.txt from " + url);
+					info.print();
+				} else if (url.getProtocol().equalsIgnoreCase(HTTPS)) {
+					HttpsClient httpsClient = new HttpsClient(robotsUrl);
+					info = httpsClient.getRobotsTxt();
+					System.out.println("Obtained new robots.txt from " + url);
+					info.print();
+				}
+				if (info == null) {
+					System.out.println(url + " : Error in fetching robots.txt");
+				} else {
+					XPathCrawler.getRobotTxts().put(url.getHost(), info);
+				}
+			}
+		}
+		return info;
+	}
+
+	public DocumentRecord getDocumentRecord(URL url)
+			throws NumberFormatException, UnknownHostException, IOException,
+			SAXException, ParserConfigurationException {
+		DocumentRecord documentRecord = null;
+		if (url.getProtocol().equalsIgnoreCase(HTTP)) {
+			HttpClient httpClient = new HttpClient(url);
+			documentRecord = httpClient.getDocument();
+		} else if (url.getProtocol().equalsIgnoreCase(HTTPS)) {
+			HttpsClient httpsClient = new HttpsClient(url);
+			documentRecord = httpsClient.getDocument();
+		}
+		return documentRecord;
+	}
+
+	public ArrayList<URL> extractUrls(DocumentRecord documentRecord, URL url)
+			throws ParserConfigurationException, SAXException, IOException {
+		ArrayList<URL> urls = null;
+		if (documentRecord != null && documentRecord.getDocument() != null) {
+			urls = new ArrayList<URL>();
+			System.out.println(url + " : downloaded");
+			if (DocumentRecordDA.getDocument(url.toString()) != null) {
+				System.out.println(url + " : Already Exists");
+			}
+			// store document in db
+			// System.out.println("Storing Document Record - "+documentRecord+"\n"+DocumentRecordDA.putDocument(documentRecord));
+			DocumentRecordDA.putDocument(documentRecord);
+			System.out.println(url + " : Stored");
+			// read all the url from the document
+			NodeList urlNodes = documentRecord.getDocument()
+					.getElementsByTagName("a");
+			for (int i = 0; i < urlNodes.getLength(); i++) {
+				Node urlNode = urlNodes.item(i);
+				if (urlNode.getAttributes() != null
+						&& urlNode.getAttributes().getNamedItem("href") != null) {
+					String urlString = urlNode.getAttributes()
+							.getNamedItem("href").getNodeValue();
+					if (urlString.startsWith("http://")
+							|| urlString.startsWith("https://")) {
+						urls.add(new URL(urlString));
+					} else {
+						urls.add(new URL(url, urlString));
+
+					}
+				}
+			}
+		}
+		return urls;
 	}
 }
