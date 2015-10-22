@@ -249,6 +249,7 @@ public class XPathServlet extends HttpServlet
 					pageContent += "created user - " + user.toString() + "<br>";
 					HttpSession session = request.getSession(true);
 					session.setAttribute("username", username);
+					response.sendRedirect(request.getContextPath()+request.getServletPath()+"/userhome");
 				}
 			}
 			else if (user != null)
