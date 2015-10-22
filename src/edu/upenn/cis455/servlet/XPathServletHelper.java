@@ -1,9 +1,5 @@
 package edu.upenn.cis455.servlet;
 
-import edu.upenn.cis455.bean.User;
-import edu.upenn.cis455.storage.DBWrapper;
-import edu.upenn.cis455.storage.UserDA;
-
 public class XPathServletHelper
 {
 
@@ -43,6 +39,8 @@ public class XPathServletHelper
 			+ "<br>"
 			+ "<br><br>" + "Ankit Mishra<br>" + "mankit<br>";
 
+	private static final String userHome = "<h2> Welcome to your Home page,  </h2>";
+	
 	public static String getServletHome()
 	{
 		return servletHome;
@@ -63,74 +61,9 @@ public class XPathServletHelper
 	{
 		return signupPage;
 	}
-
-	public static String loginVerify(String username, String password,
-			String dbPath) throws Exception
+	
+	public static String getUserHome(String username)
 	{
-		String pageContent = "username : " + username + " password : "
-				+ password;
-		if (username == null || password == null || username.isEmpty()
-				|| password.isEmpty())
-		{
-			pageContent += "Whoops - Invalid username or password <br>"
-					+ XPathServletHelper.getLoginPage();
-		}
-		else
-		{
-			DBWrapper.openDBWrapper(dbPath);
-			User user = UserDA.getUser(username);
-			if (user != null && user.getPassword().equals(password))
-			{
-				pageContent += "Login successful<br>"
-						+ XPathServletHelper.getLoginPage();
-			}
-			else
-			{
-				pageContent += "Invalid username or password<br>"
-						+ XPathServletHelper.getLoginPage();
-			}
-			DBWrapper.closeDBWrapper();
-		}
-		return pageContent;
-	}
-
-	public static String signupComplete(String username, String password,
-			String passwordReTyped, String dbPath) throws Exception
-	{
-		String pageContent = "username : " + username + " password : "
-				+ password;
-		if (username == null || password == null || passwordReTyped == null
-				|| username.isEmpty() || password.isEmpty()
-				|| passwordReTyped.isEmpty())
-		{
-			pageContent += "Whoops - Invalid username or password <br>"
-					+ XPathServletHelper.getSignUpPage();
-		}
-		else if (!password.equals(passwordReTyped))
-		{
-			pageContent += "Whoops - passwords do not match <br>"
-					+ XPathServletHelper.getSignUpPage();
-		}
-		else
-		{
-			DBWrapper.openDBWrapper(dbPath);
-			User user = UserDA.getUser(username);
-			if(user == null)
-			{
-				UserDA.putUser(new User(username, password));
-				user = UserDA.getUser(username);
-				if(user!=null)
-				{
-					pageContent += "created user - "+user.toString()+"<br>";
-				}
-			}
-			else if (user != null)
-			{
-				pageContent += "Whoops - Username already exists<br>"
-						+ XPathServletHelper.getSignUpPage();
-			}
-			DBWrapper.closeDBWrapper();
-		}
-		return pageContent;
+		return userHome+username+"<br>";
 	}
 }

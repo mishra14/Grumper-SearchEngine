@@ -6,9 +6,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-
-import com.sleepycat.je.rep.vlsn.VLSNIndex.WaitTimeOutException;
-
 import edu.upenn.cis455.crawler.info.RobotsTxtInfo;
 import edu.upenn.cis455.storage.DBWrapper;
 

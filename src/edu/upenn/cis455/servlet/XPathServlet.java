@@ -1,20 +1,14 @@
 package edu.upenn.cis455.servlet;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.net.URL;
 
 import javax.servlet.http.*;
-import javax.xml.parsers.ParserConfigurationException;
 
-import org.xml.sax.SAXException;
-
-import edu.upenn.cis455.bean.DocumentRecord;
-import edu.upenn.cis455.crawler.HttpClient;
-import edu.upenn.cis455.xpathengine.XPathEngine;
-import edu.upenn.cis455.xpathengine.XPathEngineFactory;
+import edu.upenn.cis455.bean.User;
+import edu.upenn.cis455.storage.DBWrapper;
+import edu.upenn.cis455.storage.UserDA;
 
 /**
  * xPath servlet class generates a UI for user to enter a url and xpaths and
@@ -62,14 +56,24 @@ public class XPathServlet extends HttpServlet
 		}
 		else if (pathInfo.equalsIgnoreCase("/userhome"))
 		{
-			// TODO
+			HttpSession session = request.getSession(false);
+			if(session == null || session.getAttribute("username") == null)
+			{
+				pageContent = "Whoops - Please login<br>"
+						+ XPathServletHelper.getLoginPage();
+			}
+			else
+			{
+				String username = (String) session.getAttribute("username");
+				pageContent = XPathServletHelper.getUserHome(username);
+			}
 		}
 		else if (pathInfo.equalsIgnoreCase("/loginverify"))
 		{
 			String username = request.getParameter("username");
 			String password = request.getParameter("password");
 			String dbPath = getServletContext().getInitParameter("BDBstore");
-			if(dbPath == null)
+			if (dbPath == null)
 			{
 				pageContent = "Whoops - Error connecting to DB <br>"
 						+ XPathServletHelper.getSignUpPage();
@@ -78,7 +82,8 @@ public class XPathServlet extends HttpServlet
 			{
 				try
 				{
-					pageContent = XPathServletHelper.loginVerify(username, password, dbPath);
+					pageContent = loginVerify(username, password, dbPath,
+							request, response);
 				}
 				catch (Exception e)
 				{
@@ -88,7 +93,7 @@ public class XPathServlet extends HttpServlet
 					pageContent = stringWriter.getBuffer().toString();
 				}
 			}
-			
+
 		}
 		else if (pathInfo.equalsIgnoreCase("/signupcomplete"))
 		{
@@ -96,7 +101,7 @@ public class XPathServlet extends HttpServlet
 			String password = request.getParameter("password");
 			String passwordReTyped = request.getParameter("passwordReTyped");
 			String dbPath = getServletContext().getInitParameter("BDBstore");
-			if(dbPath == null)
+			if (dbPath == null)
 			{
 				pageContent = "Whoops - Error connecting to DB <br>"
 						+ XPathServletHelper.getSignUpPage();
@@ -105,7 +110,8 @@ public class XPathServlet extends HttpServlet
 			{
 				try
 				{
-					pageContent = XPathServletHelper.signupComplete(username, password, passwordReTyped, dbPath);
+					pageContent = signupComplete(username, password,
+							passwordReTyped, dbPath, request, response);
 				}
 				catch (Exception e)
 				{
@@ -122,7 +128,7 @@ public class XPathServlet extends HttpServlet
 					.getErrorPage("Whoops - unknown url");
 		}
 		PrintWriter out = response.getWriter();
-		out.print("<html><body>" + pathInfo + pageContent + "</body></html>");
+		out.print("<html><body>" +pathInfo + pageContent + "</body></html>");
 		response.flushBuffer();
 	}
 
@@ -135,6 +141,8 @@ public class XPathServlet extends HttpServlet
 	{
 		String pathInfo = request.getPathInfo();
 		String pageContent = null;
+		String extras = "";
+		extras = request.getProtocol()+request.getLocalAddr()+request.getLocalName()+request.getLocalPort()+request.getContextPath()+request.getServletPath();
 		if (pathInfo == null || pathInfo.equalsIgnoreCase("/")) // homepage
 		{
 			pageContent = XPathServletHelper.getServletHome();
@@ -149,7 +157,17 @@ public class XPathServlet extends HttpServlet
 		}
 		else if (pathInfo.equalsIgnoreCase("/userhome"))
 		{
-
+			HttpSession session = request.getSession(false);
+			if(session == null || session.getAttribute("username") == null)
+			{
+				pageContent = "Whoops - Please login<br>"
+						+ XPathServletHelper.getLoginPage();
+			}
+			else
+			{
+				String username = (String) session.getAttribute("username");
+				pageContent = XPathServletHelper.getUserHome(username);
+			}
 		}
 		else
 		{
@@ -157,7 +175,89 @@ public class XPathServlet extends HttpServlet
 					.getErrorPage("Whoops - unknown url");
 		}
 		PrintWriter out = response.getWriter();
-		out.print("<html><body>"  + pathInfo + pageContent + "</body></html>");
+		out.print("<html><body>" + extras + "<br>"+ pathInfo + pageContent + "</body></html>");
 		response.flushBuffer();
+	}
+
+	
+	
+	
+	
+	//helper methods
+	public static String loginVerify(String username, String password,
+			String dbPath, HttpServletRequest request,
+			HttpServletResponse response) throws Exception
+	{
+		String pageContent = "username : " + username + " password : "
+				+ password;
+		if (username == null || password == null || username.isEmpty()
+				|| password.isEmpty())
+		{
+			pageContent += "Whoops - Invalid username or password <br>"
+					+ XPathServletHelper.getLoginPage();
+		}
+		else
+		{
+			DBWrapper.openDBWrapper(dbPath);
+			User user = UserDA.getUser(username);
+			if (user != null && user.getPassword().equals(password))
+			{
+				pageContent += "Login successful<br>"
+						+ XPathServletHelper.getLoginPage();
+				HttpSession session = request.getSession(true);
+				session.setAttribute("username", username);
+				response.sendRedirect(request.getContextPath()+request.getServletPath()+"/userhome");
+			}
+			else
+			{
+				pageContent += "Invalid username or password<br>"
+						+ XPathServletHelper.getLoginPage();
+			}
+			DBWrapper.closeDBWrapper();
+		}
+		return pageContent;
+	}
+
+	public static String signupComplete(String username, String password,
+			String passwordReTyped, String dbPath, HttpServletRequest request,
+			HttpServletResponse response) throws Exception
+	{
+		String pageContent = "username : " + username + " password : "
+				+ password;
+		if (username == null || password == null || passwordReTyped == null
+				|| username.isEmpty() || password.isEmpty()
+				|| passwordReTyped.isEmpty())
+		{
+			pageContent += "Whoops - Invalid username or password <br>"
+					+ XPathServletHelper.getSignUpPage();
+		}
+		else if (!password.equals(passwordReTyped))
+		{
+			pageContent += "Whoops - passwords do not match <br>"
+					+ XPathServletHelper.getSignUpPage();
+		}
+		else
+		{
+			DBWrapper.openDBWrapper(dbPath);
+			User user = UserDA.getUser(username);
+			if (user == null)
+			{
+				UserDA.putUser(new User(username, password));
+				user = UserDA.getUser(username);
+				if (user != null)
+				{
+					pageContent += "created user - " + user.toString() + "<br>";
+					HttpSession session = request.getSession(true);
+					session.setAttribute("username", username);
+				}
+			}
+			else if (user != null)
+			{
+				pageContent += "Whoops - Username already exists<br>"
+						+ XPathServletHelper.getSignUpPage();
+			}
+			DBWrapper.closeDBWrapper();
+		}
+		return pageContent;
 	}
 }
