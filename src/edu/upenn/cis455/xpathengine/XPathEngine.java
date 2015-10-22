@@ -5,7 +5,8 @@ import java.io.InputStream;
 import org.w3c.dom.Document;
 import org.xml.sax.helpers.DefaultHandler;
 
-public interface XPathEngine {
+public interface XPathEngine
+{
 
 	/**
 	 * Sets the XPath expression(s) that are to be evaluated.

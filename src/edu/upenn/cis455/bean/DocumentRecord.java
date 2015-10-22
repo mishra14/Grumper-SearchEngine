@@ -18,7 +18,8 @@ import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
 
 @Entity
-public class DocumentRecord {
+public class DocumentRecord
+{
 
 	@PrimaryKey
 	private String documentId;
@@ -29,12 +30,14 @@ public class DocumentRecord {
 
 	private static final String DEFAULT_ENCODING = "utf-8";
 
-	public DocumentRecord() {
+	public DocumentRecord()
+	{
 
 	}
 
 	public DocumentRecord(String documentId, String document, boolean html,
-			boolean xml, long lastCrawled) {
+			boolean xml, long lastCrawled)
+	{
 		super();
 		this.documentId = documentId;
 		this.documentString = document;
@@ -43,51 +46,63 @@ public class DocumentRecord {
 		this.lastCrawled = lastCrawled;
 	}
 
-	public String getDocumentId() {
+	public String getDocumentId()
+	{
 		return documentId;
 	}
 
-	public void setDocumentId(String documentId) {
+	public void setDocumentId(String documentId)
+	{
 		this.documentId = documentId;
 	}
 
-	public String getDocumentString() {
+	public String getDocumentString()
+	{
 		return documentString;
 	}
 
-	public void setDocument(String documentString) {
+	public void setDocument(String documentString)
+	{
 		this.documentString = documentString;
 	}
 
-	public boolean isHtml() {
+	public boolean isHtml()
+	{
 		return html;
 	}
 
-	public void setHtml(boolean html) {
+	public void setHtml(boolean html)
+	{
 		this.html = html;
 	}
 
-	public boolean isXml() {
+	public boolean isXml()
+	{
 		return xml;
 	}
 
-	public long getLastCrawled() {
+	public long getLastCrawled()
+	{
 		return lastCrawled;
 	}
 
-	public void setLastCrawled(long lastCrawled) {
+	public void setLastCrawled(long lastCrawled)
+	{
 		this.lastCrawled = lastCrawled;
 	}
 
-	public static Date getDate(String dateString) {
+	public static Date getDate(String dateString)
+	{
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	public Document getDocument() throws ParserConfigurationException,
-			SAXException, IOException {
+			SAXException, IOException
+	{
 		Document document = null;
-		if (isHtml() && documentString != null) {
+		if (isHtml() && documentString != null)
+		{
 			Tidy tidy = new Tidy();
 			tidy.setInputEncoding(DEFAULT_ENCODING);
 			tidy.setOutputEncoding(DEFAULT_ENCODING);
@@ -100,7 +115,9 @@ public class DocumentRecord {
 			ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 			document = tidy.parseDOM(byteArrayInputStream,
 					byteArrayOutputStream);
-		} else if (isXml() && documentString != null) {
+		}
+		else if (isXml() && documentString != null)
+		{
 			InputStream documentInputStream = new ByteArrayInputStream(
 					documentString.getBytes(DEFAULT_ENCODING));
 			DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory
@@ -115,7 +132,8 @@ public class DocumentRecord {
 	}
 
 	@Override
-	public String toString() {
+	public String toString()
+	{
 		return "DocumentRecord [documentId=" + documentId + ", documentString="
 				+ documentString + ", html=" + html + ", xml=" + xml
 				+ ", lastCrawled=" + lastCrawled + "]";

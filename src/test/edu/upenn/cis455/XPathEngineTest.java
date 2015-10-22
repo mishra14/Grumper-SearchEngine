@@ -22,7 +22,8 @@ import edu.upenn.cis455.xpathengine.XPathEngineFactory;
  * @author cis455
  *
  */
-public class XPathEngineTest extends TestCase {
+public class XPathEngineTest extends TestCase
+{
 	/**
 	 * This method tests 5 valid xpath cases
 	 * 
@@ -33,7 +34,8 @@ public class XPathEngineTest extends TestCase {
 	 */
 	@Test
 	public void testXPathAllValid() throws UnknownHostException, IOException,
-			SAXException, ParserConfigurationException {
+			SAXException, ParserConfigurationException
+	{
 		// get all the xPaths
 		String xPath = "/node;"
 				+ "/node[a/b/c[subnode]]/sub-subnode;"
@@ -45,11 +47,13 @@ public class XPathEngineTest extends TestCase {
 		XPathEngine engine = XPathEngineFactory.getXPathEngine();
 		engine.setXPaths(xPaths);
 		boolean[] result = new boolean[xPaths.length];
-		for (int i = 0; i < result.length; i++) {
+		for (int i = 0; i < result.length; i++)
+		{
 			result[i] = engine.isValid(i);
 		}
 		boolean[] expected = new boolean[xPaths.length];
-		for (int i = 0; i < result.length; i++) {
+		for (int i = 0; i < result.length; i++)
+		{
 			expected[i] = true;
 		}
 		assertArrayEquals(result, expected);
@@ -66,7 +70,8 @@ public class XPathEngineTest extends TestCase {
 	 */
 	@Test
 	public void testXPathAllInvalid() throws UnknownHostException, IOException,
-			SAXException, ParserConfigurationException {
+			SAXException, ParserConfigurationException
+	{
 		// get all the xPaths
 		String xPath = "/;" + "node[a/b/c[subnode]]/sub-subnode;"
 				+ "/node[text()=\"someText\";" + "/node//" + "/node&&";
@@ -74,11 +79,13 @@ public class XPathEngineTest extends TestCase {
 		XPathEngine engine = XPathEngineFactory.getXPathEngine();
 		engine.setXPaths(xPaths);
 		boolean[] result = new boolean[xPaths.length];
-		for (int i = 0; i < result.length; i++) {
+		for (int i = 0; i < result.length; i++)
+		{
 			result[i] = engine.isValid(i);
 		}
 		boolean[] expected = new boolean[xPaths.length];
-		for (int i = 0; i < result.length; i++) {
+		for (int i = 0; i < result.length; i++)
+		{
 			expected[i] = false;
 		}
 		assertArrayEquals(result, expected);

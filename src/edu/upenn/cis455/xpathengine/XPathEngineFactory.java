@@ -9,12 +9,15 @@ import org.xml.sax.helpers.DefaultHandler;
  * @author cis455
  *
  */
-public class XPathEngineFactory {
-	public static XPathEngine getXPathEngine() {
+public class XPathEngineFactory
+{
+	public static XPathEngine getXPathEngine()
+	{
 		return new XPathEngineImpl();
 	}
 
-	public static DefaultHandler getSAXHandler() {
+	public static DefaultHandler getSAXHandler()
+	{
 		return null;
 	}
 }

@@ -10,19 +10,22 @@ import java.util.EnumMap;
  * @author cis455
  *
  */
-public class XPathParser {
+public class XPathParser
+{
 
 	/*
 	 * Unique symbols in an xPath - /, (, ), [, ], =, @, ",
 	 */
-	private static enum symbol {
+	private static enum symbol
+	{
 		ForwardSlash, OpenParen, CloseParen, OpenBracket, CloseBracket, Equals, At, DoubleQuote, Text, Contains, Comma
 	};
 
 	private static EnumMap<symbol, String> symbolMap = new EnumMap<symbol, String>(
 			symbol.class);
 
-	static {
+	static
+	{
 		symbolMap.put(symbol.ForwardSlash, "/");
 		symbolMap.put(symbol.OpenParen, "(");
 		symbolMap.put(symbol.CloseParen, ")");
@@ -38,19 +41,24 @@ public class XPathParser {
 	}
 
 	// method to match a token to a special symbol
-	private static boolean matchToken(String token, symbol symbol) {
+	private static boolean matchToken(String token, symbol symbol)
+	{
 		// System.out.println("Matching token - "+token+" with "+symbolMap.get(symbol));
 		return token.equalsIgnoreCase(symbolMap.get(symbol));
 	}
 
 	// parsing xpath to check for validity
-	public static void parseXPath(XPath xPath) {
+	public static void parseXPath(XPath xPath)
+	{
 		XPathStep rootStep = xPath(xPath.getTokens(), 0);
 		if (rootStep == null
-				|| rootStep.getAfterStep() != xPath.getTokens().size()) {
+				|| rootStep.getAfterStep() != xPath.getTokens().size())
+		{
 			// System.out.println("Invalid path - "+xPath.getxPath());
 			xPath.setValid(false);
-		} else {
+		}
+		else
+		{
 			// System.out.println("Valid path - "+xPath.getxPath());
 			xPath.setRootStep(xPath(xPath.getTokens(), 0));
 			xPath.setValid(true);
@@ -58,15 +66,19 @@ public class XPathParser {
 	}
 
 	// Start validation from root
-	private static XPathStep xPath(ArrayList<String> tokens, int next) {
+	private static XPathStep xPath(ArrayList<String> tokens, int next)
+	{
 		XPathStep step = null;
-		if ((axis(tokens, next++))) {
+		if ((axis(tokens, next++)))
+		{
 			step = step(tokens, next++);
-			if (step != null) {
+			if (step != null)
+			{
 				int afterStep = step.getAfterStep();
 				// System.out.println("Final pointer - "+afterStep);
 				// System.out.println("Total tokens - "+tokens.size());
-				if (afterStep == tokens.size()) {
+				if (afterStep == tokens.size())
+				{
 					return step;
 				}
 			}
@@ -75,8 +87,10 @@ public class XPathParser {
 	}
 
 	// verify if an axis is correct
-	private static boolean axis(ArrayList<String> tokens, int next) {
-		if (tokens.size() <= next) {
+	private static boolean axis(ArrayList<String> tokens, int next)
+	{
+		if (tokens.size() <= next)
+		{
 			return false;
 		}
 		// System.out.println("In axis with - "+tokens.get(next));
@@ -84,11 +98,13 @@ public class XPathParser {
 	}
 
 	// verify if a step is correct
-	private static XPathStep step(ArrayList<String> tokens, int next) {
+	private static XPathStep step(ArrayList<String> tokens, int next)
+	{
 		XPathStep step = null;
 		// System.out.println("Begin step with - "+next);
 		if (tokens.size() <= next || tokens.get(next).contains("::")
-				|| !tokens.get(next).matches("[a-zA-Z0-9\\-]*")) {
+				|| !tokens.get(next).matches("[a-zA-Z0-9\\-]*"))
+		{
 			return step;
 		}
 		// check if the first token is a nodename - check if the first token is
@@ -99,9 +115,12 @@ public class XPathParser {
 		// System.out.println("Tests - "+step.getTests());
 		// then check if there are 0 or more [test]
 		// System.out.println("before recursive test - "+(next+1));
-		if (step.getTests() == null) {
+		if (step.getTests() == null)
+		{
 			next = next + 1;
-		} else {
+		}
+		else
+		{
 			next = step.getTests().get(step.getTests().size() - 1)
 					.getAfterTest() + 1;
 		}
@@ -109,15 +128,21 @@ public class XPathParser {
 		// System.out.println("After recursive test - "+next);
 		// System.out.println("Before checking for axis step - "+next);
 		int beforeAxisStep = next;
-		if (axis(tokens, next++)) {
+		if (axis(tokens, next++))
+		{
 			XPathStep nextStep = step(tokens, next++);
-			if (nextStep == null) {
+			if (nextStep == null)
+			{
 				next = beforeAxisStep;
-			} else {
+			}
+			else
+			{
 				next = nextStep.getAfterStep();
 				step.setNextStep(nextStep);
 			}
-		} else {
+		}
+		else
+		{
 			next = beforeAxisStep;
 		}
 		// System.out.println("After axis step - "+next);
@@ -131,30 +156,38 @@ public class XPathParser {
 
 	// recursively find test filters after a step
 	private static ArrayList<XPathTest> recursiveTest(ArrayList<String> tokens,
-			int next) {
+			int next)
+	{
 		ArrayList<XPathTest> tests = null;
 		// System.out.println("In recursive Test with - "+next);
 		int afterAllTests = next;
-		if (tokens.size() <= next) {
+		if (tokens.size() <= next)
+		{
 			return tests;
 		}
-		if (matchToken(tokens.get(next), symbol.OpenBracket)) {
+		if (matchToken(tokens.get(next), symbol.OpenBracket))
+		{
 			// System.out.println("[");
 			// System.out.println("Before test - "+next);
 			XPathTest test = test(tokens, next + 1);
-			if (test == null) {
+			if (test == null)
+			{
 				return tests;
-			} else {
+			}
+			else
+			{
 				tests = new ArrayList<XPathTest>();
 				tests.add(test);
 				// System.out.println("Test - "+test);
 				if (matchToken(tokens.get(test.getAfterTest()),
-						symbol.CloseBracket)) {
+						symbol.CloseBracket))
+				{
 					// System.out.println("]");
 					afterAllTests = test.getAfterTest() + 1;
 					ArrayList<XPathTest> otherTests = recursiveTest(tokens,
 							afterAllTests);
-					if (otherTests != null) {
+					if (otherTests != null)
+					{
 						tests.addAll(otherTests);
 					}
 				}
@@ -164,32 +197,41 @@ public class XPathParser {
 	}
 
 	// validate a test filter starting from tokens.get(next)
-	private static XPathTest test(ArrayList<String> tokens, int next) {
+	private static XPathTest test(ArrayList<String> tokens, int next)
+	{
 		XPathTest test = null;
-		if (tokens.size() <= next) {
+		if (tokens.size() <= next)
+		{
 			return test;
 		}
 		// test can be a step or a [text()=".."] or a [contains(text(),".."] or
 		// [@attname = ".."]
 		if (matchToken(tokens.get(next), symbol.Text)
-				&& tokens.size() >= next + 7) {
+				&& tokens.size() >= next + 7)
+		{
 			test = new XPathTest();
 			test.setTextFilter(true);
 			next++;
 			if (matchToken(tokens.get(next++), symbol.OpenParen)
 					&& matchToken(tokens.get(next++), symbol.CloseParen)
 					&& matchToken(tokens.get(next++), symbol.Equals)
-					&& matchToken(tokens.get(next++), symbol.DoubleQuote)) {
+					&& matchToken(tokens.get(next++), symbol.DoubleQuote))
+			{
 				test.setQueryString(tokens.get(next++));
-				if (!matchToken(tokens.get(next++), symbol.DoubleQuote)) {
+				if (!matchToken(tokens.get(next++), symbol.DoubleQuote))
+				{
 					test = null;
 					// System.out.println("In Test, text case matching");
-				} else {
+				}
+				else
+				{
 					test.setAfterTest(next);
 				}
 			}
-		} else if (matchToken(tokens.get(next), symbol.Contains)
-				&& tokens.size() >= next + 10) {
+		}
+		else if (matchToken(tokens.get(next), symbol.Contains)
+				&& tokens.size() >= next + 10)
+		{
 			test = new XPathTest();
 			test.setContainsFilter(true);
 			next++;
@@ -198,41 +240,58 @@ public class XPathParser {
 					&& matchToken(tokens.get(next++), symbol.OpenParen)
 					&& matchToken(tokens.get(next++), symbol.CloseParen)
 					&& matchToken(tokens.get(next++), symbol.Comma)
-					&& matchToken(tokens.get(next++), symbol.DoubleQuote)) {
+					&& matchToken(tokens.get(next++), symbol.DoubleQuote))
+			{
 				test.setQueryString(tokens.get(next++));
-				if (!matchToken(tokens.get(next++), symbol.DoubleQuote)) {
+				if (!matchToken(tokens.get(next++), symbol.DoubleQuote))
+				{
 					test = null;
-				} else {
-					if (!matchToken(tokens.get(next++), symbol.CloseParen)) {
+				}
+				else
+				{
+					if (!matchToken(tokens.get(next++), symbol.CloseParen))
+					{
 						test = null;
-					} else {
+					}
+					else
+					{
 						// //System.out.println("In Test, contains case matching");
 						test.setAfterTest(next);
 					}
 
 				}
 			}
-		} else if (matchToken(tokens.get(next), symbol.At)) {
+		}
+		else if (matchToken(tokens.get(next), symbol.At))
+		{
 			test = new XPathTest();
 			test.setAttFilter(true);
 			next++;
 			test.setAttName(tokens.get(next++));
-			if (matchToken(tokens.get(next++), symbol.Equals)) {
-				if (matchToken(tokens.get(next++), symbol.DoubleQuote)) {
+			if (matchToken(tokens.get(next++), symbol.Equals))
+			{
+				if (matchToken(tokens.get(next++), symbol.DoubleQuote))
+				{
 					test.setQueryString(tokens.get(next++));
-					if (!matchToken(tokens.get(next++), symbol.DoubleQuote)) {
+					if (!matchToken(tokens.get(next++), symbol.DoubleQuote))
+					{
 						test = null;
 						// System.out.println("In Test, At case matching");
-					} else {
+					}
+					else
+					{
 						test.setAfterTest(next);
 					}
 				}
 
 			}
-		} else {
+		}
+		else
+		{
 			// System.out.println("In Test, checking step at - "+next+" with "+tokens.get(next));
 			XPathStep step = step(tokens, next);
-			if (step != null) {
+			if (step != null)
+			{
 				test = new XPathTest();
 				test.setStep(true);
 				test.setStep(step);

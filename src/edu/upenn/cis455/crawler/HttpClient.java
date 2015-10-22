@@ -28,7 +28,8 @@ import edu.upenn.cis455.crawler.info.RobotsTxtInfo;
  * @author cis455
  *
  */
-public class HttpClient {
+public class HttpClient
+{
 	private URL sourceUrl;
 	private int port;
 	private String host;
@@ -38,7 +39,8 @@ public class HttpClient {
 	private static final String XML = "xml";
 	private static final String HTML = "html";
 
-	public HttpClient(URL url) throws UnknownHostException, IOException {
+	public HttpClient(URL url) throws UnknownHostException, IOException
+	{
 		sourceUrl = url;
 		host = sourceUrl.getHost();
 		port = sourceUrl.getPort() == -1 ? sourceUrl.getDefaultPort()
@@ -56,7 +58,8 @@ public class HttpClient {
 	 * @throws ParserConfigurationException
 	 */
 	public DocumentRecord getDocument() throws UnknownHostException,
-			IOException, SAXException, ParserConfigurationException {
+			IOException, SAXException, ParserConfigurationException
+	{
 		boolean isHtml = false;
 		;
 		boolean isXml = false;
@@ -67,14 +70,16 @@ public class HttpClient {
 		if (response != null && response.getHeaders() != null
 				&& response.getResponseCode().equals("200")
 				&& response.getHeaders().containsKey(CONTENT_LENGTH_HEADER)
-				&& response.getHeaders().containsKey(CONTENT_TYPE_HEADER)) {
+				&& response.getHeaders().containsKey(CONTENT_TYPE_HEADER))
+		{
 			String contentType = response.getHeaders().get(CONTENT_TYPE_HEADER)
 					.get(0);
 			int contentLength = Integer.valueOf(response.getHeaders()
 					.get(CONTENT_LENGTH_HEADER).get(0));
 
 			if (!(contentType.contains(HTML) || contentType.contains(XML))
-					|| contentLength > XPathCrawler.getMaxSize()) {
+					|| contentLength > XPathCrawler.getMaxSize())
+			{
 				// return if document is not xml || html or if length is larger
 				// than max size
 				System.out
@@ -85,7 +90,9 @@ public class HttpClient {
 				System.out.println("max size - " + XPathCrawler.getMaxSize());
 				return documentRecord;
 			}
-		} else {
+		}
+		else
+		{
 			return documentRecord;
 		}
 		socket = new Socket(host, port);
@@ -95,19 +102,25 @@ public class HttpClient {
 
 		if (response != null && response.getResponseCode() != null
 				&& response.getResponseCode().equals("200")
-				&& response.getHeaders().containsKey(CONTENT_TYPE_HEADER)) {
+				&& response.getHeaders().containsKey(CONTENT_TYPE_HEADER))
+		{
 			if (response.getHeaders().get(CONTENT_TYPE_HEADER).get(0)
-					.contains(HTML)) {
+					.contains(HTML))
+			{
 				isHtml = true;
-			} else if (response.getHeaders().get(CONTENT_TYPE_HEADER).get(0)
-					.contains(XML)) {
+			}
+			else if (response.getHeaders().get(CONTENT_TYPE_HEADER).get(0)
+					.contains(XML))
+			{
 				isXml = true;
 			}
 			long lastCrawled = (new Date()).getTime();
-			if (response.getHeaders().containsKey("Date")) {
+			if (response.getHeaders().containsKey("Date"))
+			{
 				String dateString = response.getHeaders().get("Date").get(0);
 				Date date = DocumentRecord.getDate(dateString);
-				if (date != null) {
+				if (date != null)
+				{
 					lastCrawled = date.getTime();
 				}
 			}
@@ -118,18 +131,21 @@ public class HttpClient {
 		return documentRecord;
 	}
 
-	public RobotsTxtInfo getRobotsTxt() throws IOException {
+	public RobotsTxtInfo getRobotsTxt() throws IOException
+	{
 		RobotsTxtInfo info = null;
 		HttpResponse response = sendRobotsTxtRequest();
 		System.out.println(sourceUrl + " - " + response);
 		if (response != null && response.getData() != null
-				&& response.getResponseCode().equals("200")) {
+				&& response.getResponseCode().equals("200"))
+		{
 			info = RobotsTxtInfo.parseRobotsTxt(response.getData());
 		}
 		return info;
 	}
 
-	public HttpResponse sendRobotsTxtRequest() throws IOException {
+	public HttpResponse sendRobotsTxtRequest() throws IOException
+	{
 		PrintWriter clientSocketOut = new PrintWriter(new OutputStreamWriter(
 				socket.getOutputStream()));
 		clientSocketOut.print("GET " + sourceUrl + " HTTP/1.0\r\n");
@@ -140,7 +156,8 @@ public class HttpClient {
 		return parseResponse();
 	}
 
-	private HttpResponse sendHead() throws IOException {
+	private HttpResponse sendHead() throws IOException
+	{
 		PrintWriter clientSocketOut = new PrintWriter(new OutputStreamWriter(
 				socket.getOutputStream()));
 		clientSocketOut.print("HEAD " + sourceUrl + " HTTP/1.0\r\n");
@@ -150,7 +167,8 @@ public class HttpClient {
 		return parseResponse();
 	}
 
-	public HttpResponse sendFileRequest() throws IOException {
+	public HttpResponse sendFileRequest() throws IOException
+	{
 		PrintWriter clientSocketOut = new PrintWriter(new OutputStreamWriter(
 				socket.getOutputStream()));
 		clientSocketOut.print("GET " + sourceUrl + " HTTP/1.0\r\n");
@@ -162,7 +180,8 @@ public class HttpClient {
 		return parseResponse();
 	}
 
-	public HttpResponse parseResponse() throws IOException {
+	public HttpResponse parseResponse() throws IOException
+	{
 		InputStream socketInputStream = socket.getInputStream();
 		InputStreamReader socketInputStreamReader = new InputStreamReader(
 				socketInputStream);
@@ -183,15 +202,19 @@ public class HttpClient {
 	 * @return
 	 * @throws IOException
 	 */
-	public HttpResponse parseResponse(BufferedReader in) throws IOException {
+	public HttpResponse parseResponse(BufferedReader in) throws IOException
+	{
 		HttpResponse response = new HttpResponse();
 		String line = in.readLine();
-		if (line != null) {
+		if (line != null)
+		{
 			String[] firstLineSplit = line.trim().split(" ", 3);
-			if (firstLineSplit.length < 3) {
+			if (firstLineSplit.length < 3)
+			{
 				return null;
 			}
-			if (firstLineSplit[0].trim().split("/").length < 2) {
+			if (firstLineSplit[0].trim().split("/").length < 2)
+			{
 				return null;
 			}
 			response.setProtocol((firstLineSplit[0].trim().split("/")[0]));
@@ -199,15 +222,21 @@ public class HttpClient {
 			response.setResponseCode(firstLineSplit[1].trim());
 			response.setResponseCodeString(firstLineSplit[2].trim());
 			Map<String, List<String>> headers = new HashMap<String, List<String>>();
-			while ((line = in.readLine()) != null) {
-				if (line.equals("")) {
+			while ((line = in.readLine()) != null)
+			{
+				if (line.equals(""))
+				{
 					break;
 				}
 				String[] lineSplit = line.trim().split(":", 2);
-				if (lineSplit.length == 2) {
-					if (headers.containsKey(lineSplit[0].toLowerCase().trim())) {
+				if (lineSplit.length == 2)
+				{
+					if (headers.containsKey(lineSplit[0].toLowerCase().trim()))
+					{
 						headers.get(lineSplit[0]).add(lineSplit[1].trim());
-					} else {
+					}
+					else
+					{
 						ArrayList<String> values = new ArrayList<String>();
 						values.add(lineSplit[1].trim());
 						headers.put(lineSplit[0].toLowerCase().trim(), values);
@@ -216,12 +245,15 @@ public class HttpClient {
 				}
 			}
 			StringBuilder responseBody = new StringBuilder();
-			while ((line = in.readLine()) != null) {
+			while ((line = in.readLine()) != null)
+			{
 				responseBody.append(line + "\r\n");
 			}
 			response.setHeaders(headers);
 			response.setData(responseBody.toString());
-		} else {
+		}
+		else
+		{
 			return null;
 		}
 		return response;

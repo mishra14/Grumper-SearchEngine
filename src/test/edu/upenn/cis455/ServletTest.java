@@ -16,14 +16,16 @@ import edu.upenn.cis455.servlet.XPathServlet;
  * @author cis455
  *
  */
-public class ServletTest extends TestCase {
+public class ServletTest extends TestCase
+{
 	/**
 	 * This method tests the case when a success html is expected
 	 * 
 	 * @throws Exception
 	 */
 	@Test
-	public void testServletSuccess() throws Exception {
+	public void testServletSuccess() throws Exception
+	{
 		HttpServletRequest request = EasyMock.mock(HttpServletRequest.class);
 		HttpServletResponse response = EasyMock.mock(HttpServletResponse.class);
 
@@ -47,7 +49,8 @@ public class ServletTest extends TestCase {
 		BufferedReader reader = new BufferedReader(fileReader);
 		StringBuilder fileString = new StringBuilder();
 		String line;
-		while ((line = reader.readLine()) != null) {
+		while ((line = reader.readLine()) != null)
+		{
 			fileString.append(line);
 		}
 		reader.close();
@@ -63,7 +66,8 @@ public class ServletTest extends TestCase {
 	 */
 
 	@Test
-	public void testServletFaliure() throws Exception {
+	public void testServletFaliure() throws Exception
+	{
 		HttpServletRequest request = EasyMock.mock(HttpServletRequest.class);
 		HttpServletResponse response = EasyMock.mock(HttpServletResponse.class);
 
@@ -87,7 +91,8 @@ public class ServletTest extends TestCase {
 		BufferedReader reader = new BufferedReader(fileReader);
 		StringBuilder fileString = new StringBuilder();
 		String line;
-		while ((line = reader.readLine()) != null) {
+		while ((line = reader.readLine()) != null)
+		{
 			fileString.append(line);
 		}
 		reader.close();

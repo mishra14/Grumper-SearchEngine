@@ -16,7 +16,8 @@ import com.sleepycat.persist.model.PrimaryKey;
  *
  */
 @Entity
-public class XPath {
+public class XPath
+{
 
 	@PrimaryKey
 	private String xPath;
@@ -27,16 +28,22 @@ public class XPath {
 	/*
 	 * Unique symbols in an xPath - /, (, ), [, ], =, @, ",
 	 */
-	public XPath() {
+	public XPath()
+	{
 	}
 
-	public XPath(String xPath) {
+	public XPath(String xPath)
+	{
 		StringBuilder xPathBuilder = new StringBuilder();
 		int quotes = 0;
-		for (int i = 0; i < xPath.length(); i++) {
-			if (xPath.charAt(i) == '\"') {
+		for (int i = 0; i < xPath.length(); i++)
+		{
+			if (xPath.charAt(i) == '\"')
+			{
 				quotes++;
-			} else if (xPath.charAt(i) == ' ' && quotes % 2 == 0) {
+			}
+			else if (xPath.charAt(i) == ' ' && quotes % 2 == 0)
+			{
 				continue;
 			}
 			xPathBuilder.append(xPath.charAt(i));
@@ -50,98 +57,128 @@ public class XPath {
 	/**
 	 * This method tokenizes an xpath based on special symbols
 	 */
-	public void tokenize() {
+	public void tokenize()
+	{
 		int last = 0;
 		tokens = new ArrayList<String>();
 		boolean quote = false;
 		int bracket = 0;
 		int paran = 0;
-		for (int i = 0; i < xPath.length(); i++) {
+		for (int i = 0; i < xPath.length(); i++)
+		{
 			char ch = xPath.charAt(i);
 			if (ch == '/' || ch == '(' || ch == ')' || ch == '[' || ch == ']'
-					|| ch == '=' || ch == '@' || ch == '"') {
+					|| ch == '=' || ch == '@' || ch == '"')
+			{
 				/*
 				 * System.out.println("char - "+ch);
 				 * System.out.println("Quote - "+quote);
 				 * System.out.println("Bracket - "+bracket);
 				 * System.out.println("Paran - "+ paran);
 				 */
-				if (!quote) {
-					if (last != i) {
+				if (!quote)
+				{
+					if (last != i)
+					{
 						tokens.add(xPath.substring(last, i));
 					}
 					tokens.add(xPath.substring(i, i + 1));
 					last = i + 1;
 				}
-				if (!quote && ch == '"') {
+				if (!quote && ch == '"')
+				{
 					quote = true;
-				} else if (!quote && ch == '(') {
+				}
+				else if (!quote && ch == '(')
+				{
 					paran++;
-				} else if (!quote && ch == '[') {
+				}
+				else if (!quote && ch == '[')
+				{
 					bracket++;
-				} else if (!quote && ch == ')') {
+				}
+				else if (!quote && ch == ')')
+				{
 					paran--;
-				} else if (!quote && ch == ']') {
+				}
+				else if (!quote && ch == ']')
+				{
 					bracket--;
-				} else if (quote
-						&& ((bracket > 0 && ch == ']') || (paran > 0 && ch == ')'))) {
+				}
+				else if (quote
+						&& ((bracket > 0 && ch == ']') || (paran > 0 && ch == ')')))
+				{
 					// System.out.println("inside with - "+ch);
-					if (last != i) {
+					if (last != i)
+					{
 						tokens.add(xPath.substring(last, i - 1));
 					}
 					tokens.add(xPath.substring(i - 1, i));
 					tokens.add(xPath.substring(i, i + 1));
 					last = i + 1;
 					quote = false;
-					if (paran > 0 && ch == ')') {
+					if (paran > 0 && ch == ')')
+					{
 						paran--;
-					} else if (bracket > 0 && ch == ']') {
+					}
+					else if (bracket > 0 && ch == ']')
+					{
 						bracket--;
 					}
 				}
 
 			}
 		}
-		if (last != xPath.length()) {
+		if (last != xPath.length())
+		{
 			tokens.add(xPath.substring(last));
 		}
 		System.out.println("Tokens - \n" + tokens);
 	}
 
-	public String getxPath() {
+	public String getxPath()
+	{
 		return xPath;
 	}
 
-	public ArrayList<String> getTokens() {
+	public ArrayList<String> getTokens()
+	{
 		return tokens;
 	}
 
-	public XPathStep getRootStep() {
+	public XPathStep getRootStep()
+	{
 		return rootStep;
 	}
 
-	public void setRootStep(XPathStep rootStep) {
+	public void setRootStep(XPathStep rootStep)
+	{
 		this.rootStep = rootStep;
 	}
 
-	public void setxPath(String xPath) {
+	public void setxPath(String xPath)
+	{
 		this.xPath = xPath;
 	}
 
-	public void setTokens(ArrayList<String> tokens) {
+	public void setTokens(ArrayList<String> tokens)
+	{
 		this.tokens = tokens;
 	}
 
-	public boolean isValid() {
+	public boolean isValid()
+	{
 		return isValid;
 	}
 
-	public void setValid(boolean isValid) {
+	public void setValid(boolean isValid)
+	{
 		this.isValid = isValid;
 	}
 
 	@Override
-	public String toString() {
+	public String toString()
+	{
 		return "XPath [xPath=" + xPath + ", tokens=" + tokens + ", rootStep="
 				+ rootStep + ", isValid=" + isValid + "]";
 	}

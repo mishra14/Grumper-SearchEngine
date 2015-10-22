@@ -11,7 +11,8 @@ import org.w3c.dom.NodeList;
  * @author cis455
  *
  */
-public class DomParser {
+public class DomParser
+{
 
 	/**
 	 * parse the document against the xpath
@@ -20,9 +21,11 @@ public class DomParser {
 	 * @param xPath
 	 * @return
 	 */
-	public static boolean parseDom(Document document, XPath xPath) {
+	public static boolean parseDom(Document document, XPath xPath)
+	{
 		boolean result = false;
-		if (!(xPath == null || document == null)) {
+		if (!(xPath == null || document == null))
+		{
 			result = validateStep(document.getDocumentElement(),
 					xPath.getRootStep());
 		}
@@ -37,11 +40,13 @@ public class DomParser {
 	 * @param rootStep
 	 * @return
 	 */
-	private static boolean validateStep(Node root, XPathStep rootStep) {
+	private static boolean validateStep(Node root, XPathStep rootStep)
+	{
 		boolean result = false;
 		System.out.println("Root - " + root.getNodeName());
 		System.out.println("xPathStep - " + rootStep);
-		if (root == null || rootStep == null) {
+		if (root == null || rootStep == null)
+		{
 			return false;
 		}
 		if (root.getNodeName().equals(rootStep.getNodeName())) // node name
@@ -50,20 +55,26 @@ public class DomParser {
 																// further
 		{
 			result = true;
-			if (rootStep.getTests() != null) {
-				for (XPathTest test : rootStep.getTests()) {
+			if (rootStep.getTests() != null)
+			{
+				for (XPathTest test : rootStep.getTests())
+				{
 					result = validateTest(root, test);
-					if (!result) {
+					if (!result)
+					{
 						break;
 					}
 
 				}
 			}
-			if (rootStep.getNextStep() != null) {
+			if (rootStep.getNextStep() != null)
+			{
 				result = false;
 				NodeList children = root.getChildNodes();
-				for (int i = 0; i < children.getLength(); i++) {
-					if (validateStep(children.item(i), rootStep.getNextStep())) {
+				for (int i = 0; i < children.getLength(); i++)
+				{
+					if (validateStep(children.item(i), rootStep.getNextStep()))
+					{
 						result = true;
 						break;
 					}
@@ -81,45 +92,56 @@ public class DomParser {
 	 * @return
 	 */
 
-	private static boolean validateTest(Node root, XPathTest test) {
+	private static boolean validateTest(Node root, XPathTest test)
+	{
 		boolean result = false;
 
 		// test can be a text()= ".."
-		if (test.isTextFilter()) {
+		if (test.isTextFilter())
+		{
 			String textContent = root.getTextContent();
 			if (textContent != null
-					&& textContent.contains(test.getQueryString())) {
+					&& textContent.contains(test.getQueryString()))
+			{
 				result = true;
 			}
 		}
 		// test can be a contains(text(), "..")
-		else if (test.isContainsFilter()) {
+		else if (test.isContainsFilter())
+		{
 			String textContent = root.getTextContent();
 			if (textContent != null
-					&& textContent.equals(test.getQueryString())) {
+					&& textContent.equals(test.getQueryString()))
+			{
 				result = true;
 			}
 		}
 		// test can be a @att= ".."
-		else if (test.isAttFilter()) {
+		else if (test.isAttFilter())
+		{
 			NamedNodeMap attributeMap = root.getAttributes();
-			if (attributeMap.getNamedItem(test.getAttName()) != null) {
+			if (attributeMap.getNamedItem(test.getAttName()) != null)
+			{
 				System.out
 						.println(attributeMap.getNamedItem(test.getAttName()));
 				String attributeValue = attributeMap.getNamedItem(
 						test.getAttName()).getNodeValue();
 				if (attributeValue != null
-						&& attributeValue.equals(test.getQueryString())) {
+						&& attributeValue.equals(test.getQueryString()))
+				{
 					result = true;
 				}
 			}
 		}
 		// test can be a step
-		else if (test.isStep()) {
+		else if (test.isStep())
+		{
 			result = false;
 			NodeList children = root.getChildNodes();
-			for (int i = 0; i < children.getLength(); i++) {
-				if (validateStep(children.item(i), test.getStep())) {
+			for (int i = 0; i < children.getLength(); i++)
+			{
+				if (validateStep(children.item(i), test.getStep()))
+				{
 					result = true;
 					break;
 				}

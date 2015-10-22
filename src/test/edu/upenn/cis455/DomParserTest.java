@@ -28,7 +28,8 @@ import edu.upenn.cis455.xpath.XPathParser;
  * @author cis455
  *
  */
-public class DomParserTest extends TestCase {
+public class DomParserTest extends TestCase
+{
 
 	/**
 	 * This method tests the case with valid xpath
@@ -40,7 +41,8 @@ public class DomParserTest extends TestCase {
 	 */
 	@Test
 	public void testValidPathAndDocument() throws UnknownHostException,
-			IOException, SAXException, ParserConfigurationException {
+			IOException, SAXException, ParserConfigurationException
+	{
 		XPath xPath = new XPath("/note/to");
 		xPath.tokenize();
 		XPathParser.parseXPath(xPath);
@@ -62,7 +64,8 @@ public class DomParserTest extends TestCase {
 
 	@Test
 	public void testInValidPathAndValidDocument() throws UnknownHostException,
-			IOException, SAXException, ParserConfigurationException {
+			IOException, SAXException, ParserConfigurationException
+	{
 		XPath xPath = new XPath("/note/non-present-field");
 		xPath.tokenize();
 		XPathParser.parseXPath(xPath);

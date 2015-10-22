@@ -1,6 +1,7 @@
 package edu.upenn.cis455.crawler.info;
 
-public class URLInfo {
+public class URLInfo
+{
 	private String hostName;
 	private int portNo;
 	private String filePath;
@@ -9,7 +10,8 @@ public class URLInfo {
 	 * Constructor called with raw URL as input - parses URL to obtain host name
 	 * and file path
 	 */
-	public URLInfo(String docURL) {
+	public URLInfo(String docURL)
+	{
 		if (docURL == null || docURL.equals(""))
 			return;
 		docURL = docURL.trim();
@@ -22,7 +24,8 @@ public class URLInfo {
 		 * if(docURL.startsWith("www.")) docURL = docURL.substring(4);
 		 */
 		int i = 0;
-		while (i < docURL.length()) {
+		while (i < docURL.length())
+		{
 			char c = docURL.charAt(i);
 			if (c == '/')
 				break;
@@ -35,53 +38,67 @@ public class URLInfo {
 			filePath = docURL.substring(i); // starts with '/'
 		if (address.equals("/") || address.equals(""))
 			return;
-		if (address.indexOf(':') != -1) {
+		if (address.indexOf(':') != -1)
+		{
 			String[] comp = address.split(":", 2);
 			hostName = comp[0].trim();
-			try {
+			try
+			{
 				portNo = Integer.parseInt(comp[1].trim());
-			} catch (NumberFormatException nfe) {
+			}
+			catch (NumberFormatException nfe)
+			{
 				portNo = 80;
 			}
-		} else {
+		}
+		else
+		{
 			hostName = address;
 			portNo = 80;
 		}
 	}
 
-	public URLInfo(String hostName, String filePath) {
+	public URLInfo(String hostName, String filePath)
+	{
 		this.hostName = hostName;
 		this.filePath = filePath;
 		this.portNo = 80;
 	}
 
-	public URLInfo(String hostName, int portNo, String filePath) {
+	public URLInfo(String hostName, int portNo, String filePath)
+	{
 		this.hostName = hostName;
 		this.portNo = portNo;
 		this.filePath = filePath;
 	}
 
-	public String getHostName() {
+	public String getHostName()
+	{
 		return hostName;
 	}
 
-	public void setHostName(String s) {
+	public void setHostName(String s)
+	{
 		hostName = s;
 	}
 
-	public int getPortNo() {
+	public int getPortNo()
+	{
 		return portNo;
 	}
 
-	public void setPortNo(int p) {
+	public void setPortNo(int p)
+	{
 		portNo = p;
 	}
 
-	public String getFilePath() {
+	public String getFilePath()
+	{
 		return filePath;
 	}
 
-	public void setFilePath(String fp) {
+	public void setFilePath(String fp)
+	{
 		filePath = fp;
 	}
 

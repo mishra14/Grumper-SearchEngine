@@ -3,7 +3,8 @@ package edu.upenn.cis455.crawler.info;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class RobotsTxtInfo {
+public class RobotsTxtInfo
+{
 
 	private HashMap<String, ArrayList<String>> disallowedLinks;
 	private HashMap<String, ArrayList<String>> allowedLinks;
@@ -12,7 +13,8 @@ public class RobotsTxtInfo {
 	private ArrayList<String> sitemapLinks;
 	private ArrayList<String> userAgents;
 
-	public RobotsTxtInfo() {
+	public RobotsTxtInfo()
+	{
 		disallowedLinks = new HashMap<String, ArrayList<String>>();
 		allowedLinks = new HashMap<String, ArrayList<String>>();
 		crawlDelays = new HashMap<String, Integer>();
@@ -20,12 +22,16 @@ public class RobotsTxtInfo {
 		userAgents = new ArrayList<String>();
 	}
 
-	public void addDisallowedLink(String key, String value) {
-		if (!disallowedLinks.containsKey(key)) {
+	public void addDisallowedLink(String key, String value)
+	{
+		if (!disallowedLinks.containsKey(key))
+		{
 			ArrayList<String> temp = new ArrayList<String>();
 			temp.add(value);
 			disallowedLinks.put(key, temp);
-		} else {
+		}
+		else
+		{
 			ArrayList<String> temp = disallowedLinks.get(key);
 			if (temp == null)
 				temp = new ArrayList<String>();
@@ -34,12 +40,16 @@ public class RobotsTxtInfo {
 		}
 	}
 
-	public void addAllowedLink(String key, String value) {
-		if (!allowedLinks.containsKey(key)) {
+	public void addAllowedLink(String key, String value)
+	{
+		if (!allowedLinks.containsKey(key))
+		{
 			ArrayList<String> temp = new ArrayList<String>();
 			temp.add(value);
 			allowedLinks.put(key, temp);
-		} else {
+		}
+		else
+		{
 			ArrayList<String> temp = allowedLinks.get(key);
 			if (temp == null)
 				temp = new ArrayList<String>();
@@ -48,36 +58,45 @@ public class RobotsTxtInfo {
 		}
 	}
 
-	public void addCrawlDelay(String key, Integer value) {
+	public void addCrawlDelay(String key, Integer value)
+	{
 		crawlDelays.put(key, value);
 	}
 
-	public void addSitemapLink(String val) {
+	public void addSitemapLink(String val)
+	{
 		sitemapLinks.add(val);
 	}
 
-	public void addUserAgent(String key) {
+	public void addUserAgent(String key)
+	{
 		userAgents.add(key);
 	}
 
-	public boolean containsUserAgent(String key) {
+	public boolean containsUserAgent(String key)
+	{
 		return userAgents.contains(key);
 	}
 
-	public ArrayList<String> getDisallowedLinks(String key) {
+	public ArrayList<String> getDisallowedLinks(String key)
+	{
 		return disallowedLinks.get(key);
 	}
 
-	public ArrayList<String> getAllowedLinks(String key) {
+	public ArrayList<String> getAllowedLinks(String key)
+	{
 		return allowedLinks.get(key);
 	}
 
-	public int getCrawlDelay(String key) {
+	public int getCrawlDelay(String key)
+	{
 		return crawlDelays.get(key);
 	}
 
-	public void print() {
-		for (String userAgent : userAgents) {
+	public void print()
+	{
+		for (String userAgent : userAgents)
+		{
 			System.out.println("User-Agent: " + userAgent);
 			ArrayList<String> dlinks = disallowedLinks.get(userAgent);
 			if (dlinks != null)
@@ -92,47 +111,62 @@ public class RobotsTxtInfo {
 						.println("Crawl-Delay: " + crawlDelays.get(userAgent));
 			System.out.println();
 		}
-		if (sitemapLinks.size() > 0) {
+		if (sitemapLinks.size() > 0)
+		{
 			System.out.println("# SiteMap Links");
 			for (String sitemap : sitemapLinks)
 				System.out.println(sitemap);
 		}
 	}
 
-	public boolean crawlContainAgent(String key) {
+	public boolean crawlContainAgent(String key)
+	{
 		return crawlDelays.containsKey(key);
 	}
 
 	public static RobotsTxtInfo parseRobotsTxt(String robots)
-			throws NumberFormatException {
+			throws NumberFormatException
+	{
 		RobotsTxtInfo info = new RobotsTxtInfo();
 		String[] lines = robots.split(System.getProperty("line.separator"));
 		String userAgent = null;
 		String disallow = null;
 		String allow = null;
 		int delay = -1;
-		for (String line : lines) {
+		for (String line : lines)
+		{
 			line = line.trim();
-			if (line.startsWith("User-agent") && line.contains(":")) {
-				if (line.split(":").length > 1) {
+			if (line.startsWith("User-agent") && line.contains(":"))
+			{
+				if (line.split(":").length > 1)
+				{
 					userAgent = line.split(":")[1].trim();
 					info.addUserAgent(userAgent);
 				}
-			} else if (line.startsWith("Disallow") && line.contains(":")
-					&& userAgent != null) {
-				if (line.split(":").length > 1) {
+			}
+			else if (line.startsWith("Disallow") && line.contains(":")
+					&& userAgent != null)
+			{
+				if (line.split(":").length > 1)
+				{
 					disallow = line.split(":")[1].trim();
 					info.addDisallowedLink(userAgent, disallow);
 				}
-			} else if (line.startsWith("Allow") && line.contains(":")
-					&& userAgent != null) {
-				if (line.split(":").length > 1) {
+			}
+			else if (line.startsWith("Allow") && line.contains(":")
+					&& userAgent != null)
+			{
+				if (line.split(":").length > 1)
+				{
 					allow = line.split(":")[1].trim();
 					info.addAllowedLink(userAgent, allow);
 				}
-			} else if (line.startsWith("Crawl-delay") && line.contains(":")
-					&& userAgent != null) {
-				if (line.split(":").length > 1) {
+			}
+			else if (line.startsWith("Crawl-delay") && line.contains(":")
+					&& userAgent != null)
+			{
+				if (line.split(":").length > 1)
+				{
 					delay = Integer.valueOf(line.split(":")[1].trim());
 					info.addCrawlDelay(userAgent, delay);
 				}
@@ -142,11 +176,12 @@ public class RobotsTxtInfo {
 	}
 
 	@Override
-	public String toString() {
+	public String toString()
+	{
 		return "RobotsTxtInfo [disallowedLinks=" + disallowedLinks
 				+ ", allowedLinks=" + allowedLinks + ", crawlDelays="
 				+ crawlDelays + ", sitemapLinks=" + sitemapLinks
 				+ ", userAgents=" + userAgents + "]";
 	}
-	
+
 }

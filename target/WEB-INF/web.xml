@@ -8,7 +8,7 @@
    <display-name>Channel Subscription Servlets</display-name>
    <context-param>
      <param-name>BDBstore</param-name>
-     <param-value>database</param-value>
+     <param-value>/usr/share/jetty/webapps/db</param-value>
    </context-param>
     
    <servlet>
@@ -18,7 +18,7 @@
     
    <servlet-mapping>
      <servlet-name>xpath</servlet-name>
-     <url-pattern>/xpath</url-pattern>
+     <url-pattern>/xpath/*</url-pattern>
    </servlet-mapping>  
 
    <!-- add any additional servlets and servlet mappings here -->

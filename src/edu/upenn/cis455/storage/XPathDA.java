@@ -3,15 +3,18 @@ package edu.upenn.cis455.storage;
 import com.sleepycat.persist.PrimaryIndex;
 import edu.upenn.cis455.xpath.XPath;
 
-public class XPathDA {
+public class XPathDA
+{
 	public static XPath getXPath(String xPathString) // returns null if the
 														// entry wasn't found
 	{
 		XPath xPath = null;
-		if (DBWrapper.getStore() != null) {
+		if (DBWrapper.getStore() != null)
+		{
 			PrimaryIndex<String, XPath> xPathPrimaryIndex = DBWrapper
 					.getStore().getPrimaryIndex(String.class, XPath.class);
-			if (xPathPrimaryIndex != null) {
+			if (xPathPrimaryIndex != null)
+			{
 				xPath = xPathPrimaryIndex.get(xPathString);
 			}
 		}
@@ -22,10 +25,12 @@ public class XPathDA {
 												// not exist in the DB
 	{
 		XPath insertedXPath = null;
-		if (DBWrapper.getStore() != null) {
+		if (DBWrapper.getStore() != null)
+		{
 			PrimaryIndex<String, XPath> xPathPrimaryIndex = DBWrapper
 					.getStore().getPrimaryIndex(String.class, XPath.class);
-			if (xPathPrimaryIndex != null) {
+			if (xPathPrimaryIndex != null)
+			{
 				insertedXPath = xPathPrimaryIndex.put(xPath);
 			}
 		}

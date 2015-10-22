@@ -14,22 +14,26 @@ import edu.upenn.cis455.xpath.XPath;
  * @author cis455
  *
  */
-public class XPathEngineImpl implements XPathEngine {
+public class XPathEngineImpl implements XPathEngine
+{
 
 	private String[] xPathStrings;
 	private XPath[] xPaths;
 
-	public XPathEngineImpl() {
+	public XPathEngineImpl()
+	{
 		// Do NOT add arguments to the constructor!!
 	}
 
 	/**
 	 * Set the xpaths
 	 */
-	public void setXPaths(String[] xPathArray) {
+	public void setXPaths(String[] xPathArray)
+	{
 		xPathStrings = xPathArray;
 		xPaths = new XPath[xPathStrings.length];
-		for (int i = 0; i < xPathStrings.length; i++) {
+		for (int i = 0; i < xPathStrings.length; i++)
+		{
 			xPaths[i] = new XPath(xPathStrings[i]);
 		}
 	}
@@ -37,10 +41,14 @@ public class XPathEngineImpl implements XPathEngine {
 	/**
 	 * check if i'th xpath is valid
 	 */
-	public boolean isValid(int i) {
-		if (i >= xPaths.length || i < 0 || !xPaths[i].isValid()) {
+	public boolean isValid(int i)
+	{
+		if (i >= xPaths.length || i < 0 || !xPaths[i].isValid())
+		{
 			return false;
-		} else {
+		}
+		else
+		{
 			return true;
 		}
 	}
@@ -48,15 +56,21 @@ public class XPathEngineImpl implements XPathEngine {
 	/**
 	 * evaluate the document against all xpaths
 	 */
-	public boolean[] evaluate(Document document) {
-		if (xPaths == null || xPaths.length == 0) {
+	public boolean[] evaluate(Document document)
+	{
+		if (xPaths == null || xPaths.length == 0)
+		{
 			return null;
 		}
 		boolean[] result = new boolean[xPaths.length];
-		for (int i = 0; i < result.length; i++) {
-			if (xPaths[i].isValid()) {
+		for (int i = 0; i < result.length; i++)
+		{
+			if (xPaths[i].isValid())
+			{
 				result[i] = DomParser.parseDom(document, xPaths[i]);
-			} else {
+			}
+			else
+			{
 				result[i] = false;
 			}
 		}
@@ -67,7 +81,8 @@ public class XPathEngineImpl implements XPathEngine {
 	 * always return false
 	 */
 	@Override
-	public boolean isSAX() {
+	public boolean isSAX()
+	{
 		return false;
 	}
 
@@ -75,7 +90,8 @@ public class XPathEngineImpl implements XPathEngine {
 	 * always return null
 	 */
 	@Override
-	public boolean[] evaluateSAX(InputStream document, DefaultHandler handler) {
+	public boolean[] evaluateSAX(InputStream document, DefaultHandler handler)
+	{
 		return null;
 	}
 

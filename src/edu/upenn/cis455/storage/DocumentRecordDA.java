@@ -4,7 +4,8 @@ import com.sleepycat.persist.PrimaryIndex;
 
 import edu.upenn.cis455.bean.DocumentRecord;
 
-public class DocumentRecordDA {
+public class DocumentRecordDA
+{
 
 	public static DocumentRecord getDocument(String documentId) // returns null
 																// if the
@@ -12,11 +13,13 @@ public class DocumentRecordDA {
 	// found
 	{
 		DocumentRecord document = null;
-		if (DBWrapper.getStore() != null) {
+		if (DBWrapper.getStore() != null)
+		{
 			PrimaryIndex<String, DocumentRecord> userPrimaryIndex = DBWrapper
 					.getStore().getPrimaryIndex(String.class,
 							DocumentRecord.class);
-			if (userPrimaryIndex != null) {
+			if (userPrimaryIndex != null)
+			{
 				document = userPrimaryIndex.get(documentId);
 			}
 		}
@@ -31,11 +34,13 @@ public class DocumentRecordDA {
 	// in the DB
 	{
 		DocumentRecord insertedDocument = null;
-		if (DBWrapper.getStore() != null) {
+		if (DBWrapper.getStore() != null)
+		{
 			PrimaryIndex<String, DocumentRecord> userPrimaryIndex = DBWrapper
 					.getStore().getPrimaryIndex(String.class,
 							DocumentRecord.class);
-			if (userPrimaryIndex != null) {
+			if (userPrimaryIndex != null)
+			{
 				insertedDocument = userPrimaryIndex.put(document);
 			}
 		}

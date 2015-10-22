@@ -4,16 +4,19 @@ import com.sleepycat.persist.PrimaryIndex;
 
 import edu.upenn.cis455.bean.User;
 
-public class UserDA {
+public class UserDA
+{
 
 	public static User getUser(String userName) // returns null if the entry
 												// wasn't found
 	{
 		User user = null;
-		if (DBWrapper.getStore() != null) {
+		if (DBWrapper.getStore() != null)
+		{
 			PrimaryIndex<String, User> userPrimaryIndex = DBWrapper.getStore()
 					.getPrimaryIndex(String.class, User.class);
-			if (userPrimaryIndex != null) {
+			if (userPrimaryIndex != null)
+			{
 				user = userPrimaryIndex.get(userName);
 			}
 		}
@@ -24,10 +27,12 @@ public class UserDA {
 											// exist in the DB
 	{
 		User insertedUser = null;
-		if (DBWrapper.getStore() != null) {
+		if (DBWrapper.getStore() != null)
+		{
 			PrimaryIndex<String, User> userPrimaryIndex = DBWrapper.getStore()
 					.getPrimaryIndex(String.class, User.class);
-			if (userPrimaryIndex != null) {
+			if (userPrimaryIndex != null)
+			{
 				insertedUser = userPrimaryIndex.put(user);
 			}
 		}

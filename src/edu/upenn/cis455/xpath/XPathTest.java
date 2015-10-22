@@ -9,7 +9,8 @@ import com.sleepycat.persist.model.Persistent;
  *
  */
 @Persistent
-public class XPathTest {
+public class XPathTest
+{
 
 	private boolean isStep;
 	private boolean isTextFilter;
@@ -20,79 +21,97 @@ public class XPathTest {
 	private String queryString;
 	private int afterTest;
 
-	public XPathTest() {
+	public XPathTest()
+	{
 		this.isStep = false;
 		this.isTextFilter = false;
 		this.isAttFilter = false;
 		this.isContainsFilter = false;
 	}
 
-	public boolean isStep() {
+	public boolean isStep()
+	{
 		return isStep;
 	}
 
-	public void setStep(boolean isStep) {
+	public void setStep(boolean isStep)
+	{
 		this.isStep = isStep;
 	}
 
-	public boolean isTextFilter() {
+	public boolean isTextFilter()
+	{
 		return isTextFilter;
 	}
 
-	public void setTextFilter(boolean isTextFilter) {
+	public void setTextFilter(boolean isTextFilter)
+	{
 		this.isTextFilter = isTextFilter;
 	}
 
-	public boolean isContainsFilter() {
+	public boolean isContainsFilter()
+	{
 		return isContainsFilter;
 	}
 
-	public void setContainsFilter(boolean isContainsFilter) {
+	public void setContainsFilter(boolean isContainsFilter)
+	{
 		this.isContainsFilter = isContainsFilter;
 	}
 
-	public boolean isAttFilter() {
+	public boolean isAttFilter()
+	{
 		return isAttFilter;
 	}
 
-	public void setAttFilter(boolean isAttFilter) {
+	public void setAttFilter(boolean isAttFilter)
+	{
 		this.isAttFilter = isAttFilter;
 	}
 
-	public XPathStep getStep() {
+	public XPathStep getStep()
+	{
 		return step;
 	}
 
-	public void setStep(XPathStep step) {
+	public void setStep(XPathStep step)
+	{
 		this.step = step;
 	}
 
-	public String getAttName() {
+	public String getAttName()
+	{
 		return attName;
 	}
 
-	public void setAttName(String attName) {
+	public void setAttName(String attName)
+	{
 		this.attName = attName;
 	}
 
-	public String getQueryString() {
+	public String getQueryString()
+	{
 		return queryString;
 	}
 
-	public void setQueryString(String queryString) {
+	public void setQueryString(String queryString)
+	{
 		this.queryString = queryString;
 	}
 
-	public int getAfterTest() {
+	public int getAfterTest()
+	{
 		return afterTest;
 	}
 
-	public void setAfterTest(int afterTest) {
+	public void setAfterTest(int afterTest)
+	{
 		this.afterTest = afterTest;
 	}
 
 	@Override
-	public String toString() {
+	public String toString()
+	{
 		return "XPathTest [isStep=" + isStep + ", isTextFilter=" + isTextFilter
 				+ ", isContainsFilter=" + isContainsFilter + ", isAttFilter="
 				+ isAttFilter + ", \nstep=" + step + ", attName=" + attName

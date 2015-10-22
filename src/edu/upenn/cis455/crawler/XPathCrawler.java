@@ -12,7 +12,8 @@ import com.sleepycat.je.rep.vlsn.VLSNIndex.WaitTimeOutException;
 import edu.upenn.cis455.crawler.info.RobotsTxtInfo;
 import edu.upenn.cis455.storage.DBWrapper;
 
-public class XPathCrawler {
+public class XPathCrawler
+{
 	private static Queue<URL> queue = new Queue<URL>();
 	private static HashMap<String, RobotsTxtInfo> robotTxts = new HashMap<String, RobotsTxtInfo>();
 	private static ArrayList<XPathCrawlerThread> threads = new ArrayList<XPathCrawlerThread>();
@@ -36,63 +37,105 @@ public class XPathCrawler {
 	 *            of files to get before stopping
 	 * @throws URISyntaxException
 	 */
-	public static void main(String[] args) {
-		if (args.length < 3 || args.length > 4) {
+	public static void main(String[] args)
+	{
+		if (args.length < 3 || args.length > 4)
+		{
 			System.out.println("Invalid arguments");
 			System.out.println("Ankit Mishra");
 			System.out.println("mankit");
 			System.exit(-1);
-		} else {
-			try {
+		}
+		else
+		{
+			try
+			{
 				startingUrl = new URL(args[0]);
 				DBWrapper.openDBWrapper(args[1]);
 				maxSize = Integer.valueOf(args[2]) * 1024;
-				if (args.length == 4) {
-					try {
+				if (args.length == 4)
+				{
+					try
+					{
 						maxCount = Integer.valueOf(args[3]);
-					} catch (NumberFormatException e) {
+					}
+					catch (NumberFormatException e)
+					{
 						System.out.println("Invalid max document count - ");
 						e.printStackTrace();
 					}
 				}
 				// start the crawler threads
-				for (int i = 0; i < THREAD_COUNT; i++) {
+				for (int i = 0; i < THREAD_COUNT; i++)
+				{
 					XPathCrawlerThread thread = new XPathCrawlerThread(i);
 					thread.start();
 					threads.add(thread);
 				}
 				// add the starting url to the queue
 				queue.enqueue(startingUrl);
-				while (isRun()) {
-					if (queue.getSize() == 0) {
+				while (true)
+				{
+					if (queue.getSize() == 0)
+					{
 						boolean shouldEndCrawl = true;
-						for (XPathCrawlerThread thread : threads) {
-							if (thread.getState().equals(Thread.State.RUNNABLE)) {
+						for (XPathCrawlerThread thread : threads)
+						{
+							if (thread.getState().equals(Thread.State.RUNNABLE))
+							{
 								shouldEndCrawl = false;
 								break;
 							}
 						}
-						if (shouldEndCrawl) {
+						if (shouldEndCrawl)
+						{
 							System.out
 									.println("Stopping crawler : Nothing to crawl");
-							setRun(false);
+							break;
+						}
+					}
+					else if (!isRun())
+					{
+						boolean shouldEndCrawl = true;
+						for (XPathCrawlerThread thread : threads)
+						{
+							if (thread.getState().equals(Thread.State.RUNNABLE))
+							{
+								shouldEndCrawl = false;
+								break;
+							}
+						}
+						if (shouldEndCrawl)
+						{
+							System.out
+									.println("Stopping crawler main : Max count reached");
+							break;
 						}
 					}
 				}
-				for (XPathCrawlerThread thread : threads) {
+
+				for (XPathCrawlerThread thread : threads)
+				{
 					thread.interrupt();
 				}
 				// wait for threads to end before stopping
-				for (int i = 0; i < THREAD_COUNT; i++) {
+				for (int i = 0; i < THREAD_COUNT; i++)
+				{
 					threads.get(i).join();
 				}
-			} catch (MalformedURLException e) {
+			}
+			catch (MalformedURLException e)
+			{
 				System.out.println("Invalid starting url - ");
 				e.printStackTrace();
-			} catch (NumberFormatException e) {
+			}
+			catch (NumberFormatException e)
+			{
 				System.out.println("Invalid max file size - ");
 				e.printStackTrace();
-			} catch (Exception e) {
+			}
+			catch (Exception e)
+			{
 				System.out.println("Invalid db Path - ");
 				e.printStackTrace();
 			}
@@ -103,75 +146,93 @@ public class XPathCrawler {
 		DBWrapper.closeDBWrapper();
 	}
 
-	public static Queue<URL> getQueue() {
+	public static Queue<URL> getQueue()
+	{
 		return queue;
 	}
 
-	public static void setQueue(Queue<URL> queue) {
+	public static void setQueue(Queue<URL> queue)
+	{
 		XPathCrawler.queue = queue;
 	}
 
-	public static URL getStartingUrl() {
+	public static URL getStartingUrl()
+	{
 		return startingUrl;
 	}
 
-	public static void setStartingUrl(URL startingUrl) {
+	public static void setStartingUrl(URL startingUrl)
+	{
 		XPathCrawler.startingUrl = startingUrl;
 	}
 
-	public static String getDbPath() {
+	public static String getDbPath()
+	{
 		return dbPath;
 	}
 
-	public static void setDbPath(String dbPath) {
+	public static void setDbPath(String dbPath)
+	{
 		XPathCrawler.dbPath = dbPath;
 	}
 
-	public static int getMaxSize() {
+	public static int getMaxSize()
+	{
 		return maxSize;
 	}
 
-	public static void setMaxSize(int maxSize) {
+	public static void setMaxSize(int maxSize)
+	{
 		XPathCrawler.maxSize = maxSize;
 	}
 
-	public static Integer getMaxCount() {
+	public static Integer getMaxCount()
+	{
 		return maxCount;
 	}
 
-	public static void setMaxCount(Integer maxCount) {
+	public static void setMaxCount(Integer maxCount)
+	{
 		XPathCrawler.maxCount = maxCount;
 	}
 
-	public synchronized static boolean isRun() {
+	public synchronized static boolean isRun()
+	{
 		return run;
 	}
 
-	public synchronized static void setRun(boolean run) {
+	public synchronized static void setRun(boolean run)
+	{
 		XPathCrawler.run = run;
 	}
 
-	public static ArrayList<XPathCrawlerThread> getThreads() {
+	public static ArrayList<XPathCrawlerThread> getThreads()
+	{
 		return threads;
 	}
 
-	public static void setThreads(ArrayList<XPathCrawlerThread> threads) {
+	public static void setThreads(ArrayList<XPathCrawlerThread> threads)
+	{
 		XPathCrawler.threads = threads;
 	}
 
-	public static HashMap<String, RobotsTxtInfo> getRobotTxts() {
+	public static HashMap<String, RobotsTxtInfo> getRobotTxts()
+	{
 		return robotTxts;
 	}
 
-	public static void setRobotTxts(HashMap<String, RobotsTxtInfo> robotTxts) {
+	public static void setRobotTxts(HashMap<String, RobotsTxtInfo> robotTxts)
+	{
 		XPathCrawler.robotTxts = robotTxts;
 	}
 
-	public static HashSet<URL> getSeenUrls() {
+	public static HashSet<URL> getSeenUrls()
+	{
 		return seenUrls;
 	}
 
-	public static void setSeenUrls(HashSet<URL> seenUrls) {
+	public static void setSeenUrls(HashSet<URL> seenUrls)
+	{
 		XPathCrawler.seenUrls = seenUrls;
 	}
 

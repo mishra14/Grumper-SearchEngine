@@ -8,18 +8,22 @@ import com.sleepycat.je.EnvironmentConfig;
 import com.sleepycat.persist.EntityStore;
 import com.sleepycat.persist.StoreConfig;
 
-public class DBWrapper {
+public class DBWrapper
+{
 
 	private static String envDirectory = null;
 
 	private static Environment env;
 	private static EntityStore store;
 
-	public static void openDBWrapper(String path) throws Exception {
+	public static void openDBWrapper(String path) throws Exception
+	{
 		System.out.println("DB at - " + path);
 		File dbFile = new File(path);
-		if (!dbFile.isDirectory()) {
-			if (!dbFile.mkdirs()) {
+		if (!dbFile.isDirectory())
+		{
+			if (!dbFile.mkdirs())
+			{
 				throw new Exception("DB File make dir failed");
 			}
 			System.out.println("Created new DB Dir at - " + path);
@@ -34,25 +38,31 @@ public class DBWrapper {
 		store = new EntityStore(env, "Crawler Store", storeConfig);
 	}
 
-	public static void closeDBWrapper() throws DatabaseException {
-		if (store != null) {
+	public static void closeDBWrapper() throws DatabaseException
+	{
+		if (store != null)
+		{
 			store.close();
 		}
-		if (env != null) {
+		if (env != null)
+		{
 			env.close();
 		}
 
 	}
 
-	public static String getEnvDirectory() {
+	public static String getEnvDirectory()
+	{
 		return envDirectory;
 	}
 
-	public static Environment getDbEnv() {
+	public static Environment getDbEnv()
+	{
 		return env;
 	}
 
-	public static EntityStore getStore() {
+	public static EntityStore getStore()
+	{
 		return store;
 	}
 

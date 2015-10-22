@@ -11,50 +11,61 @@ import com.sleepycat.persist.model.Persistent;
  *
  */
 @Persistent
-public class XPathStep {
+public class XPathStep
+{
 
 	private String nodeName;
 	private ArrayList<XPathTest> tests;
 	private XPathStep nextStep;
 	private int afterStep;
 
-	public XPathStep() {
+	public XPathStep()
+	{
 	}
 
-	public String getNodeName() {
+	public String getNodeName()
+	{
 		return nodeName;
 	}
 
-	public void setNodeName(String nodeName) {
+	public void setNodeName(String nodeName)
+	{
 		this.nodeName = nodeName;
 	}
 
-	public ArrayList<XPathTest> getTests() {
+	public ArrayList<XPathTest> getTests()
+	{
 		return tests;
 	}
 
-	public void setTests(ArrayList<XPathTest> tests) {
+	public void setTests(ArrayList<XPathTest> tests)
+	{
 		this.tests = tests;
 	}
 
-	public XPathStep getNextStep() {
+	public XPathStep getNextStep()
+	{
 		return nextStep;
 	}
 
-	public void setNextStep(XPathStep nextStep) {
+	public void setNextStep(XPathStep nextStep)
+	{
 		this.nextStep = nextStep;
 	}
 
-	public int getAfterStep() {
+	public int getAfterStep()
+	{
 		return afterStep;
 	}
 
-	public void setAfterStep(int afterStep) {
+	public void setAfterStep(int afterStep)
+	{
 		this.afterStep = afterStep;
 	}
 
 	@Override
-	public String toString() {
+	public String toString()
+	{
 		return "XPathStep [nodeName=" + nodeName + ", tests=" + tests
 				+ ", \nnextStep=" + nextStep + ", afterStep=" + afterStep + "]";
 	}
