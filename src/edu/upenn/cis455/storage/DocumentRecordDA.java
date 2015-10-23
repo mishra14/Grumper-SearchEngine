@@ -46,4 +46,19 @@ public class DocumentRecordDA
 		}
 		return insertedDocument;
 	}
+
+	public static boolean removeDocument(String documentId)
+	{
+		if (DBWrapper.getStore() != null)
+		{
+			PrimaryIndex<String, DocumentRecord> userPrimaryIndex = DBWrapper
+					.getStore().getPrimaryIndex(String.class,
+							DocumentRecord.class);
+			if (userPrimaryIndex != null)
+			{
+				return userPrimaryIndex.delete(documentId);
+			}
+		}
+		return false;
+	}
 }

@@ -1,6 +1,7 @@
 package edu.upenn.cis455.storage;
 
 import com.sleepycat.persist.PrimaryIndex;
+
 import edu.upenn.cis455.xpath.XPath;
 
 public class XPathDA
@@ -35,6 +36,20 @@ public class XPathDA
 			}
 		}
 		return insertedXPath;
+	}
+
+	public static boolean removeXPath(String xPathString)
+	{
+		if (DBWrapper.getStore() != null)
+		{
+			PrimaryIndex<String, XPath> xPathPrimaryIndex = DBWrapper
+					.getStore().getPrimaryIndex(String.class, XPath.class);
+			if (xPathPrimaryIndex != null)
+			{
+				return xPathPrimaryIndex.delete(xPathString);
+			}
+		}
+		return false;
 	}
 
 }

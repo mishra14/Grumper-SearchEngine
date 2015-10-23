@@ -38,4 +38,18 @@ public class UserDA
 		}
 		return insertedUser;
 	}
+
+	public static boolean removeUser(String userName)
+	{
+		if (DBWrapper.getStore() != null)
+		{
+			PrimaryIndex<String, User> userPrimaryIndex = DBWrapper.getStore()
+					.getPrimaryIndex(String.class, User.class);
+			if (userPrimaryIndex != null)
+			{
+				return userPrimaryIndex.delete(userName);
+			}
+		}
+		return false;
+	}
 }

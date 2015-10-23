@@ -40,7 +40,7 @@ public class XPathServletHelper
 			+ "<br><br>" + "Ankit Mishra<br>" + "mankit<br>";
 
 	private static final String userHome = "<h2> Welcome to your Home page,  </h2>";
-	
+
 	public static String getServletHome()
 	{
 		return servletHome;
@@ -61,9 +61,9 @@ public class XPathServletHelper
 	{
 		return signupPage;
 	}
-	
+
 	public static String getUserHome(String username)
 	{
-		return userHome+username+"<br>";
+		return userHome + username + "<br>";
 	}
 }

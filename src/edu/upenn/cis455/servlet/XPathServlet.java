@@ -57,7 +57,7 @@ public class XPathServlet extends HttpServlet
 		else if (pathInfo.equalsIgnoreCase("/userhome"))
 		{
 			HttpSession session = request.getSession(false);
-			if(session == null || session.getAttribute("username") == null)
+			if (session == null || session.getAttribute("username") == null)
 			{
 				pageContent = "Whoops - Please login<br>"
 						+ XPathServletHelper.getLoginPage();
@@ -128,7 +128,7 @@ public class XPathServlet extends HttpServlet
 					.getErrorPage("Whoops - unknown url");
 		}
 		PrintWriter out = response.getWriter();
-		out.print("<html><body>" +pathInfo + pageContent + "</body></html>");
+		out.print("<html><body>" + pathInfo + pageContent + "</body></html>");
 		response.flushBuffer();
 	}
 
@@ -142,7 +142,9 @@ public class XPathServlet extends HttpServlet
 		String pathInfo = request.getPathInfo();
 		String pageContent = null;
 		String extras = "";
-		extras = request.getProtocol()+request.getLocalAddr()+request.getLocalName()+request.getLocalPort()+request.getContextPath()+request.getServletPath();
+		extras = request.getProtocol() + request.getLocalAddr()
+				+ request.getLocalName() + request.getLocalPort()
+				+ request.getContextPath() + request.getServletPath();
 		if (pathInfo == null || pathInfo.equalsIgnoreCase("/")) // homepage
 		{
 			pageContent = XPathServletHelper.getServletHome();
@@ -158,7 +160,7 @@ public class XPathServlet extends HttpServlet
 		else if (pathInfo.equalsIgnoreCase("/userhome"))
 		{
 			HttpSession session = request.getSession(false);
-			if(session == null || session.getAttribute("username") == null)
+			if (session == null || session.getAttribute("username") == null)
 			{
 				pageContent = "Whoops - Please login<br>"
 						+ XPathServletHelper.getLoginPage();
@@ -175,15 +177,12 @@ public class XPathServlet extends HttpServlet
 					.getErrorPage("Whoops - unknown url");
 		}
 		PrintWriter out = response.getWriter();
-		out.print("<html><body>" + extras + "<br>"+ pathInfo + pageContent + "</body></html>");
+		out.print("<html><body>" + extras + "<br>" + pathInfo + pageContent
+				+ "</body></html>");
 		response.flushBuffer();
 	}
 
-	
-	
-	
-	
-	//helper methods
+	// helper methods
 	public static String loginVerify(String username, String password,
 			String dbPath, HttpServletRequest request,
 			HttpServletResponse response) throws Exception
@@ -206,7 +205,8 @@ public class XPathServlet extends HttpServlet
 						+ XPathServletHelper.getLoginPage();
 				HttpSession session = request.getSession(true);
 				session.setAttribute("username", username);
-				response.sendRedirect(request.getContextPath()+request.getServletPath()+"/userhome");
+				response.sendRedirect(request.getContextPath()
+						+ request.getServletPath() + "/userhome");
 			}
 			else
 			{
@@ -249,7 +249,8 @@ public class XPathServlet extends HttpServlet
 					pageContent += "created user - " + user.toString() + "<br>";
 					HttpSession session = request.getSession(true);
 					session.setAttribute("username", username);
-					response.sendRedirect(request.getContextPath()+request.getServletPath()+"/userhome");
+					response.sendRedirect(request.getContextPath()
+							+ request.getServletPath() + "/userhome");
 				}
 			}
 			else if (user != null)

@@ -1,6 +1,7 @@
 package edu.upenn.cis455.xpath;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
@@ -24,6 +25,7 @@ public class XPath
 	private ArrayList<String> tokens;
 	private XPathStep rootStep;
 	private boolean isValid;
+	private HashSet<String> channelNames;
 
 	/*
 	 * Unique symbols in an xPath - /, (, ), [, ], =, @, ",
@@ -34,6 +36,7 @@ public class XPath
 
 	public XPath(String xPath)
 	{
+		channelNames = new HashSet<String>();
 		StringBuilder xPathBuilder = new StringBuilder();
 		int quotes = 0;
 		for (int i = 0; i < xPath.length(); i++)
@@ -176,11 +179,22 @@ public class XPath
 		this.isValid = isValid;
 	}
 
+	public HashSet<String> getChannelNames()
+	{
+		return channelNames;
+	}
+
+	public void setChannelNames(HashSet<String> channelNames)
+	{
+		this.channelNames = channelNames;
+	}
+
 	@Override
 	public String toString()
 	{
 		return "XPath [xPath=" + xPath + ", tokens=" + tokens + ", rootStep="
-				+ rootStep + ", isValid=" + isValid + "]";
+				+ rootStep + ", isValid=" + isValid + ", channelNames="
+				+ channelNames + "]";
 	}
 
 }
