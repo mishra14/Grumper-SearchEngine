@@ -35,6 +35,7 @@ public class HttpsClient
 
 	public HttpsClient(URL url) throws UnknownHostException, IOException
 	{
+		//HttpsURLConnection.setFollowRedirects(false); //TODO test this
 		sourceUrl = url;
 	}
 
@@ -56,7 +57,7 @@ public class HttpsClient
 		DocumentRecord documentRecord = null;
 		// send head request
 		HttpResponse response = sendHead();
-		// System.out.println(sourceUrl + " - " + response);
+		System.out.println(sourceUrl + " - " + response);
 		if (response != null && response.getHeaders() != null
 				&& response.getHeaders().containsKey(CONTENT_LENGTH_HEADER)
 				&& response.getHeaders().containsKey(CONTENT_TYPE_HEADER))
@@ -81,7 +82,7 @@ public class HttpsClient
 		}
 		// then send get
 		response = sendFileRequest();
-		// System.out.println(response);
+		System.out.println(response);
 
 		if (response != null && response.getResponseCode().equals("200")
 				&& response.getHeaders().containsKey(CONTENT_TYPE_HEADER))
