@@ -126,6 +126,7 @@ public class DocumentRecord
 		if (isHtml() && documentString != null)
 		{
 			Tidy tidy = new Tidy();
+			tidy.setQuiet(true);
 			tidy.setInputEncoding(DEFAULT_ENCODING);
 			tidy.setOutputEncoding(DEFAULT_ENCODING);
 			tidy.setWraplen(Integer.MAX_VALUE);

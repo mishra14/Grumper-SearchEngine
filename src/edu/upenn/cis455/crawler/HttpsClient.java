@@ -192,7 +192,6 @@ public class HttpsClient
 
 			String dateString = (dateFormat.format(new Date(documentRecord
 					.getLastCrawled())));
-			System.out.println(sourceUrl + ":date:" + dateString);
 			connection.setRequestProperty("If-Modified-Since", dateString);
 		}
 		OutputStreamWriter outputStreamWriter = new OutputStreamWriter(

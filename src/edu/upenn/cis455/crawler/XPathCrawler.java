@@ -10,7 +10,6 @@ import java.util.HashSet;
 import edu.upenn.cis455.crawler.info.RobotsTxtInfo;
 import edu.upenn.cis455.storage.DBWrapper;
 import edu.upenn.cis455.storage.DocumentRecordDA;
-import edu.upenn.cis455.storage.XPathDA;
 
 /**
  * This is the main crawler class. It is responsible for starting the crawler
@@ -28,7 +27,7 @@ public class XPathCrawler
 	private static URL startingUrl;
 	private static String dbPath;
 	private static long maxSize;
-	private static Integer maxCount = new Integer(-1); // default value = -1//
+	private static Integer maxCount = new Integer(Integer.MAX_VALUE); // default value = MAX//
 														// synchronized - but
 	// the call should be in syn
 	// block
@@ -59,7 +58,6 @@ public class XPathCrawler
 			{
 				startingUrl = new URL(args[0]);
 				DBWrapper.openDBWrapper(args[1]);
-				System.out.println("All xPaths - " + XPathDA.getAllXPaths());
 				System.out.println("CURRENT DOCUMENT SIZE = "
 						+ DocumentRecordDA.getSize());
 				maxSize = Integer.valueOf(args[2]) * 1024 * 1024;
