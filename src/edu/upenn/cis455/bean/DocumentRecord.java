@@ -4,7 +4,11 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Locale;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -93,7 +97,25 @@ public class DocumentRecord
 
 	public static Date getDate(String dateString)
 	{
-		// TODO Auto-generated method stub
+		Date date = new Date();
+		ArrayList<SimpleDateFormat> httpDateFormats = new ArrayList<SimpleDateFormat>();
+		httpDateFormats.add(new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z",
+				Locale.ENGLISH));
+		httpDateFormats.add(new SimpleDateFormat(
+				"EEEEEE, dd-MMM-yy HH:mm:ss z", Locale.ENGLISH));
+		httpDateFormats.add(new SimpleDateFormat("EEE MMM dd HH:mm:ss yyyy",
+				Locale.ENGLISH));
+		for (SimpleDateFormat format : httpDateFormats)
+		{
+			try
+			{
+				date = format.parse(dateString);
+				return date;
+			}
+			catch (ParseException e)
+			{
+			}
+		}
 		return null;
 	}
 

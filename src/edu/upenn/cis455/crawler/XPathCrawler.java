@@ -6,9 +6,19 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+
 import edu.upenn.cis455.crawler.info.RobotsTxtInfo;
 import edu.upenn.cis455.storage.DBWrapper;
+import edu.upenn.cis455.storage.DocumentRecordDA;
+import edu.upenn.cis455.storage.XPathDA;
 
+/**
+ * This is the main crawler class. It is responsible for starting the crawler
+ * threadpool.
+ * 
+ * @author cis455
+ *
+ */
 public class XPathCrawler
 {
 	private static Queue<URL> queue = new Queue<URL>();
@@ -17,7 +27,7 @@ public class XPathCrawler
 	private static HashSet<URL> seenUrls = new HashSet<URL>();
 	private static URL startingUrl;
 	private static String dbPath;
-	private static int maxSize;
+	private static long maxSize;
 	private static Integer maxCount = new Integer(-1); // default value = -1//
 														// synchronized - but
 	// the call should be in syn
@@ -49,7 +59,10 @@ public class XPathCrawler
 			{
 				startingUrl = new URL(args[0]);
 				DBWrapper.openDBWrapper(args[1]);
-				maxSize = Integer.valueOf(args[2]) * 1024;
+				System.out.println("All xPaths - " + XPathDA.getAllXPaths());
+				System.out.println("CURRENT DOCUMENT SIZE = "
+						+ DocumentRecordDA.getSize());
+				maxSize = Integer.valueOf(args[2]) * 1024 * 1024;
 				if (args.length == 4)
 				{
 					try
@@ -88,10 +101,12 @@ public class XPathCrawler
 						{
 							System.out
 									.println("Stopping crawler : Nothing to crawl");
+							setRun(false);
+
 							break;
 						}
 					}
-					else if (!isRun())
+					if (!isRun())
 					{
 						boolean shouldEndCrawl = true;
 						for (XPathCrawlerThread thread : threads)
@@ -173,7 +188,7 @@ public class XPathCrawler
 		XPathCrawler.dbPath = dbPath;
 	}
 
-	public static int getMaxSize()
+	public static long getMaxSize()
 	{
 		return maxSize;
 	}

@@ -1,7 +1,9 @@
 package edu.upenn.cis455.storage;
 
-import com.sleepycat.persist.PrimaryIndex;
+import java.util.ArrayList;
 
+import com.sleepycat.persist.EntityCursor;
+import com.sleepycat.persist.PrimaryIndex;
 import edu.upenn.cis455.xpath.XPath;
 
 public class XPathDA
@@ -50,6 +52,36 @@ public class XPathDA
 			}
 		}
 		return false;
+	}
+
+	public static ArrayList<XPath> getAllXPaths()
+	{
+		ArrayList<XPath> result = null;
+		if (DBWrapper.getStore() != null)
+		{
+			PrimaryIndex<String, XPath> xPathPrimaryIndex = DBWrapper
+					.getStore().getPrimaryIndex(String.class, XPath.class);
+			if (xPathPrimaryIndex != null)
+			{
+				result = new ArrayList<XPath>();
+				EntityCursor<XPath> xPathCursor = xPathPrimaryIndex.entities();
+				try
+				{
+					for (XPath xPath : xPathCursor)
+					{
+						result.add(xPath);
+					}
+
+				}
+				finally
+				{
+					xPathCursor.close();
+				}
+			}
+
+		}
+
+		return result;
 	}
 
 }

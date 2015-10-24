@@ -101,11 +101,7 @@ public class XPathCrawlerThread extends Thread
 								String disallowedUrl = url.getProtocol()
 										+ "://" + url.getHost() + disallowed;
 								String urlToCompare = url.toString();
-								if (!(urlToCompare.endsWith(".xml") || urlToCompare
-										.endsWith(".html")))
-								{
-									urlToCompare = urlToCompare.concat("/");
-								}
+
 								if (urlToCompare.startsWith(disallowedUrl))
 								{
 									// we should not crawl this url
@@ -122,6 +118,8 @@ public class XPathCrawlerThread extends Thread
 							if (documentRecord != null)
 							{
 								// process document
+								processDocument(documentRecord);
+								// extract urls
 								ArrayList<URL> urls = extractUrls(
 										documentRecord, url);
 								// System.out.println("URLS - "+urls);
@@ -226,14 +224,14 @@ public class XPathCrawlerThread extends Thread
 					HttpClient httpClient = new HttpClient(robotsUrl);
 					info = httpClient.getRobotsTxt();
 					System.out.println("Obtained new robots.txt from " + url);
-					info.print();
+					// info.print();
 				}
 				else if (url.getProtocol().equalsIgnoreCase(HTTPS))
 				{
 					HttpsClient httpsClient = new HttpsClient(robotsUrl);
 					info = httpsClient.getRobotsTxt();
 					System.out.println("Obtained new robots.txt from " + url);
-					info.print();
+					// info.print();
 				}
 				if (info == null)
 				{
@@ -293,19 +291,40 @@ public class XPathCrawlerThread extends Thread
 				{
 					String urlString = urlNode.getAttributes()
 							.getNamedItem("href").getNodeValue();
+					URL newUrl;
 					if (urlString.startsWith("http://")
 							|| urlString.startsWith("https://"))
 					{
-						urls.add(new URL(urlString));
+						newUrl = new URL(urlString);
+						urls.add(newUrl);
 					}
 					else
 					{
-						urls.add(new URL(url, urlString));
-
+						if (url.toString().endsWith("/"))
+						{
+							newUrl = new URL(url + urlString);
+							urls.add(newUrl);
+						}
+						else
+						{
+							newUrl = new URL(url.toString().substring(0,
+									url.toString().lastIndexOf("/") + 1)
+									+ urlString);
+							urls.add(newUrl);
+						}
 					}
 				}
 			}
 		}
 		return urls;
+	}
+
+	private void processDocument(DocumentRecord documentRecord)
+	{
+		if (documentRecord.isXml())
+		{
+
+		}
+
 	}
 }

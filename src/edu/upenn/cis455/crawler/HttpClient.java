@@ -9,11 +9,14 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -21,6 +24,7 @@ import org.xml.sax.SAXException;
 
 import edu.upenn.cis455.bean.DocumentRecord;
 import edu.upenn.cis455.crawler.info.RobotsTxtInfo;
+import edu.upenn.cis455.storage.DocumentRecordDA;
 
 /**
  * This class creates an HttpClient that can fetch documents from a given url
@@ -61,73 +65,109 @@ public class HttpClient
 			IOException, SAXException, ParserConfigurationException
 	{
 		boolean isHtml = false;
-		;
 		boolean isXml = false;
-		DocumentRecord documentRecord = null;
-		// first send head
-		HttpResponse response = sendHead();
-		// System.out.println(sourceUrl + " - " + response);
-		if (response != null && response.getHeaders() != null
-				&& response.getResponseCode().equals("200")
-				&& response.getHeaders().containsKey(CONTENT_LENGTH_HEADER)
-				&& response.getHeaders().containsKey(CONTENT_TYPE_HEADER))
-		{
-			String contentType = response.getHeaders().get(CONTENT_TYPE_HEADER)
-					.get(0);
-			int contentLength = Integer.valueOf(response.getHeaders()
-					.get(CONTENT_LENGTH_HEADER).get(0));
-
-			if (!(contentType.contains(HTML) || contentType.contains(XML))
-					|| contentLength > XPathCrawler.getMaxSize())
-			{
-				// return if document is not xml || html or if length is larger
-				// than max size
-				System.out
-						.println(sourceUrl
-								+ " : Not fetching file due to type mis match or larger size");
-				System.out.println("contentType - " + contentType);
-				System.out.println("contentLength - " + contentLength);
-				System.out.println("max size - " + XPathCrawler.getMaxSize());
-				return documentRecord;
-			}
-		}
-		else
+		DocumentRecord documentRecord = DocumentRecordDA.getDocument(sourceUrl
+				.toString());
+		// send head request
+		HttpResponse response = sendHead(documentRecord);
+		// System.out.println(sourceUrl + " head response - " + response);
+		if (response == null)
 		{
 			return documentRecord;
 		}
-		socket = new Socket(host, port);
-		// then send get
-		response = sendFileRequest();
-		// System.out.println(response);
-
-		if (response != null && response.getResponseCode() != null
-				&& response.getResponseCode().equals("200")
-				&& response.getHeaders().containsKey(CONTENT_TYPE_HEADER))
+		else if (response.getResponseCode().equals("301")
+				&& response.getHeaders() != null
+				&& response.getHeaders().get("Location") != null)
 		{
-			if (response.getHeaders().get(CONTENT_TYPE_HEADER).get(0)
-					.contains(HTML))
+			URL redirectUrl = new URL(response.getHeaders().get("Location")
+					.get(0));
+			synchronized (XPathCrawler.getSeenUrls())
 			{
-				isHtml = true;
-			}
-			else if (response.getHeaders().get(CONTENT_TYPE_HEADER).get(0)
-					.contains(XML))
-			{
-				isXml = true;
-			}
-			long lastCrawled = (new Date()).getTime();
-			if (response.getHeaders().containsKey("Date"))
-			{
-				String dateString = response.getHeaders().get("Date").get(0);
-				Date date = DocumentRecord.getDate(dateString);
-				if (date != null)
+				if (XPathCrawler.getSeenUrls().contains(redirectUrl))
 				{
-					lastCrawled = date.getTime();
+					redirectUrl = null;
 				}
 			}
-			documentRecord = new DocumentRecord(sourceUrl.toString(),
-					response.getData(), isHtml, isXml, lastCrawled);
-		}
+			// add all the read url into the back of the
+			// queue
+			if (redirectUrl != null)
+			{
+				synchronized (XPathCrawler.getQueue())
+				{
+					System.out.println("enquing redrected location : "
+							+ redirectUrl);
+					XPathCrawler.getQueue().enqueue(redirectUrl);
+				}
+			}
 
+		}
+		else
+		{
+			if (response.getHeaders() != null
+					&& response.getHeaders().containsKey(CONTENT_LENGTH_HEADER)
+					&& response.getHeaders().containsKey(CONTENT_TYPE_HEADER))
+			{
+				String contentType = response.getHeaders()
+						.get(CONTENT_TYPE_HEADER).get(0);
+				int contentLength = Integer.valueOf(response.getHeaders()
+						.get(CONTENT_LENGTH_HEADER).get(0));
+				if (!(contentType.contains(HTML) || contentType.contains(XML))
+						|| contentLength > XPathCrawler.getMaxSize())
+				{
+					// return if document is not xml || html or if length is
+					// larger
+					// than max size
+					System.out
+							.println(sourceUrl
+									+ " : Not fetching file due to type mis match or larger size");
+					System.out.println("contentType - " + contentType);
+					System.out.println("contentLength - " + contentLength);
+					System.out.println("max size - "
+							+ XPathCrawler.getMaxSize());
+					return documentRecord;
+				}
+				else
+				{
+					// check for status code 304
+					if (response.getResponseCode().equals("304"))
+					{
+						// file not modified; use local copy
+						return (documentRecord);
+					}
+					// check for status code 200
+					else if (response.getResponseCode().equals("200"))
+					{
+						// fetch the document
+						response = sendFileRequest();
+						// System.out.println(response);
+						if (response.getHeaders().get(CONTENT_TYPE_HEADER)
+								.get(0).contains(HTML))
+						{
+							isHtml = true;
+						}
+						else if (response.getHeaders().get(CONTENT_TYPE_HEADER)
+								.get(0).contains(XML))
+						{
+							isXml = true;
+						}
+						long lastCrawled = (new Date()).getTime();
+						if (response.getHeaders().containsKey("Date"))
+						{
+							String dateString = response.getHeaders()
+									.get("Date").get(0);
+							Date date = DocumentRecord.getDate(dateString);
+							if (date != null)
+							{
+								lastCrawled = date.getTime();
+							}
+						}
+						documentRecord = new DocumentRecord(
+								sourceUrl.toString(), response.getData(),
+								isHtml, isXml, lastCrawled);
+					}
+				}
+			}
+		}
 		return documentRecord;
 	}
 
@@ -156,11 +196,23 @@ public class HttpClient
 		return parseResponse();
 	}
 
-	private HttpResponse sendHead() throws IOException
+	private HttpResponse sendHead(DocumentRecord documentRecord)
+			throws IOException
 	{
 		PrintWriter clientSocketOut = new PrintWriter(new OutputStreamWriter(
 				socket.getOutputStream()));
 		clientSocketOut.print("HEAD " + sourceUrl + " HTTP/1.0\r\n");
+		if (documentRecord != null)
+		{
+			SimpleDateFormat dateFormat = new SimpleDateFormat(
+					"EEE, dd MMM yyyy HH:mm:ss z", Locale.ENGLISH);
+			dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+
+			String dateString = (dateFormat.format(new Date(documentRecord
+					.getLastCrawled())));
+			System.out.println(sourceUrl + ":date:" + dateString);
+			clientSocketOut.print("If-Modified-Since : " + dateString + "\r\n");
+		}
 		clientSocketOut.print("User-Agent: cis455crawler\r\n");
 		clientSocketOut.print("\r\n");
 		clientSocketOut.flush();

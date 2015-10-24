@@ -61,4 +61,20 @@ public class DocumentRecordDA
 		}
 		return false;
 	}
+
+	public static long getSize()
+	{
+		long result = -1;
+		if (DBWrapper.getStore() != null)
+		{
+			PrimaryIndex<String, DocumentRecord> userPrimaryIndex = DBWrapper
+					.getStore().getPrimaryIndex(String.class,
+							DocumentRecord.class);
+			if (userPrimaryIndex != null)
+			{
+				result = userPrimaryIndex.count();
+			}
+		}
+		return result;
+	}
 }
