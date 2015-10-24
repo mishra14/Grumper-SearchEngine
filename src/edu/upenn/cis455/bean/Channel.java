@@ -18,16 +18,19 @@ public class Channel
 	private HashSet<String> xPaths;
 	@SecondaryKey(relate = Relationship.MANY_TO_MANY, relatedEntity = DocumentRecord.class, onRelatedEntityDelete = DeleteAction.NULLIFY)
 	private HashSet<String> documentIdList;
+	@SecondaryKey(relate = Relationship.MANY_TO_ONE, relatedEntity = User.class, onRelatedEntityDelete = DeleteAction.ABORT)
+	private String username;
 
 	public Channel()
 	{
 	}
 
-	public Channel(String channelName)
+	public Channel(String channelName, String username)
 	{
 		this.channelName = channelName;
-		xPaths = new HashSet<String>();
-		documentIdList = new HashSet<String>();
+		this.username = username;
+		this.xPaths = new HashSet<String>();
+		this.documentIdList = new HashSet<String>();
 
 	}
 
@@ -59,6 +62,16 @@ public class Channel
 	public void setDocumentIdList(HashSet<String> documentIdList)
 	{
 		this.documentIdList = documentIdList;
+	}
+
+	public String getUsername()
+	{
+		return username;
+	}
+
+	public void setUsername(String username)
+	{
+		this.username = username;
 	}
 
 	public boolean addDocumentId(String documentId)
@@ -93,7 +106,7 @@ public class Channel
 	public String toString()
 	{
 		return "Channel [channelName=" + channelName + ", xPaths=" + xPaths
-				+ ", documentIdList=" + documentIdList + "]";
+				+ ", documentIdList=" + documentIdList + ", username="
+				+ username + "]";
 	}
-
 }

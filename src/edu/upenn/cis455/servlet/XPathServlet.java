@@ -123,7 +123,8 @@ public class XPathServlet extends HttpServlet
 					.getErrorPage("Whoops - unknown url");
 		}
 		PrintWriter out = response.getWriter();
-		out.print("<html><body>" + pathInfo + pageContent + "</body></html>");
+		out.print("<html><body>" + XPathServletHelper.getCss() + pageContent
+				+ "</body></html>");
 		response.flushBuffer();
 	}
 
@@ -138,10 +139,6 @@ public class XPathServlet extends HttpServlet
 		XPathServletHelper.setPort(request.getLocalPort());
 		String pathInfo = request.getPathInfo();
 		String pageContent = null;
-		String extras = "";
-		extras = request.getProtocol() + request.getLocalAddr()
-				+ request.getLocalName() + request.getLocalPort()
-				+ request.getContextPath() + request.getServletPath();
 		if (pathInfo == null
 				|| pathInfo.equalsIgnoreCase(XPathServletHelper.getHomepath())) // homepage
 		{
@@ -154,7 +151,9 @@ public class XPathServlet extends HttpServlet
 			{
 				if (session.getAttribute("username") != null)
 				{
-					response.sendRedirect("/userhome");
+					response.sendRedirect(request.getContextPath()
+							+ request.getServletPath()
+							+ XPathServletHelper.getAllchannelpath());
 				}
 				else if (session.getAttribute("loginError") != null)
 				{
@@ -189,7 +188,8 @@ public class XPathServlet extends HttpServlet
 			{
 				try
 				{
-					pageContent = XPathServletHelper.getAllChannels(dbPath);
+					pageContent = XPathServletHelper.getAllChannels(dbPath,
+							request, response);
 				}
 				catch (Exception e)
 				{
@@ -220,7 +220,8 @@ public class XPathServlet extends HttpServlet
 				if (session.getAttribute("createChannelError") != null)
 				{
 					pageContent = "error : "
-							+ session.getAttribute("createChannelError") + "<br>";
+							+ session.getAttribute("createChannelError")
+							+ "<br>";
 				}
 				try
 				{
@@ -235,21 +236,39 @@ public class XPathServlet extends HttpServlet
 				}
 			}
 		}
-		else if (pathInfo
-				.equalsIgnoreCase(XPathServletHelper.getUserhomepath())) // user
-																			// home
-																			// page
+		else if (pathInfo.equalsIgnoreCase(XPathServletHelper
+				.getViewchannelpath())) // view channel page
 		{
-			HttpSession session = request.getSession(false);
-			if (session == null || session.getAttribute("username") == null)
+			String dbPath = getServletContext().getInitParameter("BDBstore");
+			String channelName = request.getParameter("channelName");
+			try
 			{
-				pageContent = "Whoops - Please login<br>"
-						+ XPathServletHelper.getLoginPage();
+				pageContent = XPathServletHelper
+						.getChannel(dbPath, channelName);
 			}
-			else
+			catch (Exception e)
 			{
-				String username = (String) session.getAttribute("username");
-				pageContent = XPathServletHelper.getUserHome(username);
+				StringWriter stringWriter = new StringWriter();
+				PrintWriter printWriter = new PrintWriter(stringWriter);
+				e.printStackTrace(printWriter);
+				pageContent = stringWriter.getBuffer().toString();
+			}
+		}
+		else if (pathInfo.equalsIgnoreCase(XPathServletHelper
+				.getDeletechannelpath())) // delete channel page
+		{
+			String dbPath = getServletContext().getInitParameter("BDBstore");
+			try
+			{
+				pageContent = XPathServletHelper.deleteChannel(dbPath, request,
+						response);
+			}
+			catch (Exception e)
+			{
+				StringWriter stringWriter = new StringWriter();
+				PrintWriter printWriter = new PrintWriter(stringWriter);
+				e.printStackTrace(printWriter);
+				pageContent = stringWriter.getBuffer().toString();
 			}
 		}
 		else
@@ -258,9 +277,8 @@ public class XPathServlet extends HttpServlet
 					.getErrorPage("Whoops - unknown url");
 		}
 		PrintWriter out = response.getWriter();
-		out.print("<html><body>" + extras + "<br>" + pathInfo + pageContent
-				+ "</body></html>");
+		out.print("<html>" + XPathServletHelper.getCss() + "<body>"
+				+ pageContent + "</body></html>");
 		response.flushBuffer();
 	}
-
 }

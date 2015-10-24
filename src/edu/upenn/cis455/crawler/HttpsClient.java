@@ -35,7 +35,7 @@ public class HttpsClient
 
 	public HttpsClient(URL url) throws UnknownHostException, IOException
 	{
-		//HttpsURLConnection.setFollowRedirects(false); //TODO test this
+		// HttpsURLConnection.setFollowRedirects(false); //TODO test this
 		sourceUrl = url;
 	}
 

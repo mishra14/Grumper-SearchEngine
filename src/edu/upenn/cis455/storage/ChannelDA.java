@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import com.sleepycat.persist.EntityCursor;
 import com.sleepycat.persist.PrimaryIndex;
 import com.sleepycat.persist.model.Entity;
-
 import edu.upenn.cis455.bean.Channel;
 import edu.upenn.cis455.xpath.XPath;
 
@@ -132,7 +131,9 @@ public class ChannelDA
 	/*public static void main(String args[]) throws Exception
 	{
 		DBWrapper.openDBWrapper("./db/");
-		Channel channel = new Channel("peace");
+		User user = new User("tess","t");
+		UserDA.putUser(user);
+		Channel channel = new Channel("peace","tess");
 		DocumentRecord document = new DocumentRecord("ankitmishra.me",
 				"content", true, false, 100);
 		DocumentRecordDA.putDocument(document);
