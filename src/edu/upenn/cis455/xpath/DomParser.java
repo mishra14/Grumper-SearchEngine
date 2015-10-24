@@ -43,7 +43,7 @@ public class DomParser
 	private static boolean validateStep(Node root, XPathStep rootStep)
 	{
 		boolean result = false;
-		//System.out.println("Root - " + root.getNodeName());
+		// System.out.println("Root - " + root.getNodeName());
 		if (root == null || rootStep == null)
 		{
 			return false;
@@ -121,7 +121,7 @@ public class DomParser
 			NamedNodeMap attributeMap = root.getAttributes();
 			if (attributeMap.getNamedItem(test.getAttName()) != null)
 			{
-				//System.out.println(attributeMap.getNamedItem(test.getAttName()));
+				// System.out.println(attributeMap.getNamedItem(test.getAttName()));
 				String attributeValue = attributeMap.getNamedItem(
 						test.getAttName()).getNodeValue();
 				if (attributeValue != null

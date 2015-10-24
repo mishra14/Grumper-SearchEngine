@@ -27,8 +27,11 @@ public class XPathCrawler
 	private static URL startingUrl;
 	private static String dbPath;
 	private static long maxSize;
-	private static Integer maxCount = new Integer(Integer.MAX_VALUE); // default value = MAX//
-														// synchronized - but
+	private static Integer maxCount = new Integer(Integer.MAX_VALUE); // default
+																		// value
+																		// =
+																		// MAX//
+	// synchronized - but
 	// the call should be in syn
 	// block
 	private static boolean run = true; // synchronized

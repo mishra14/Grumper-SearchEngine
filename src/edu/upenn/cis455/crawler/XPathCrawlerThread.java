@@ -37,7 +37,7 @@ public class XPathCrawlerThread extends Thread
 
 	public void run()
 	{
-		System.out.println("Crawler Thread "+id+" started");
+		System.out.println("Crawler Thread " + id + " started");
 		while (XPathCrawler.isRun())
 		{
 			URL url = null;
@@ -54,9 +54,11 @@ public class XPathCrawlerThread extends Thread
 					{
 						try
 						{
-							//System.out.println("Waiting on url queue - " + id);
+							// System.out.println("Waiting on url queue - " +
+							// id);
 							XPathCrawler.getQueue().wait();
-							//System.out.println("Done waiting on url queue - "+ id);
+							// System.out.println("Done waiting on url queue - "+
+							// id);
 						}
 						catch (InterruptedException e)
 						{
@@ -273,7 +275,7 @@ public class XPathCrawlerThread extends Thread
 			// store document in db
 			// System.out.println("Storing Document Record - "+documentRecord+"\n"+DocumentRecordDA.putDocument(documentRecord));
 			DocumentRecordDA.putDocument(documentRecord);
-			//System.out.println(url + " : Stored");
+			// System.out.println(url + " : Stored");
 			// read all the url from the document
 			NodeList urlNodes = documentRecord.getDocument()
 					.getElementsByTagName("a");
