@@ -1,6 +1,10 @@
 package edu.upenn.cis455.servlet;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -323,7 +327,7 @@ public class XPathServletHelper
 		for (Channel channel : channels)
 		{
 			pageContent.append("<tr>");
-			pageContent.append("<td>" + channel + "</td>");
+			pageContent.append("<td>" + channel.getChannelName() + "</td>");
 			pageContent.append("<td>" + "<form action=\"http://localhost:"
 					+ port + "/servlet/xpath/viewchannel\">"
 					+ "<input type=\"hidden\" name =\"channelName\"value=\""
@@ -463,18 +467,34 @@ public class XPathServletHelper
 				pageBuilder.append("Documents - <br>");
 				for (String documentId : channel.getDocumentIdList())
 				{
-					DocumentRecord document = DocumentRecordDA
+					DocumentRecord documentRecord = DocumentRecordDA
 							.getDocument(documentId);
-					if (document == null)
+					if (documentRecord == null)
 					{
 						pageBuilder
 								.append("<tr><td>Opps!! not found</td></tr>");
 					}
 					else
 					{
-						pageBuilder.append("<tr><td>" + documentId
-								+ "</td></tr>");
-
+						Date date = new Date(documentRecord.getLastCrawled());
+						SimpleDateFormat dateFormat = new SimpleDateFormat(
+								"YYYY-MM-DD", Locale.ENGLISH);
+						dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+						SimpleDateFormat timeFormat = new SimpleDateFormat(
+								"hh:mm:ss", Locale.ENGLISH);
+						dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+						String dateString = dateFormat.format(date);
+						String timeString = timeFormat.format(date);
+						pageBuilder.append("<tr><td>");
+						pageBuilder.append("Crawled on : " + dateString + "T"
+								+ timeString + "<br>");
+						pageBuilder.append("Location : "
+								+ documentRecord.getDocumentId() + "<br>");
+						String documentString = documentRecord
+								.getDocumentString().replace("<", "&lt;");
+						documentString = documentString.replace(">", "&gt;");
+						pageBuilder.append("<div>" + documentString + "</div>");
+						pageBuilder.append("</td></tr>");
 					}
 				}
 				pageContent = pageBuilder.toString();

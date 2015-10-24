@@ -35,6 +35,22 @@ public class Queue<T>
 
 	public synchronized T dequeue()
 	{
+		synchronized (XPathCrawler.getMaxCount())
+		{
+			int count = XPathCrawler.getMaxCount();
+			if (count >= 0)
+			{
+				count--;
+				XPathCrawler.setMaxCount(count);
+				if (count <= 0)
+				{
+					// max count reached
+					System.out
+							.println("Max Count reached : Crawler stopping");
+					XPathCrawler.setRun(false);
+				}
+			}
+		}
 		return queue.remove(0); // remove element from the beginning of the
 								// array list
 	}

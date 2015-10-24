@@ -11,9 +11,15 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import edu.upenn.cis455.bean.Channel;
 import edu.upenn.cis455.bean.DocumentRecord;
 import edu.upenn.cis455.crawler.info.RobotsTxtInfo;
+import edu.upenn.cis455.storage.ChannelDA;
 import edu.upenn.cis455.storage.DocumentRecordDA;
+import edu.upenn.cis455.storage.XPathDA;
+import edu.upenn.cis455.xpath.XPath;
+import edu.upenn.cis455.xpathengine.XPathEngine;
+import edu.upenn.cis455.xpathengine.XPathEngineFactory;
 
 public class XPathCrawlerThread extends Thread
 {
@@ -94,8 +100,8 @@ public class XPathCrawlerThread extends Thread
 								disallowedUrls = info
 										.getDisallowedLinks(ALL_AGENT);
 							}
-							System.out.println("disallowed links - "
-									+ disallowedUrls);
+							// System.out.println("disallowed links - "+
+							// disallowedUrls);
 							for (String disallowed : disallowedUrls)
 							{
 								String disallowedUrl = url.getProtocol()
@@ -118,7 +124,7 @@ public class XPathCrawlerThread extends Thread
 							if (documentRecord != null)
 							{
 								// process document
-								processDocument(documentRecord);
+								processDocument(url, documentRecord);
 								// extract urls
 								ArrayList<URL> urls = extractUrls(
 										documentRecord, url);
@@ -146,22 +152,7 @@ public class XPathCrawlerThread extends Thread
 								System.out
 										.println(url + " : error in download");
 							}
-							synchronized (XPathCrawler.getMaxCount())
-							{
-								int count = XPathCrawler.getMaxCount();
-								if (count >= 0)
-								{
-									count--;
-									XPathCrawler.setMaxCount(count);
-									if (count <= 0)
-									{
-										// max count reached
-										System.out
-												.println("Max Count reached : Crawler stopping");
-										XPathCrawler.setRun(false);
-									}
-								}
-							}
+
 						}
 						// try to fetch the next url
 					}
@@ -211,7 +202,7 @@ public class XPathCrawlerThread extends Thread
 			{
 				// robots.txt found use this to check for disallowed url
 				info = XPathCrawler.getRobotTxts().get(url.getHost());
-				System.out.println(url + " : robots.txt already fetched");
+				// System.out.println(url + " : robots.txt already fetched");
 			}
 			else
 			{
@@ -223,14 +214,16 @@ public class XPathCrawlerThread extends Thread
 
 					HttpClient httpClient = new HttpClient(robotsUrl);
 					info = httpClient.getRobotsTxt();
-					System.out.println("Obtained new robots.txt from " + url);
+					// System.out.println("Obtained new robots.txt from " +
+					// url);
 					// info.print();
 				}
 				else if (url.getProtocol().equalsIgnoreCase(HTTPS))
 				{
 					HttpsClient httpsClient = new HttpsClient(robotsUrl);
 					info = httpsClient.getRobotsTxt();
-					System.out.println("Obtained new robots.txt from " + url);
+					// System.out.println("Obtained new robots.txt from " +
+					// url);
 					// info.print();
 				}
 				if (info == null)
@@ -319,11 +312,40 @@ public class XPathCrawlerThread extends Thread
 		return urls;
 	}
 
-	private void processDocument(DocumentRecord documentRecord)
+	private void processDocument(URL url, DocumentRecord documentRecord)
+			throws ParserConfigurationException, SAXException, IOException
 	{
 		if (documentRecord.isXml())
 		{
-
+			ArrayList<XPath> xPathList = XPathDA.getAllXPaths();
+			XPathEngine engine = XPathEngineFactory.getXPathEngine();
+			engine.setXPaths(xPathList);
+			boolean[] result = engine.evaluate(documentRecord.getDocument());
+			for (int i = 0; i < result.length; i++)
+			{
+				if (result[i])
+				{
+					for (String channelName : xPathList.get(i)
+							.getChannelNames())
+					{
+						Channel channel = ChannelDA.getChannel(channelName);
+						if (channel != null)
+						{
+							if (!channel.getDocumentIdList().contains(
+									url.toString()))
+							{
+								channel.addDocumentId(url.toString());
+							}
+							ChannelDA.putChannel(channel);
+						}
+						else
+						{
+							System.out.println("channel : " + channelName
+									+ " not found");
+						}
+					}
+				}
+			}
 		}
 
 	}

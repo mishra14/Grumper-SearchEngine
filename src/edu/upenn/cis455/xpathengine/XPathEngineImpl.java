@@ -1,6 +1,7 @@
 package edu.upenn.cis455.xpathengine;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 
 import org.w3c.dom.Document;
 import org.xml.sax.helpers.DefaultHandler;
@@ -26,7 +27,7 @@ public class XPathEngineImpl implements XPathEngine
 	}
 
 	/**
-	 * Set the xpaths
+	 * Set the xpaths as strings
 	 */
 	public void setXPaths(String[] xPathArray)
 	{
@@ -36,6 +37,15 @@ public class XPathEngineImpl implements XPathEngine
 		{
 			xPaths[i] = new XPath(xPathStrings[i]);
 		}
+	}
+
+	/**
+	 * set xPaths as objects
+	 */
+	public void setXPaths(ArrayList<XPath> xPathList)
+	{
+		xPaths = new XPath[xPathList.size()];
+		xPathList.toArray(xPaths);
 	}
 
 	/**

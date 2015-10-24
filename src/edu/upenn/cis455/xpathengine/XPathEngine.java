@@ -1,9 +1,12 @@
 package edu.upenn.cis455.xpathengine;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 
 import org.w3c.dom.Document;
 import org.xml.sax.helpers.DefaultHandler;
+
+import edu.upenn.cis455.xpath.XPath;
 
 public interface XPathEngine
 {
@@ -14,6 +17,13 @@ public interface XPathEngine
 	 * @param expressions
 	 */
 	public void setXPaths(String[] expressions);
+
+	/**
+	 * Sets the XPath expression(s) that are to be evaluated as XPATH objects
+	 * 
+	 * @param xPathList
+	 */
+	public void setXPaths(ArrayList<XPath> xPathList);
 
 	/**
 	 * Returns true if the i.th XPath expression given to the last setXPaths()
