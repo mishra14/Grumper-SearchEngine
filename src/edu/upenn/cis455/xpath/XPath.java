@@ -54,7 +54,7 @@ public class XPath
 		this.xPath = xPathBuilder.toString();// xPath.replace(" ", "");
 		tokenize();
 		XPathParser.parseXPath(this);
-		System.out.println(this.xPath);
+		// System.out.println(this.xPath);
 	}
 
 	/**
@@ -136,7 +136,7 @@ public class XPath
 		{
 			tokens.add(xPath.substring(last));
 		}
-		System.out.println("Tokens - \n" + tokens);
+		// System.out.println("Tokens - \n" + tokens);
 	}
 
 	public String getxPath()

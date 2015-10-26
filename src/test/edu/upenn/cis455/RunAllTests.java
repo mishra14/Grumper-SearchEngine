@@ -13,7 +13,9 @@ public class RunAllTests extends TestCase
 			Class[] testClasses = {
 					test.edu.upenn.cis455.XPathEngineTest.class,
 					test.edu.upenn.cis455.DomParserTest.class,
-					test.edu.upenn.cis455.ServletTest.class };
+					test.edu.upenn.cis455.ServletTest.class,
+					test.edu.upenn.cis455.StorageTest.class,
+					test.edu.upenn.cis455.CrawlerTest.class};
 
 			return new TestSuite(testClasses);
 		}

@@ -4,6 +4,12 @@ import com.sleepycat.persist.PrimaryIndex;
 
 import edu.upenn.cis455.bean.User;
 
+/**
+ * Data Accessor class for the user entity class
+ * 
+ * @author cis455
+ *
+ */
 public class UserDA
 {
 

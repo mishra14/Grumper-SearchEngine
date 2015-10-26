@@ -1,6 +1,7 @@
 package edu.upenn.cis455.bean;
 
 import java.util.HashSet;
+
 import com.sleepycat.persist.model.DeleteAction;
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
@@ -9,6 +10,12 @@ import com.sleepycat.persist.model.SecondaryKey;
 
 import edu.upenn.cis455.xpath.XPath;
 
+/**
+ * Entity class holds channel data
+ * 
+ * @author cis455
+ *
+ */
 @Entity
 public class Channel
 {

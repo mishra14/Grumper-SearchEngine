@@ -3,7 +3,7 @@ package edu.upenn.cis455.crawler;
 import java.util.ArrayList;
 
 /**
- * que class
+ * queue class
  * 
  * @author cis455
  *

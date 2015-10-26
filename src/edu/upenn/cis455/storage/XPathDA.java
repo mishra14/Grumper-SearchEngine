@@ -4,8 +4,15 @@ import java.util.ArrayList;
 
 import com.sleepycat.persist.EntityCursor;
 import com.sleepycat.persist.PrimaryIndex;
+
 import edu.upenn.cis455.xpath.XPath;
 
+/**
+ * Data Accessor class for the xpath entity class
+ * 
+ * @author cis455
+ *
+ */
 public class XPathDA
 {
 	public static XPath getXPath(String xPathString) // returns null if the

@@ -95,8 +95,8 @@ public class DomParser
 	{
 		boolean result = false;
 
-		// test can be a text()= ".."
-		if (test.isTextFilter())
+		// test can be a contains(text(), "..")
+		if (test.isContainsFilter())
 		{
 			String textContent = root.getTextContent();
 			if (textContent != null
@@ -105,8 +105,9 @@ public class DomParser
 				result = true;
 			}
 		}
-		// test can be a contains(text(), "..")
-		else if (test.isContainsFilter())
+
+		// test can be a text()= ".."
+		else if (test.isTextFilter())
 		{
 			String textContent = root.getTextContent();
 			if (textContent != null

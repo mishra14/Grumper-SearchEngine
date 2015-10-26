@@ -42,7 +42,8 @@ public class XPathEngineTest extends TestCase
 				+ "/node[t e x  t ( )=\"someText\"];"
 				+ "/node[@att=\"value\"];"
 				+ "/node[contains(text(),\"someText\")];"
-				+ "/node[filter[subfiler[lastfilter[contains(text(),\"someText\")]]]]";
+				+ "/node[filter[subfiler[lastfilter[contains(text(),\"someText\")]]]];"
+				+ "/rss/channel/item/title[contains(text(), \"war\")]";
 		String[] xPaths = xPath.split(";");
 		XPathEngine engine = XPathEngineFactory.getXPathEngine();
 		engine.setXPaths(xPaths);

@@ -8,6 +8,12 @@ import com.sleepycat.je.EnvironmentConfig;
 import com.sleepycat.persist.EntityStore;
 import com.sleepycat.persist.StoreConfig;
 
+/**
+ * DBWrapper class that is used to create, open and close berkley DB
+ * 
+ * @author cis455
+ *
+ */
 public class DBWrapper
 {
 

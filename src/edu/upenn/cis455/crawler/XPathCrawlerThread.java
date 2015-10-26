@@ -21,6 +21,12 @@ import edu.upenn.cis455.xpath.XPath;
 import edu.upenn.cis455.xpathengine.XPathEngine;
 import edu.upenn.cis455.xpathengine.XPathEngineFactory;
 
+/**
+ * A Thread class that is executed by the XPathCrawler class
+ * 
+ * @author cis455
+ *
+ */
 public class XPathCrawlerThread extends Thread
 {
 
@@ -321,6 +327,10 @@ public class XPathCrawlerThread extends Thread
 		if (documentRecord.isXml())
 		{
 			ArrayList<XPath> xPathList = XPathDA.getAllXPaths();
+			if (xPathList.isEmpty())
+			{
+				return;
+			}
 			XPathEngine engine = XPathEngineFactory.getXPathEngine();
 			engine.setXPaths(xPathList);
 			boolean[] result = engine.evaluate(documentRecord.getDocument());

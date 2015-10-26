@@ -18,6 +18,13 @@ import edu.upenn.cis455.storage.DBWrapper;
 import edu.upenn.cis455.storage.DocumentRecordDA;
 import edu.upenn.cis455.storage.UserDA;
 
+/**
+ * Helper class for the XPathServlet; performs the operations of talking to the
+ * database
+ * 
+ * @author cis455
+ *
+ */
 public class XPathServletHelper
 {
 

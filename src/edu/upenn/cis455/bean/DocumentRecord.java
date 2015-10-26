@@ -21,6 +21,12 @@ import org.xml.sax.SAXException;
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
 
+/**
+ * Entity class to hold document records
+ * 
+ * @author cis455
+ *
+ */
 @Entity
 public class DocumentRecord
 {

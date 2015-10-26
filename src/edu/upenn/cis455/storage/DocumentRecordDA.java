@@ -4,6 +4,12 @@ import com.sleepycat.persist.PrimaryIndex;
 
 import edu.upenn.cis455.bean.DocumentRecord;
 
+/**
+ * Data Accessor class for the document entity class
+ * 
+ * @author cis455
+ *
+ */
 public class DocumentRecordDA
 {
 

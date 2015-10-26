@@ -69,6 +69,7 @@ public class HttpClient
 		DocumentRecord documentRecord = DocumentRecordDA.getDocument(sourceUrl
 				.toString());
 		// send head request
+		socket = new Socket(host, port);
 		HttpResponse response = sendHead(documentRecord);
 		// System.out.println(sourceUrl + " head response - " + response);
 		if (response == null)
@@ -138,6 +139,7 @@ public class HttpClient
 					else if (response.getResponseCode().equals("200"))
 					{
 						// fetch the document
+						socket = new Socket(host, port);
 						response = sendFileRequest();
 						// System.out.println(response);
 						if (response.getHeaders().get(CONTENT_TYPE_HEADER)

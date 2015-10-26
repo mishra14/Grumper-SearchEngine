@@ -3,6 +3,12 @@ package edu.upenn.cis455.crawler.info;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+/**
+ * Class to hold information obtained by parsing robots.txt
+ * 
+ * @author cis455
+ *
+ */
 public class RobotsTxtInfo
 {
 

@@ -3,6 +3,12 @@ package edu.upenn.cis455.bean;
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
 
+/**
+ * Entity class to hold user data
+ * 
+ * @author cis455
+ *
+ */
 @Entity
 public class User
 {

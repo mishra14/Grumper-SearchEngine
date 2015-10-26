@@ -1,14 +1,19 @@
 package edu.upenn.cis455.storage;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import com.sleepycat.persist.EntityCursor;
 import com.sleepycat.persist.PrimaryIndex;
-import com.sleepycat.persist.model.Entity;
 import edu.upenn.cis455.bean.Channel;
 import edu.upenn.cis455.xpath.XPath;
 
-@Entity
+/**
+ * Data Accessor class for the channel entity class
+ * 
+ * @author cis455
+ *
+ */
 public class ChannelDA
 {
 
@@ -36,29 +41,23 @@ public class ChannelDA
 		Channel insertedChannel = null;
 		if (DBWrapper.getStore() != null)
 		{
+			HashSet<String> xPaths = new HashSet<String>();
 			for (String xPathString : channel.getxPaths())
 			{
-				XPath xPath = XPathDA.getXPath(xPathString);
-				if (xPath == null)
+				XPath newXPath = new XPath(xPathString);
+				if (newXPath.isValid())
 				{
-					xPath = new XPath(xPathString);
-					if (xPath.isValid())
+					XPath xPath = XPathDA.getXPath(newXPath.getxPath());
+					if (xPath == null)
 					{
-						xPath.getChannelNames().add(channel.getChannelName());
-						XPathDA.putXPath(xPath);
+						xPath = newXPath;
 					}
-					else
-					{
-						channel.removeXPath(xPathString);
-						continue;
-					}
-				}
-				else
-				{
 					xPath.getChannelNames().add(channel.getChannelName());
 					XPathDA.putXPath(xPath);
+					xPaths.add(xPath.getxPath());
 				}
 			}
+			channel.setxPaths(xPaths);
 			PrimaryIndex<String, Channel> channelPrimaryIndex = DBWrapper
 					.getStore().getPrimaryIndex(String.class, Channel.class);
 			if (channelPrimaryIndex != null)
