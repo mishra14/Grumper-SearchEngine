@@ -43,7 +43,8 @@ public class Http
 	 * @throws IOException
 	 *             Signals that an I/O exception has occurred.
 	 */
-	private static HttpResponse parseResponse(BufferedReader in) throws IOException
+	private static HttpResponse parseResponse(BufferedReader in)
+			throws IOException
 	{
 		HttpResponse response = new HttpResponse();
 		String line = in.readLine();

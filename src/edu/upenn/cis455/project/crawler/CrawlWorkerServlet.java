@@ -2,7 +2,6 @@ package edu.upenn.cis455.project.crawler;
 
 import java.io.PrintWriter;
 import java.net.MalformedURLException;
-import java.net.Socket;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,8 +17,7 @@ public class CrawlWorkerServlet extends HttpServlet
 
 	private List<String> workers;
 	private WorkerStatus status;
-	private PingThread pingThread;
-	private Socket socket;
+	private WorkerPingThread pingThread;
 
 	public void init()
 	{
@@ -35,7 +33,7 @@ public class CrawlWorkerServlet extends HttpServlet
 					+ "/master/workerstatus";
 			System.out.println("crawl worker servlet : master url - " + url);
 			masterUrl = new URL(url);
-			pingThread = new PingThread(masterUrl, status);
+			pingThread = new WorkerPingThread(masterUrl, status);
 			pingThread.start();
 		}
 		catch (MalformedURLException e)
@@ -50,7 +48,7 @@ public class CrawlWorkerServlet extends HttpServlet
 	public void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws java.io.IOException
 	{
-		System.out.println("worker : post received");
+		System.out.println("crawl worker : post received");
 		String pathInfo = request.getPathInfo();
 		StringBuilder pageContent = new StringBuilder();
 		if (pathInfo.equalsIgnoreCase("/runcrawl")) // run crawl
@@ -65,24 +63,9 @@ public class CrawlWorkerServlet extends HttpServlet
 			System.out.println("crawl worker : /runcrawl received");
 			// read job info from the request and store it
 			String urlString = request.getParameter("urls");
-			String numThreads = request.getParameter("crawlthreads");
-			int numWorkers = Integer
-					.valueOf(request.getParameter("numworkers") == null ? "0"
-							: request.getParameter("numworkers"));
-			int threadCount = Integer.valueOf(numThreads);
-			List<String> workerList = new ArrayList<String>();
-			for (int i = 0; i < numWorkers; i++)
-			{
-				String worker = request.getParameter("worker" + (i + 1));
-				if (worker != null)
-				{
-					workerList.add(worker);
-				}
-			}
-			synchronized (workers)
-			{
-				workers = workerList;
-			}
+			// String numThreads = request.getParameter("crawlthreads");
+			// int threadCount = Integer.valueOf(numThreads);
+			updateWorkerList(request);
 			System.out.println("crawl worker : new crawl job - " + urlString);
 			// if status is idle then spawn crawl threads
 			synchronized (status)
@@ -93,13 +76,46 @@ public class CrawlWorkerServlet extends HttpServlet
 				status.setStatus(WorkerStatus.statusType.crawling);
 			}
 		}
-		else if (pathInfo.equalsIgnoreCase("/pushdata")) // get a reduce job
+		else if (pathInfo.equalsIgnoreCase("/pushdata"))
 		{
+			// add these new urls into the frontier
 			System.out.println("crawl worker : /pushdata received");
 			response.setContentType("text/html");
 			PrintWriter out = response.getWriter();
 			out.print("<html>" + pageContent.toString() + "</html>");
 			response.flushBuffer();
 		}
+		else if (pathInfo.equalsIgnoreCase("/updateWorkers"))
+		{
+			// add these new urls into the frontier
+			System.out.println("crawl worker : /updateworkers received");
+			response.setContentType("text/html");
+			PrintWriter out = response.getWriter();
+			out.print("<html>" + pageContent.toString() + "</html>");
+			response.flushBuffer();
+			updateWorkerList(request);
+		}
+	}
+
+	private void updateWorkerList(HttpServletRequest request)
+	{
+		int numWorkers = Integer
+				.valueOf(request.getParameter("numworkers") == null ? "0"
+						: request.getParameter("numworkers"));
+		List<String> workerList = new ArrayList<String>();
+		for (int i = 0; i < numWorkers; i++)
+		{
+			String worker = request.getParameter("worker" + (i + 1));
+			if (worker != null)
+			{
+				workerList.add(worker);
+			}
+		}
+		synchronized (workers)
+		{
+			workers = workerList;
+		}
+		System.out
+				.println("crawl worker : updated qorker list to - " + workers);
 	}
 }

@@ -39,11 +39,17 @@ public class CrawlMasterServlet extends HttpServlet
 
 	private List<String> workerList;
 
+	private MasterPingThread pingThread;
+
+	private static long INACTIVE_INTERVAL = 30000;
+
 	public void init()
 	{
 		System.out.println("Master servlet ready");
 		this.workers = new HashMap<String, WorkerStatus>();
 		this.workerList = new ArrayList<String>();
+		pingThread = new MasterPingThread(workers, workerList);
+		pingThread.start();
 	}
 
 	public void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -111,14 +117,18 @@ public class CrawlMasterServlet extends HttpServlet
 			String pagesCrawled = request.getParameter("pagescrawled");
 			WorkerStatus workerStatus = new WorkerStatus(port, lastCrawledUrl,
 					pagesCrawled, status);
-			if (!workerList.contains(request.getRemoteAddr() + ":" + port))
+			synchronized (workerList)
 			{
-				workerList.add(request.getRemoteAddr() + ":" + port);
+				if (!workerList.contains(request.getRemoteAddr() + ":" + port))
+				{
+					workerList.add(request.getRemoteAddr() + ":" + port);
+				}
+				synchronized (workers)
+				{
+					workers.put(request.getRemoteAddr() + ":" + port,
+							workerStatus);
+				}
 			}
-			workers.put(request.getRemoteAddr() + ":" + port, workerStatus);
-			// check if the current job is done
-			// if done then assign the next job, if any
-			// else do nothing
 			System.out.println("master : " + "Updated worker - "
 					+ workerStatus.toString());
 			pageContent.append("Updated worker - " + workerStatus.toString());
@@ -163,19 +173,24 @@ public class CrawlMasterServlet extends HttpServlet
 		pageContent.append("Worker status - <br>" + "<table>"
 				+ "<th>IP:Port</th>" + "<th>Status</th>"
 				+ "<th>Last Crawled Url</th>" + "<th>Pages Crawled</th>");
-		for (Map.Entry<String, WorkerStatus> entry : workers.entrySet())
+		synchronized (workers)
 		{
-			long now = (new Date()).getTime();
-			if (now - entry.getValue().getTimestamp() <= 30000)
+			for (Map.Entry<String, WorkerStatus> entry : workers.entrySet())
 			{
-				pageContent.append("<tr>" + "<td>" + entry.getKey() + "</td>"
-						+ "<td>" + entry.getValue().getStatus() + "</td>"
-						+ "<td>" + entry.getValue().getLastCrawledUrl()
-						+ "</td>" + "<td>" + entry.getValue().getPagesCrawled()
-						+ "</td></tr>");
-			}
+				long now = (new Date()).getTime();
+				if (now - entry.getValue().getTimestamp() <= INACTIVE_INTERVAL)
+				{
+					pageContent.append("<tr>" + "<td>" + entry.getKey()
+							+ "</td>" + "<td>" + entry.getValue().getStatus()
+							+ "</td>" + "<td>"
+							+ entry.getValue().getLastCrawledUrl() + "</td>"
+							+ "<td>" + entry.getValue().getPagesCrawled()
+							+ "</td></tr>");
+				}
 
+			}
 		}
+
 		pageContent.append("</table></body>");
 
 		return pageContent.toString();
@@ -184,15 +199,23 @@ public class CrawlMasterServlet extends HttpServlet
 	private void assignJob(String[] urls, String crawlThreads)
 			throws IOException, NoSuchAlgorithmException
 	{
-		ArrayList<String> activeWorkers = new ArrayList<String>(workerList);
-		for (Map.Entry<String, WorkerStatus> entry : workers.entrySet())
+		ArrayList<String> activeWorkers;
+		synchronized (workerList)
 		{
-			long now = (new Date()).getTime();
-			if (now - entry.getValue().getTimestamp() > 30000)
+			activeWorkers = new ArrayList<String>(workerList);
+		}
+		synchronized (workers)
+		{
+			for (Map.Entry<String, WorkerStatus> entry : workers.entrySet())
 			{
-				activeWorkers.remove(entry.getKey());
+				long now = (new Date()).getTime();
+				if (now - entry.getValue().getTimestamp() > INACTIVE_INTERVAL)
+				{
+					activeWorkers.remove(entry.getKey());
+				}
 			}
 		}
+
 		if (activeWorkers.size() < 1)
 		{
 			System.out.println("crawl master : no active worker");
