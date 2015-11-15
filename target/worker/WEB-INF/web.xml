@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ <!DOCTYPE web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.2//EN" "http://java.sun.com/j2ee/dtds/web-app_2_2.dtd">
+ <web-app>
+     <display-name>HW3 (Worker)</display-name>
+     
+     <servlet>
+         <servlet-name>worker</servlet-name>
+         <servlet-class>edu.upenn.cis455.project.crawler.CrawlWorkerServlet</servlet-class>
+         <init-param>
+           <param-name>master</param-name>
+           <param-value>127.0.0.1:8080</param-value>
+         </init-param>
+         <init-param>
+           <param-name>selfport</param-name>
+           <param-value>8080</param-value>
+         </init-param>
+         <load-on-startup>2</load-on-startup>
+     </servlet>
+
+     <servlet-mapping>
+         <servlet-name>worker</servlet-name>
+         <url-pattern>/*</url-pattern>
+     </servlet-mapping>
+</web-app>
