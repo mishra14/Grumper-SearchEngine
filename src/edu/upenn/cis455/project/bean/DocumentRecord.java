@@ -1,4 +1,4 @@
-package edu.upenn.cis455.bean;
+package edu.upenn.cis455.project.bean;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

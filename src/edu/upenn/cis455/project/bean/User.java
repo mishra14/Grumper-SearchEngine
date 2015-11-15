@@ -1,4 +1,4 @@
-package edu.upenn.cis455.bean;
+package edu.upenn.cis455.project.bean;
 
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;

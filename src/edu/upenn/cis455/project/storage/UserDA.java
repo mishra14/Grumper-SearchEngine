@@ -1,8 +1,8 @@
-package edu.upenn.cis455.storage;
+package edu.upenn.cis455.project.storage;
 
 import com.sleepycat.persist.PrimaryIndex;
 
-import edu.upenn.cis455.bean.User;
+import edu.upenn.cis455.project.bean.User;
 
 /**
  * Data Accessor class for the user entity class

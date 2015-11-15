@@ -1,4 +1,4 @@
-package edu.upenn.cis455.crawler.info;
+package edu.upenn.cis455.project.crawler.info;
 
 import java.util.ArrayList;
 import java.util.HashMap;

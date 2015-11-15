@@ -1,9 +1,10 @@
-package test.edu.upenn.cis455;
+package test.edu.upenn.cis455.project;
 
 import org.junit.Test;
-import edu.upenn.cis455.bean.User;
-import edu.upenn.cis455.storage.DBWrapper;
-import edu.upenn.cis455.storage.UserDA;
+
+import edu.upenn.cis455.project.bean.User;
+import edu.upenn.cis455.project.storage.DBWrapper;
+import edu.upenn.cis455.project.storage.UserDA;
 import junit.framework.TestCase;
 
 /**
