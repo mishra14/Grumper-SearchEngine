@@ -4,11 +4,14 @@ import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import edu.upenn.cis455.project.bean.Queue;
 
 public class CrawlWorkerServlet extends HttpServlet
 {
@@ -18,6 +21,7 @@ public class CrawlWorkerServlet extends HttpServlet
 	private List<String> workers;
 	private WorkerStatus status;
 	private WorkerPingThread pingThread;
+	private Queue<String> urlQueue;
 
 	public void init()
 	{
@@ -43,6 +47,7 @@ public class CrawlWorkerServlet extends HttpServlet
 			e.printStackTrace();
 		}
 		workers = new ArrayList<String>();
+		urlQueue = new Queue<String>();
 	}
 
 	public void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -59,21 +64,24 @@ public class CrawlWorkerServlet extends HttpServlet
 					+ request.getParameter("urls"));
 			out.print("<html>" + pageContent.toString() + "</html>");
 			response.flushBuffer();
-
-			System.out.println("crawl worker : /runcrawl received");
-			// read job info from the request and store it
 			String urlString = request.getParameter("urls");
+			System.out.println("crawl worker : /runcrawl received with urls - "
+					+ urlString);
 			// String numThreads = request.getParameter("crawlthreads");
 			// int threadCount = Integer.valueOf(numThreads);
 			updateWorkerList(request);
-			System.out.println("crawl worker : new crawl job - " + urlString);
-			// if status is idle then spawn crawl threads
+			addToQueue(request.getParameter("urls"));
+			System.out.println("crawl worker : queue - "+urlQueue);
+			// if status is idle then spawn crawl thread
 			synchronized (status)
 			{
-				// update status for the ping thread
-				status.setLastCrawledUrl("NA");
-				status.setPagesCrawled("0");
-				status.setStatus(WorkerStatus.statusType.crawling);
+				if (status.getStatus().equals(WorkerStatus.statusType.idle))
+				{
+					// update status for the ping thread
+					status.setLastCrawledUrl("NA");
+					status.setPagesCrawled("0");
+					status.setStatus(WorkerStatus.statusType.crawling);
+				}
 			}
 		}
 		else if (pathInfo.equalsIgnoreCase("/pushdata"))
@@ -84,6 +92,8 @@ public class CrawlWorkerServlet extends HttpServlet
 			PrintWriter out = response.getWriter();
 			out.print("<html>" + pageContent.toString() + "</html>");
 			response.flushBuffer();
+			addToQueue(request.getParameter("urls"));
+			System.out.println("crawl worker : queue - "+urlQueue);
 		}
 		else if (pathInfo.equalsIgnoreCase("/updateWorkers"))
 		{
@@ -95,6 +105,12 @@ public class CrawlWorkerServlet extends HttpServlet
 			response.flushBuffer();
 			updateWorkerList(request);
 		}
+	}
+
+	private void addToQueue(String urlString)
+	{
+		String[] urls = urlString.split(";");
+		urlQueue.enqueueAll(new ArrayList<String>(Arrays.asList(urls)));
 	}
 
 	private void updateWorkerList(HttpServletRequest request)
