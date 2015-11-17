@@ -20,4 +20,14 @@ public class Hash
 				.intValue();
 		return index;
 	}
+	
+	public static String hashKey(String key)
+			throws NoSuchAlgorithmException
+	{
+		MessageDigest encrypt = MessageDigest.getInstance("SHA-1");
+		encrypt.reset();
+		encrypt.update(key.getBytes());
+		BigInteger hash = new BigInteger(1, encrypt.digest());
+		return hash.toString(16);
+	}
 }
