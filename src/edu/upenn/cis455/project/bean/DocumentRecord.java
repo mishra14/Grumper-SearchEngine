@@ -9,12 +9,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-
-import org.json.JSONObject;
 import org.w3c.dom.Document;
 import org.w3c.tidy.Tidy;
 import org.xml.sax.SAXException;
@@ -169,14 +166,6 @@ public class DocumentRecord
 		}
 
 		return document;
-	}
-
-	public JSONObject getJson()
-	{
-		JSONObject json = new JSONObject();
-		json.put("documentString", documentString);
-		json.put("lastCrawled", lastCrawled);
-		return json;
 	}
 
 	@Override

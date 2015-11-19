@@ -9,6 +9,6 @@
 	<classpathentry kind="lib" path="/home/cis455/Downloads/mockito-all-1.9.5.jar"/>
 	<classpathentry kind="lib" path="lib/easymock-3.4.jar"/>
 	<classpathentry kind="con" path="com.amazonaws.eclipse.sdk.AWS_JAVA_SDK"/>
-	<classpathentry kind="lib" path="/home/cis455/git/cis455project/lib/json-20140107.jar"/>
+	<classpathentry kind="lib" path="/home/cis455/git/cis455project/lib/jackson-core-2.6.3.jar"/>
 	<classpathentry kind="output" path="target/classes/"/>
 </classpath>

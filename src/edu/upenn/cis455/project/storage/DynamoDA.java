@@ -1,5 +1,8 @@
 package edu.upenn.cis455.project.storage;
 
+import java.io.IOException;
+import java.util.Map;
+
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.dynamodbv2.document.DeleteItemOutcome;
@@ -8,59 +11,124 @@ import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.document.spec.DeleteItemSpec;
 import com.amazonaws.services.dynamodbv2.model.ReturnValue;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 
-public class DynamoDA
+public class DynamoDA<T>
 {
 
 	private DynamoDB dynamoDB;
 	private Table table;
-
-	public DynamoDA(String tableName)
+	private final Class<T> typeParameterClass;
+	
+	public DynamoDA(String tableName, Class<T> typeParameterClass)
 	{
 		this.dynamoDB = new DynamoDB(new AmazonDynamoDBClient(
 				new ProfileCredentialsProvider()));
 		this.table = dynamoDB.getTable(tableName);
+		this.typeParameterClass = typeParameterClass;
 	}
 
-	public Item getItem(String key)
+	public Item getItem(String primaryKey, String primaryKeyValue)
 	{
 		Item item = null;
 		try
 		{
-			item = table.getItem("documentUrl", key);
+			item = table.getItem(primaryKey, primaryKeyValue);
 
 		}
 		catch (Exception e)
 		{
-			System.err.println("GetItem failed.");
-			System.err.println(e.getMessage());
+			System.out.println("DynamoDA : GetItem failed.");
+			System.out.println(e.getMessage());
 		}
 		return item;
 	}
 
-	public void putItem(String key, String value)
+	public T getValue(String primaryKey, String primaryKeyValue, String key)
 	{
-		Item item = new Item().withPrimaryKey("documentUrl", key).withString(
-				"s3Key", value);
-		table.putItem(item);
+		Item item = getItem(primaryKey,primaryKeyValue);
+		T result=null;
+		if(item!=null)
+		{
+			String json = item.getString(key);
+			ObjectMapper mapper = new ObjectMapper();
+			mapper.setVisibility(PropertyAccessor.ALL, Visibility.NONE);
+			mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
+			
+			try
+			{
+				result = mapper.readValue(json, typeParameterClass);
+			}
+			catch (IOException e)
+			{
+				System.out.println("DynamoDA : GetValue failed.");
+				e.printStackTrace();
+			}
+		}
+		return result;
 	}
-
-	public void deleteItem(String key)
+	
+	
+	public void putItem(String primaryKey, String primaryKeyValue,
+			Map<String, T> otherPairs)
 	{
-
 		try
 		{
+			ObjectMapper mapper = new ObjectMapper();
+			mapper.setVisibility(PropertyAccessor.ALL, Visibility.NONE);
+			mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
+			ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
+			Item item = new Item().withPrimaryKey(primaryKey, primaryKeyValue);
+			for (Map.Entry<String, T> entry : otherPairs.entrySet())
+			{
+				String json = ow.writeValueAsString(entry.getValue());
+				item.withString(entry.getKey(), json);
+			}
+			table.putItem(item);
+		}
+		catch (JsonProcessingException e)
+		{
+			System.out.println("DynamoDA : json parsing exception");
+			e.printStackTrace();
+		}
 
+	}
+
+	public void putItem(String primaryKey, String primaryKeyValue, String key,
+			T value)
+	{
+		try
+		{
+			ObjectMapper mapper = new ObjectMapper();
+			mapper.setVisibility(PropertyAccessor.ALL, Visibility.NONE);
+			mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
+			ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
+			Item item = new Item().withPrimaryKey(primaryKey, primaryKeyValue);
+			String json = ow.writeValueAsString(value);
+			item.withString(key, json);
+			System.out.println(item);
+			table.putItem(item);
+		}
+		catch (JsonProcessingException e)
+		{
+			System.out.println("DynamoDA : json parsing exception");
+			e.printStackTrace();
+		}
+
+	}
+
+	public void deleteItem(String primaryKey, String primaryKeyValue)
+	{
+		try
+		{
 			DeleteItemSpec deleteItemSpec = new DeleteItemSpec()
-					.withPrimaryKey("documentUrl", key).withReturnValues(
+					.withPrimaryKey(primaryKey, primaryKeyValue).withReturnValues(
 							ReturnValue.ALL_OLD);
-
 			DeleteItemOutcome outcome = table.deleteItem(deleteItemSpec);
-
-			/*            // Check the response.
-			            System.out.println("Printing item that was deleted...");
-			            System.out.println(outcome.getItem().toJSONPretty());*/
-
 		}
 		catch (Exception e)
 		{
