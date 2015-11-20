@@ -16,6 +16,7 @@ import edu.upenn.cis455.project.crawler.info.URLInfo;
 import edu.upenn.cis455.project.http.HttpClient;
 import edu.upenn.cis455.project.parsers.HtmlParser;
 import edu.upenn.cis455.project.storage.RobotsInfoDA;
+import edu.upenn.cis455.project.storage.S3DocumentDA;
 
 public class CrawlerThread implements Runnable{
 	
@@ -74,16 +75,23 @@ public class CrawlerThread implements Runnable{
 			/**
 			 * Check if document already exists in db. Then send head to check if modified
 			 */
-//			S3DocumentDA s3 = new S3DocumentDA();
-//			DocumentRecord doc = s3.getDocument(url);
-//			
-//			if(doc!=null){
-//				long last = doc.getLastCrawled();
-//				Date date = new Date(last);
-//				if(!httpclient.sendHead(url, date)){
-//					continue;
-//				}
-//			}
+			S3DocumentDA s3 = new S3DocumentDA();
+			DocumentRecord doc = s3.getDocument(url);
+			
+			if(doc!=null){
+				long last = doc.getLastCrawled();
+				Date date = new Date(last);
+				try
+				{
+					if(!httpclient.sendHead(url, date)){
+						continue;
+					}
+				}
+				catch (IOException e)
+				{
+					System.out.println("Could not send head request: "+e);
+				}
+			}
 			
 			//check if robots.txt exists 
 			if(RobotsInfoDA.contains(domain)){
@@ -204,9 +212,9 @@ public class CrawlerThread implements Runnable{
 			}
 			
 			//TODO add document to db
-			DocumentRecord doc = new DocumentRecord(url,document,current.getTime());
+			DocumentRecord docrecord = new DocumentRecord(url,document,current.getTime());
 			synchronized(this.crawledDocs){
-				crawledDocs.add(doc);
+				crawledDocs.add(docrecord);
 			}
 			
 		}
