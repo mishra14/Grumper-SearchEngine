@@ -1,4 +1,4 @@
-package edu.upenn.cis455.project.bean;
+package edu.upenn.cis455.project.parsers;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

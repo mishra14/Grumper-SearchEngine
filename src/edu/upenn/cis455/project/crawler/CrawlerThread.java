@@ -7,6 +7,7 @@ import edu.upenn.cis455.project.bean.Queue;
 import edu.upenn.cis455.project.bean.RobotsInfo;
 import edu.upenn.cis455.project.crawler.info.URLInfo;
 import edu.upenn.cis455.project.http.HttpClient;
+import edu.upenn.cis455.project.parsers.HtmlParser;
 import edu.upenn.cis455.project.storage.RobotsInfoDA;
 
 public class CrawlerThread implements Runnable{
@@ -29,6 +30,8 @@ public class CrawlerThread implements Runnable{
 			String filepath = urlinfo.getFilePath();
 			String protocol = urlinfo.getProtocol();
 			
+			HttpClient httpclient = new HttpClient();
+			
 			/**
 			 * TODO Hash domain??
 			 */
@@ -37,7 +40,8 @@ public class CrawlerThread implements Runnable{
 			 * TODO check if document already exists in db. Then send head to check if modified
 			 */
 			
-			//TODO check if robots.txt exists 
+			
+			//check if robots.txt exists 
 			if(RobotsInfoDA.contains(domain)){
 				RobotsInfo info = RobotsInfoDA.getInfo(domain);
 				String agent_match = info.getAgentMatch();
@@ -63,7 +67,7 @@ public class CrawlerThread implements Runnable{
 				
 				try
 				{
-					modified = HttpClient.sendHead(robots,lastAccessed);
+					modified = httpclient.sendHead(robots,lastAccessed);
 				}
 				catch (IOException e)
 				{
@@ -74,7 +78,7 @@ public class CrawlerThread implements Runnable{
 					//If it has been modified, fetch updated robots
 					try
 					{
-						HttpClient.fetchRobots(robots,domain);
+						httpclient.fetchRobots(robots,domain);
 					}
 					catch (Exception e)
 					{
@@ -112,7 +116,7 @@ public class CrawlerThread implements Runnable{
 				url = protocol+domain+"/robots.txt";
 				try
 				{
-					HttpClient.fetchRobots(url,domain);
+					httpclient.fetchRobots(url,domain);
 				}
 				catch (Exception e)
 				{
@@ -122,11 +126,11 @@ public class CrawlerThread implements Runnable{
 			}
 			
 			//Fetch the actual url document
-			String document;
+			String document = null;
 			try
 			{
-				if(HttpClient.sendHead(url)){
-					document = HttpClient.fetch(url);
+				if(httpclient.sendHead(url)){
+					document = httpclient.fetch(url);
 					
 					//Update last accessed time
 					RobotsInfo info = RobotsInfoDA.getInfo(domain);
@@ -140,8 +144,14 @@ public class CrawlerThread implements Runnable{
 				continue;
 			}
 			
+			String content_type = httpclient.getContent_type();
 			
+			//Parse html documents for links
+			if(content_type.equals("text/html")){
+				HtmlParser.parse(document, url, urlQueue);
+			}
 			
+			//TODO add document to db
 			
 		}
 	}

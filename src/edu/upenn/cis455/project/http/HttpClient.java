@@ -11,15 +11,22 @@ import java.util.TimeZone;
 
 import javax.net.ssl.HttpsURLConnection;
 
-import edu.upenn.cis455.project.bean.RobotParser;
+import edu.upenn.cis455.project.bean.Queue;
 import edu.upenn.cis455.project.bean.RobotsInfo;
+import edu.upenn.cis455.project.parsers.RobotParser;
 import edu.upenn.cis455.project.storage.DBWrapper;
 import edu.upenn.cis455.project.storage.RobotsInfoDA;
 
 public class HttpClient
 {
+	private String content_type;
+	
+	public String getContent_type()
+	{
+		return content_type;
+	}
 
-	public static boolean sendHead(String url) throws IOException
+	public boolean sendHead(String url) throws IOException
 	{
 		return sendHead(url,null);
 	}
@@ -31,7 +38,7 @@ public class HttpClient
 	 * @return true if response code is 200
 	 * @throws IOException
 	 */
-	public static boolean sendHead(String url, Date lastAccessed) throws IOException
+	public boolean sendHead(String url, Date lastAccessed) throws IOException
 	{
 		URL req_url = new URL(url);
 		HttpsURLConnection connection = (HttpsURLConnection) req_url.openConnection();
@@ -58,7 +65,7 @@ public class HttpClient
 	 * @param robots url
 	 * @throws Exception 
 	 */
-	public static void fetchRobots(String robots,String domain) throws Exception
+	public void fetchRobots(String robots,String domain) throws Exception
 	{
 		String robots_doc = fetch(robots);
 		
@@ -75,12 +82,13 @@ public class HttpClient
 	}
 
 	/**
-	 * Fetches the requested document
+	 * Fetches the requested document and parses the url
 	 * @param url
+	 * @param urlQueue 
 	 * @return the document in string format
 	 * @throws IOException
 	 */
-	public static String fetch(String url) throws IOException
+	public String fetch(String url) throws IOException
 	{
 		URL req_url = new URL(url);
 		HttpsURLConnection connection = (HttpsURLConnection) req_url.openConnection();
@@ -91,7 +99,7 @@ public class HttpClient
 		BufferedReader br = new BufferedReader(new InputStreamReader(input));
 		
 		Integer length = connection.getContentLength();
-		
+		content_type = connection.getContentType();
 		
 		int total_read = 0;
 		int b;
@@ -107,6 +115,8 @@ public class HttpClient
 		return s.toString();
 		
 	}
+	
+	
 
 	
 
