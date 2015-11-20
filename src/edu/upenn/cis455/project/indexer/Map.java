@@ -1,3 +1,5 @@
+package edu.upenn.cis455.project.indexer;
+
 import java.io.IOException;
 import java.util.StringTokenizer;
 
@@ -6,18 +8,19 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 
-public class Map extends Mapper<LongWritable, Text, Text, IntWritable> {
+public class Map extends Mapper<Text, Text, Text, Text> {
     
 	@Override
-    public void map(LongWritable key, Text value, Context context) 
+    public void map(Text key, Text value, Context context) 
     		throws IOException, InterruptedException {
-        IntWritable one = new IntWritable(1);
 	    Text word = new Text();
 	    String line = value.toString();
-	    StringTokenizer tokenizer = new StringTokenizer(line);
+	    StringTokenizer tokenizer = new StringTokenizer(line, " ,.?\"");
 	    while (tokenizer.hasMoreTokens()) {
-	        word.set(tokenizer.nextToken());
-	        context.write(word, one);
+	        word.set(tokenizer.nextToken().toLowerCase());
+	        context.write(word, key);
         }
     }
+	
+	
 }
