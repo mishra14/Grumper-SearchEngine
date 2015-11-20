@@ -180,7 +180,7 @@ public class CrawlerThread implements Runnable{
 					//Update last accessed time
 					RobotsInfo info = RobotsInfoDA.getInfo(domain);
 					current = new Date();
-					info.setLastAccessed(new Date()current);
+					info.setLastAccessed(current);
 					RobotsInfoDA.putInfo(info);
 				}
 			}
