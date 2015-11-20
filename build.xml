@@ -7,15 +7,37 @@
 
 	<target name="compile-master" depends="init">
 		<javac srcdir="src" destdir="target/master/WEB-INF/classes" includes="**/CrawlMasterServlet.java" deprecation="on"
-     debug="true" includeantruntime="false" classpath="lib/servlet-api.jar">
+     debug="true" includeantruntime="false" >
 			<compilerarg value="-Xlint"/>
+			<classpath>
+				<pathelement path="lib/servlet-api.jar"/>
+				<pathelement path="lib/jsoup-1.8.3.jar"/>
+				<pathelement path="lib/je-6.2.31.jar"/>
+				<pathelement path="lib/jtidy-r938.jar"/>
+				<pathelement path="/home/cis455/aws-java-sdk/1.10.35/lib/aws-java-sdk-1.10.35.jar" />
+				<pathelement path="lib/jackson-core-2.6.3.jar"/>
+				<pathelement path="lib/junit.jar"/>
+				<pathelement path = "lib/jackson-annotations-2.6.3.jar"/>
+				<pathelement path = "lib/jackson-databind-2.6.3.jar"/>
+			</classpath>
 		</javac>
 	</target>
 
 	<target name="compile-worker" depends="init">
 		<javac srcdir="src" destdir="target/worker/WEB-INF/classes" includes="**/*CrawlWorkerServlet.java" deprecation="on"
-     debug="true" includeantruntime="false" classpath="lib/servlet-api.jar">
+     debug="true" includeantruntime="false" >
 			<compilerarg value="-Xlint"/>
+			<classpath>
+				<pathelement path="lib/servlet-api.jar"/>
+				<pathelement path="lib/jsoup-1.8.3.jar"/>
+				<pathelement path="lib/je-6.2.31.jar"/>
+				<pathelement path="lib/jtidy-r938.jar"/>
+				<pathelement path="/home/cis455/aws-java-sdk/1.10.35/lib/aws-java-sdk-1.10.35.jar" />
+				<pathelement path="lib/jackson-core-2.6.3.jar"/>
+				<pathelement path="lib/junit.jar"/>
+				<pathelement path = "lib/jackson-annotations-2.6.3.jar"/>
+				<pathelement path = "lib/jackson-databind-2.6.3.jar"/>
+			</classpath>
 		</javac>
 	</target>
 

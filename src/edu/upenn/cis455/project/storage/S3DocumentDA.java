@@ -155,7 +155,7 @@ public class S3DocumentDA
 		System.out.println(s3.documentExists(doc));
 		s3.putDocument(doc);
 		System.out.println(s3.getDocument(doc.getDocumentId()));
-		s3.deleteDocument(doc);
+		//s3.deleteDocument(doc);
 		System.out.println(s3.documentExists(doc));
 		System.out.println(s3.dynamo.getItem("documentUrl",doc.getDocumentId()));
 		
