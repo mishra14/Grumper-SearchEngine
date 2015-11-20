@@ -74,11 +74,13 @@ public class DBWrapper
 
 	/*
 	 * public static void main(String args[]) throws Exception {
-	 * openDBWrapper("./db/"); System.out.println(UserDA.putUser(new
-	 * User("ankit.mishra", "hie")));
-	 * System.out.println(UserDA.getUser("ankit.mishra")); XPath xPath = new
-	 * XPath("/html"); System.out.println(XPathDA.putXPath(xPath));
-	 * System.out.println(XPathDA.getXPath(xPath.getxPath())); closeDBWrapper();
+	 * openDBWrapper("./db/"); 
+	 * System.out.println(UserDA.putUser(new User("ankit.mishra", "hie")));
+	 * System.out.println(UserDA.getUser("ankit.mishra")); 
+	 * XPath xPath = new XPath("/html"); 
+	 * System.out.println(XPathDA.putXPath(xPath));
+	 * System.out.println(XPathDA.getXPath(xPath.getxPath())); 
+	 * closeDBWrapper();
 	 * }
 	 */
 

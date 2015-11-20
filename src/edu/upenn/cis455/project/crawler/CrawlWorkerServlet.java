@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import edu.upenn.cis455.project.bean.Queue;
+import edu.upenn.cis455.project.storage.DBWrapper;
 
 public class CrawlWorkerServlet extends HttpServlet
 {
@@ -67,8 +68,8 @@ public class CrawlWorkerServlet extends HttpServlet
 			String urlString = request.getParameter("urls");
 			System.out.println("crawl worker : /runcrawl received with urls - "
 					+ urlString);
-			// String numThreads = request.getParameter("crawlthreads");
-			// int threadCount = Integer.valueOf(numThreads);
+			String numThreads = request.getParameter("crawlthreads");
+			int threadCount = Integer.valueOf(numThreads);
 			updateWorkerList(request);
 			addToQueue(request.getParameter("urls"));
 			System.out.println("crawl worker : queue - "+urlQueue);
@@ -83,6 +84,27 @@ public class CrawlWorkerServlet extends HttpServlet
 					status.setStatus(WorkerStatus.statusType.crawling);
 				}
 			}
+			
+			//Setup db wrapper
+			try
+			{
+				DBWrapper.openDBWrapper(getServletContext().getInitParameter("BDBstore"));
+			}
+			catch (Exception e)
+			{
+				System.out.println("Could not open DB Wrapper: "+e);
+			}
+			
+			//Start crawler threads
+			Thread [] threads = new Thread[threadCount];
+			for(int i=0;i<threadCount;i++){
+				CrawlerThread crawlerThread = new CrawlerThread(urlQueue);
+				Thread thread = new Thread(crawlerThread);
+				thread.start();
+				threads[i] = thread;
+			}
+			
+			DBWrapper.closeDBWrapper();
 		}
 		else if (pathInfo.equalsIgnoreCase("/pushdata"))
 		{
