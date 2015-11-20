@@ -9,11 +9,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-
 import org.w3c.dom.Document;
 import org.w3c.tidy.Tidy;
 import org.xml.sax.SAXException;
@@ -45,14 +43,24 @@ public class DocumentRecord
 
 	}
 
-	public DocumentRecord(String documentId, String document, boolean html,
-			boolean xml, long lastCrawled)
+	public DocumentRecord(String documentId, String documentString,
+			boolean html, boolean xml, long lastCrawled)
 	{
 		super();
 		this.documentId = documentId;
-		this.documentString = document;
+		this.documentString = documentString;
 		this.html = html;
 		this.xml = xml;
+		this.lastCrawled = lastCrawled;
+	}
+
+	public DocumentRecord(String documentId, String documentString,
+			long lastCrawled)
+	{
+		super();
+		this.documentId = documentId;
+		this.documentString = documentString;
+		this.html = true;
 		this.lastCrawled = lastCrawled;
 	}
 

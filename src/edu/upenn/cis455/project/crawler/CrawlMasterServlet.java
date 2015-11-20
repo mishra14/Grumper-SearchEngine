@@ -13,8 +13,10 @@ import java.util.Map;
 
 import javax.servlet.http.*;
 
+import edu.upenn.cis455.project.bean.DocumentRecord;
 import edu.upenn.cis455.project.http.Http;
 import edu.upenn.cis455.project.http.HttpResponse;
+import edu.upenn.cis455.project.storage.S3DocumentDA;
 
 /**
  * This class is master servlet class that is responsible for receiving jobs
@@ -50,6 +52,15 @@ public class CrawlMasterServlet extends HttpServlet
 		this.workerList = new ArrayList<String>();
 		pingThread = new MasterPingThread(workers, workerList);
 		pingThread.start();
+		S3DocumentDA s3 = new S3DocumentDA();
+		DocumentRecord doc = new DocumentRecord("http://ankitmishra.me",
+				"This is a test document String", (new Date()).getTime());
+		System.out.println(doc);
+		System.out.println(s3.documentExists(doc));
+		s3.putDocument(doc);
+		System.out.println(s3.getDocument(doc.getDocumentId()));
+		//s3.deleteDocument(doc);
+		System.out.println(s3.documentExists(doc));
 	}
 
 	public void doPost(HttpServletRequest request, HttpServletResponse response)
