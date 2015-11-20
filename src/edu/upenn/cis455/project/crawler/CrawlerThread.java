@@ -1,8 +1,14 @@
 package edu.upenn.cis455.project.crawler;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
+import java.util.HashMap;
 
+import edu.upenn.cis455.project.bean.DocumentRecord;
 import edu.upenn.cis455.project.bean.Queue;
 import edu.upenn.cis455.project.bean.RobotsInfo;
 import edu.upenn.cis455.project.crawler.info.URLInfo;
@@ -13,9 +19,17 @@ import edu.upenn.cis455.project.storage.RobotsInfoDA;
 public class CrawlerThread implements Runnable{
 	
 	private Queue<String> urlQueue;
+	private WorkerStatus status;
+	private int self_id;
+	private int num_workers;
+	private HashMap<String,String> crawledDocs;
 	
-	public CrawlerThread(Queue<String> urlQueue){
+	public CrawlerThread(Queue<String> urlQueue, WorkerStatus status, int self_id, int num_workers,HashMap<String,String> crawledDocs){
 		this.urlQueue = urlQueue;
+		this.status = status;
+		this.self_id = self_id;
+		this.num_workers = num_workers;
+		this.crawledDocs = crawledDocs;
 	}
 	
 	@Override
@@ -33,13 +47,43 @@ public class CrawlerThread implements Runnable{
 			HttpClient httpclient = new HttpClient();
 			
 			/**
-			 * TODO Hash domain??
+			 * Hash domain
 			 */
+			int idx = self_id;
+			try
+			{
+				idx = Hash.hashKey(domain, num_workers);
+			}
+			catch (NoSuchAlgorithmException e1)
+			{
+				System.out.println("Could not hash domain: "+e1);
+			}
+			
+			if(idx!=self_id){
+				PrintWriter out;
+				try {
+					out = new PrintWriter(new BufferedWriter(new FileWriter("url/"+idx+".txt", true)));
+					out.println(url);
+					out.close();
+				} catch (IOException e) {
+					System.out.println("Could not write to file: "+e);
+				}
+				continue;
+			}
 			
 			/**
-			 * TODO check if document already exists in db. Then send head to check if modified
+			 * Check if document already exists in db. Then send head to check if modified
 			 */
-			
+//			S3DocumentDA s3 = new S3DocumentDA();
+//			DocumentRecord doc = s3.getDocument(url);
+//			
+//			if(doc!=null){
+//				long last = doc.getLastCrawled();
+//				Date date = new Date(last);
+//				if(!httpclient.sendHead(url, date)){
+//					continue;
+//				}
+//			}
 			
 			//check if robots.txt exists 
 			if(RobotsInfoDA.contains(domain)){
@@ -144,6 +188,12 @@ public class CrawlerThread implements Runnable{
 				continue;
 			}
 			
+			//Update worker status
+			synchronized(status){
+				status.setLastCrawledUrl(url);
+				status.incrementCount();
+			}
+			
 			String content_type = httpclient.getContent_type();
 			
 			//Parse html documents for links
@@ -152,6 +202,9 @@ public class CrawlerThread implements Runnable{
 			}
 			
 			//TODO add document to db
+			synchronized(this.crawledDocs){
+				crawledDocs.put(url, document);
+			}
 			
 		}
 	}

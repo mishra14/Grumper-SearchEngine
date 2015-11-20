@@ -5,6 +5,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.servlet.http.HttpServlet;
@@ -23,12 +24,14 @@ public class CrawlWorkerServlet extends HttpServlet
 	private WorkerStatus status;
 	private WorkerPingThread pingThread;
 	private Queue<String> urlQueue;
+	private String port;
+	private HashMap<String,String> crawledDocs;
 
 	public void init()
 	{
 		System.out.println("crawl worker servlet started");
-		status = new WorkerStatus(getServletConfig().getInitParameter(
-				"selfport"), "NA", "0", WorkerStatus.statusType.idle);
+		port = getServletConfig().getInitParameter("selfport");
+		status = new WorkerStatus(port, "NA", "0", WorkerStatus.statusType.idle);
 		System.out.println("crawl worker : status - " + status);
 		URL masterUrl;
 		try
@@ -49,6 +52,7 @@ public class CrawlWorkerServlet extends HttpServlet
 		}
 		workers = new ArrayList<String>();
 		urlQueue = new Queue<String>();
+		crawledDocs = new HashMap<String,String>();
 	}
 
 	public void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -71,6 +75,9 @@ public class CrawlWorkerServlet extends HttpServlet
 			String numThreads = request.getParameter("crawlthreads");
 			int threadCount = Integer.valueOf(numThreads);
 			updateWorkerList(request);
+			
+			int self_id = getSelfId(request.getLocalAddr());
+			
 			addToQueue(request.getParameter("urls"));
 			System.out.println("crawl worker : queue - "+urlQueue);
 			// if status is idle then spawn crawl thread
@@ -98,7 +105,7 @@ public class CrawlWorkerServlet extends HttpServlet
 			//Start crawler threads
 			Thread [] threads = new Thread[threadCount];
 			for(int i=0;i<threadCount;i++){
-				CrawlerThread crawlerThread = new CrawlerThread(urlQueue);
+				CrawlerThread crawlerThread = new CrawlerThread(urlQueue, status, self_id, this.workers.size(), crawledDocs);
 				Thread thread = new Thread(crawlerThread);
 				thread.start();
 				threads[i] = thread;
@@ -129,6 +136,19 @@ public class CrawlWorkerServlet extends HttpServlet
 		}
 	}
 
+	private int getSelfId(String ip)
+	{
+		String local = ip+":"+this.port;
+		System.out.println(local);
+		int i;
+		for(i=0;i<this.workers.size();i++){
+			if(workers.get(i).equals(local))
+				break;
+		}
+		
+		return i;
+	}
+
 	private void addToQueue(String urlString)
 	{
 		String[] urls = urlString.split(";");
@@ -153,7 +173,6 @@ public class CrawlWorkerServlet extends HttpServlet
 		{
 			workers = workerList;
 		}
-		System.out
-				.println("crawl worker : updated qorker list to - " + workers);
+		System.out.println("crawl worker : updated qorker list to - " + workers);
 	}
 }

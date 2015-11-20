@@ -23,6 +23,8 @@ public class WorkerStatus
 	private String lastCrawledUrl;
 
 	private String pagesCrawled;
+	
+	private Integer numPagesCrawled;
 
 	private statusType status;
 
@@ -37,6 +39,7 @@ public class WorkerStatus
 		this.pagesCrawled = pagesCrawled;
 		this.status = status;
 		this.timestamp = (new Date()).getTime();
+		this.numPagesCrawled = 0;
 	}
 
 	public String getPort()
@@ -88,7 +91,12 @@ public class WorkerStatus
 	{
 		this.timestamp = timestamp;
 	}
-
+	
+	public void incrementCount(){
+		this.numPagesCrawled++;
+		setPagesCrawled(numPagesCrawled.toString());
+	}
+	
 	@Override
 	public String toString()
 	{
