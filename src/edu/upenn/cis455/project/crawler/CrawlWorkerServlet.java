@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import edu.upenn.cis455.project.bean.DocumentRecord;
 import edu.upenn.cis455.project.bean.Queue;
 import edu.upenn.cis455.project.storage.DBWrapper;
 
@@ -25,7 +26,7 @@ public class CrawlWorkerServlet extends HttpServlet
 	private WorkerPingThread pingThread;
 	private Queue<String> urlQueue;
 	private String port;
-	private HashMap<String,String> crawledDocs;
+	private ArrayList<DocumentRecord> crawledDocs;
 
 	public void init()
 	{
@@ -52,7 +53,7 @@ public class CrawlWorkerServlet extends HttpServlet
 		}
 		workers = new ArrayList<String>();
 		urlQueue = new Queue<String>();
-		crawledDocs = new HashMap<String,String>();
+		crawledDocs = new ArrayList<DocumentRecord>();
 	}
 
 	public void doPost(HttpServletRequest request, HttpServletResponse response)

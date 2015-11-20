@@ -5,6 +5,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -22,9 +23,9 @@ public class CrawlerThread implements Runnable{
 	private WorkerStatus status;
 	private int self_id;
 	private int num_workers;
-	private HashMap<String,String> crawledDocs;
+	private ArrayList<DocumentRecord> crawledDocs;
 	
-	public CrawlerThread(Queue<String> urlQueue, WorkerStatus status, int self_id, int num_workers,HashMap<String,String> crawledDocs){
+	public CrawlerThread(Queue<String> urlQueue, WorkerStatus status, int self_id, int num_workers,ArrayList<DocumentRecord> crawledDocs){
 		this.urlQueue = urlQueue;
 		this.status = status;
 		this.self_id = self_id;
@@ -36,7 +37,6 @@ public class CrawlerThread implements Runnable{
 	public void run(){
 		
 		while(true){
-			
 			String url = urlQueue.dequeue();
 			URLInfo urlinfo = new URLInfo(url);
 			
@@ -171,6 +171,7 @@ public class CrawlerThread implements Runnable{
 			
 			//Fetch the actual url document
 			String document = null;
+			Date current = null;
 			try
 			{
 				if(httpclient.sendHead(url)){
@@ -178,7 +179,8 @@ public class CrawlerThread implements Runnable{
 					
 					//Update last accessed time
 					RobotsInfo info = RobotsInfoDA.getInfo(domain);
-					info.setLastAccessed(new Date());
+					current = new Date();
+					info.setLastAccessed(new Date()current);
 					RobotsInfoDA.putInfo(info);
 				}
 			}
@@ -202,8 +204,9 @@ public class CrawlerThread implements Runnable{
 			}
 			
 			//TODO add document to db
+			DocumentRecord doc = new DocumentRecord(url,document,current.getTime());
 			synchronized(this.crawledDocs){
-				crawledDocs.put(url, document);
+				crawledDocs.add(doc);
 			}
 			
 		}
