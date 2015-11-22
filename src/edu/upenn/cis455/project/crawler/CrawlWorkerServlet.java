@@ -19,6 +19,9 @@ public class CrawlWorkerServlet extends HttpServlet
 {
 
 	private static final long serialVersionUID = 1973672093393240348L;
+	
+	//Max size in megabytes
+	public static final int max_size = 1;
 
 	private List<String> workers;
 	private WorkerStatus status;
@@ -26,6 +29,7 @@ public class CrawlWorkerServlet extends HttpServlet
 	private Queue<String> urlQueue;
 	private String port;
 	private ArrayList<DocumentRecord> crawledDocs;
+	
 
 	public void init()
 	{
@@ -53,6 +57,22 @@ public class CrawlWorkerServlet extends HttpServlet
 		workers = new ArrayList<String>();
 		urlQueue = new Queue<String>();
 		crawledDocs = new ArrayList<DocumentRecord>();
+		
+		//Setup db wrapper
+		try
+		{
+			DBWrapper.openDBWrapper("/usr/share/jetty/webapps/db");
+		}
+		catch (Exception e)
+		{
+			System.out.println("Could not open DB Wrapper: "+e);
+		}
+	}
+	
+	public void destroy(){
+		
+		DBWrapper.closeDBWrapper();
+		
 	}
 
 	public void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -70,7 +90,7 @@ public class CrawlWorkerServlet extends HttpServlet
 			out.print("<html>" + pageContent.toString() + "</html>");
 			response.flushBuffer();
 			String urlString = request.getParameter("urls");
-			System.out.println("crawl worker : /runcrawl received with urls - "
+			System.out.println("CRAWL WORKER : /runcrawl received with urls - "
 					+ urlString);
 			String numThreads = request.getParameter("crawlthreads");
 			int threadCount = Integer.valueOf(numThreads);
@@ -92,15 +112,6 @@ public class CrawlWorkerServlet extends HttpServlet
 				}
 			}
 			
-			//Setup db wrapper
-			try
-			{
-				DBWrapper.openDBWrapper(getServletContext().getInitParameter("BDBstore"));
-			}
-			catch (Exception e)
-			{
-				System.out.println("Could not open DB Wrapper: "+e);
-			}
 			
 			//Start crawler threads
 			Thread [] threads = new Thread[threadCount];
@@ -111,7 +122,6 @@ public class CrawlWorkerServlet extends HttpServlet
 				threads[i] = thread;
 			}
 			
-			DBWrapper.closeDBWrapper();
 		}
 		else if (pathInfo.equalsIgnoreCase("/pushdata"))
 		{
@@ -139,7 +149,7 @@ public class CrawlWorkerServlet extends HttpServlet
 	private int getSelfId(String ip)
 	{
 		String local = ip+":"+this.port;
-		System.out.println(local);
+		System.out.println("local ip: "+local);
 		int i;
 		for(i=0;i<this.workers.size();i++){
 			if(workers.get(i).equals(local))

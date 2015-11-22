@@ -13,12 +13,13 @@ public class URLInfo
 	 * and file path
 	 */
 	public URLInfo(String docURL)
-	{
+	{	
 		if (docURL == null || docURL.equals(""))
 			return;
 		docURL = docURL.trim();
-		if (!docURL.startsWith("http://") || !docURL.startsWith("https://") || docURL.length() < 8)
+		if ((!docURL.startsWith("http://") && !docURL.startsWith("https://")) || docURL.length() < 8){
 			return;
+		}
 		
 		// Stripping off 'http://'
 		if(docURL.startsWith("http://")){

@@ -7,7 +7,7 @@ import edu.upenn.cis455.project.crawler.info.RobotsTxtInfo;
 
 public class RobotParser
 {
-		private static Pattern comment = Pattern.compile("\\s*#.*");
+		private Pattern comment = Pattern.compile("\\s*#.*");
 		private RobotsTxtInfo info;
 		
 		public RobotsTxtInfo getInfo()
@@ -23,10 +23,16 @@ public class RobotParser
 			for(String line : lines){
 				Matcher matcher = comment.matcher(line);
 				//We do not need comments
-				if(matcher.matches())
+				if(matcher.matches()){
+					System.out.println("COMMENT LINE");
 					continue;
+				}
 				if(line.length()==0)
 					continue;
+				
+				if(!line.contains(":")){
+					continue;
+				}
 				
 				String [] temp = line.split(":");
 				String header = temp[0].trim().toLowerCase();

@@ -3,12 +3,15 @@ package edu.upenn.cis455.project.crawler.info;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import com.sleepycat.persist.model.Persistent;
+
 /**
  * Class to hold information obtained by parsing robots.txt
  * 
  * @author cis455
  *
  */
+@Persistent
 public class RobotsTxtInfo
 {
 
@@ -17,6 +20,7 @@ public class RobotsTxtInfo
 
 	private HashMap<String, Integer> crawlDelays;
 	private ArrayList<String> sitemapLinks;
+	
 	private ArrayList<String> userAgents;
 
 	public RobotsTxtInfo()
