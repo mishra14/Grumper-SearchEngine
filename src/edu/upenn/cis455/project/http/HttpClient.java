@@ -13,13 +13,18 @@ import javax.net.ssl.HttpsURLConnection;
 
 import edu.upenn.cis455.project.bean.Queue;
 import edu.upenn.cis455.project.bean.RobotsInfo;
+import edu.upenn.cis455.project.crawler.CrawlWorkerServlet;
 import edu.upenn.cis455.project.parsers.RobotParser;
-import edu.upenn.cis455.project.storage.DBWrapper;
 import edu.upenn.cis455.project.storage.RobotsInfoDA;
 
 public class HttpClient
 {
-	private String content_type;
+	private Queue<String> urlQueue;
+	private String content_type = null;
+	
+	public HttpClient(Queue<String> urlQueue){
+		this.urlQueue = urlQueue;
+	}
 	
 	public String getContent_type()
 	{
@@ -42,6 +47,7 @@ public class HttpClient
 	{
 		URL req_url = new URL(url);
 		HttpsURLConnection connection = (HttpsURLConnection) req_url.openConnection();
+		connection.setInstanceFollowRedirects(false);
 		connection.setRequestMethod("HEAD");
 		connection.setRequestProperty("User-Agent", "cis455crawler");
 		
@@ -52,8 +58,20 @@ public class HttpClient
 			connection.setRequestProperty("If-Modified-Since", d);
 		}
 		
+		if(connection.getResponseCode() == 301){
+			String location = connection.getHeaderField("Location");
+//			System.out.println("Redirected to: "+location);
+			urlQueue.enqueue(location);
+		}
+		
 		if(connection.getResponseCode()!=200){
 			System.out.println("Response code for "+url+" is: "+connection.getResponseCode());
+			return false;
+		}
+		
+		Integer length = connection.getContentLength();
+		if(length > CrawlWorkerServlet.max_size*1000000){
+			System.out.println("Document greater than max size!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 			return false;
 		}
 		
@@ -68,7 +86,6 @@ public class HttpClient
 	public void fetchRobots(String robots,String domain) throws Exception
 	{
 		String robots_doc = fetch(robots);
-		
 		//Store robots in db
 		RobotParser parser = new RobotParser();
 		parser.parse(robots_doc);
@@ -76,7 +93,6 @@ public class HttpClient
 		info.setDomain(domain);
 		info.setLastAccessed(new Date());
 		info.setRobotsInfo(parser.getInfo());
-		
 		RobotsInfoDA.putInfo(info);
 		
 	}

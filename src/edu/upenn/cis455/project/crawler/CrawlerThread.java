@@ -15,6 +15,7 @@ import edu.upenn.cis455.project.bean.RobotsInfo;
 import edu.upenn.cis455.project.crawler.info.URLInfo;
 import edu.upenn.cis455.project.http.HttpClient;
 import edu.upenn.cis455.project.parsers.HtmlParser;
+import edu.upenn.cis455.project.storage.DBWrapper;
 import edu.upenn.cis455.project.storage.RobotsInfoDA;
 import edu.upenn.cis455.project.storage.S3DocumentDA;
 
@@ -38,14 +39,31 @@ public class CrawlerThread implements Runnable{
 	public void run(){
 		
 		while(true){
-			String url = urlQueue.dequeue();
+			String url = null;
+			if(urlQueue.getSize() == 0){
+				try
+				{
+					Thread.sleep(5000);
+				}
+				catch (InterruptedException e)
+				{
+					e.printStackTrace();
+				}
+			}else{
+				url = urlQueue.dequeue();
+			}
+			
+			if(url == null){
+				continue;
+			}
+			
 			URLInfo urlinfo = new URLInfo(url);
 			
 			String domain = urlinfo.getHostName();
 			String filepath = urlinfo.getFilePath();
 			String protocol = urlinfo.getProtocol();
 			
-			HttpClient httpclient = new HttpClient();
+			HttpClient httpclient = new HttpClient(urlQueue);
 			
 			/**
 			 * Hash domain
@@ -61,6 +79,7 @@ public class CrawlerThread implements Runnable{
 			}
 			
 			if(idx!=self_id){
+				System.out.println("Writing url ["+url+"] to worker "+idx);
 				PrintWriter out;
 				try {
 					out = new PrintWriter(new BufferedWriter(new FileWriter("url/"+idx+".txt", true)));
@@ -75,23 +94,23 @@ public class CrawlerThread implements Runnable{
 			/**
 			 * Check if document already exists in db. Then send head to check if modified
 			 */
-			S3DocumentDA s3 = new S3DocumentDA();
-			DocumentRecord doc = s3.getDocument(url);
-			
-			if(doc!=null){
-				long last = doc.getLastCrawled();
-				Date date = new Date(last);
-				try
-				{
-					if(!httpclient.sendHead(url, date)){
-						continue;
-					}
-				}
-				catch (IOException e)
-				{
-					System.out.println("Could not send head request: "+e);
-				}
-			}
+//			S3DocumentDA s3 = new S3DocumentDA();
+//			DocumentRecord doc = s3.getDocument(url);
+//			
+//			if(doc!=null){
+//				long last = doc.getLastCrawled();
+//				Date date = new Date(last);
+//				try
+//				{
+//					if(!httpclient.sendHead(url, date)){
+//						continue;
+//					}
+//				}
+//				catch (IOException e)
+//				{
+//					System.out.println("Could not send head request: "+e);
+//				}
+//			}
 			
 			//check if robots.txt exists 
 			if(RobotsInfoDA.contains(domain)){
@@ -100,6 +119,7 @@ public class CrawlerThread implements Runnable{
 				
 				if(agent_match.equals("No agent found")){
 					//No matching user agent was found
+					//DBWrapper.closeDBWrapper();
 					continue;
 				}
 				
@@ -110,9 +130,12 @@ public class CrawlerThread implements Runnable{
 				//Crawl delay is still active - put back URL in the queue
 				if((currentTime.getTime() - lastAccessed.getTime()) < delay*1000){
 					urlQueue.enqueue(url);
+					//DBWrapper.closeDBWrapper();
 					continue;
 				}
 				
+				System.out.println("IN THREAD: url- "+url);
+
 				//Send HEAD request to check if robots txt has been modified
 				String robots = protocol+domain+"/robots.txt";
 				boolean modified = false;
@@ -134,16 +157,28 @@ public class CrawlerThread implements Runnable{
 					}
 					catch (Exception e)
 					{
-						System.out.println("Error fetching Robots.txt: "+e);
+						System.out.println("Error fetching Robots.txt modified: "+e);
 					}
 					urlQueue.enqueue(url);
+					//DBWrapper.closeDBWrapper();
 					continue;
+				}
+				
+				System.out.println("Robots hasn't been modified");
+				
+				boolean allowed = false;
+				if(info.getRobotsInfo().getAllowedLinks(agent_match)!=null){
+					if(info.getRobotsInfo().getAllowedLinks(agent_match).contains(filepath)){
+						allowed = true;
+					}
 				}
 				
 				//If robots.txt has not been modified, check for allowed/disallowed links
 				boolean disallowed = false;
 				if(info.getRobotsInfo().getDisallowedLinks(agent_match)!=null){
 					for(String link : info.getRobotsInfo().getDisallowedLinks(agent_match)){
+//						System.out.println("DISALLOWED: "+link);
+//						System.out.println("FILEPATH: "+filepath);
 						if(filepath.startsWith(link)){
 							disallowed = true;
 							break;
@@ -151,19 +186,15 @@ public class CrawlerThread implements Runnable{
 					}
 				}
 				
-				if(info.getRobotsInfo().getAllowedLinks(agent_match)!=null){
-					if(info.getRobotsInfo().getAllowedLinks(agent_match).contains(filepath)){
-						disallowed = false;
-					}
-				}
-				
-				if(disallowed){
+				if(disallowed && !allowed){
+					//DBWrapper.closeDBWrapper();
+					System.out.println("URL: "+url+" IS NOT ALLOWED");
 					continue;
 				}
 				
-				
 			}else{
 				//Robots info for this url does not exist
+				System.out.println("Robots txt does not exists");
 				urlQueue.enqueue(url);
 				url = protocol+domain+"/robots.txt";
 				try
@@ -172,11 +203,15 @@ public class CrawlerThread implements Runnable{
 				}
 				catch (Exception e)
 				{
-					System.out.println("Error fetching Robots.txt: "+e);
+					System.out.println("Error fetching Robots.txt new: ");
+					e.printStackTrace();
+					
 				}
+				//DBWrapper.closeDBWrapper();
 				continue;
 			}
 			
+			System.out.println("Fetching document for url: "+url);
 			//Fetch the actual url document
 			String document = null;
 			Date current = null;
@@ -190,11 +225,16 @@ public class CrawlerThread implements Runnable{
 					current = new Date();
 					info.setLastAccessed(current);
 					RobotsInfoDA.putInfo(info);
+					//DBWrapper.closeDBWrapper();
+
+				}else{
+					continue;
 				}
 			}
 			catch (IOException e)
 			{
 				System.out.println("Could not fetch document: "+e);
+				//DBWrapper.closeDBWrapper();
 				continue;
 			}
 			
@@ -207,7 +247,7 @@ public class CrawlerThread implements Runnable{
 			String content_type = httpclient.getContent_type();
 			
 			//Parse html documents for links
-			if(content_type.equals("text/html")){
+			if(content_type.startsWith("text/html")){
 				HtmlParser.parse(document, url, urlQueue);
 			}
 			
