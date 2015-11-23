@@ -90,6 +90,7 @@
 	<target name="clean">
 		<delete dir="target/master/WEB-INF/classes"/>
 		<delete dir="target/worker/WEB-INF/classes"/>
+		<delete dir="target/WEB-INF"/>
 		<delete dir="classes"/>
 		<delete file="master.war"/>
 		<delete file="worker.war"/>
