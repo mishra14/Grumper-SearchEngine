@@ -24,7 +24,7 @@ public class RobotParser
 				Matcher matcher = comment.matcher(line);
 				//We do not need comments
 				if(matcher.matches()){
-					System.out.println("COMMENT LINE");
+//					System.out.println("COMMENT LINE");
 					continue;
 				}
 				if(line.length()==0)
@@ -34,7 +34,13 @@ public class RobotParser
 					continue;
 				}
 				
-				String [] temp = line.split(":");
+//				System.out.println("LINE: "+line);
+				String [] temp = line.split(":",2);
+				if(temp.length != 2){
+//					System.out.println("ERROR: Parsing robots.txt for line: "+line);
+					continue;
+				}
+				
 				String header = temp[0].trim().toLowerCase();
 				String value = temp[1].trim();
 				if(header.equals("user-agent")){
