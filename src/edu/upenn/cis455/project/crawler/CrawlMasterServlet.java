@@ -10,9 +10,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.servlet.http.*;
-
 import edu.upenn.cis455.project.bean.DocumentRecord;
 import edu.upenn.cis455.project.http.Http;
 import edu.upenn.cis455.project.http.HttpResponse;
@@ -52,15 +50,6 @@ public class CrawlMasterServlet extends HttpServlet
 		this.workerList = new ArrayList<String>();
 		pingThread = new MasterPingThread(workers, workerList);
 		pingThread.start();
-		S3DocumentDA s3 = new S3DocumentDA();
-		DocumentRecord doc = new DocumentRecord("http://ankitmishra.me",
-				"This is a test document String", (new Date()).getTime());
-		System.out.println(doc);
-		System.out.println(s3.documentExists(doc));
-		s3.putDocument(doc);
-		System.out.println(s3.getDocument(doc.getDocumentId()));
-		//s3.deleteDocument(doc);
-		System.out.println(s3.documentExists(doc));
 	}
 
 	public void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -106,6 +95,7 @@ public class CrawlMasterServlet extends HttpServlet
 	public void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws java.io.IOException
 	{
+		
 		System.out.println("crawler master : get received");
 		response.setContentType("text/html");
 
@@ -117,6 +107,14 @@ public class CrawlMasterServlet extends HttpServlet
 		}
 		else if (pathInfo.equalsIgnoreCase("/status"))
 		{
+			S3DocumentDA s3 = new S3DocumentDA();
+			DocumentRecord doc = new DocumentRecord("http://ankitmishra.me",
+					"This is a test document String", (new Date()).getTime());
+			System.out.println(doc);
+			s3.putDocument(doc);
+			System.out.println(s3.getDocument(doc.getDocumentId()));
+			//s3.deleteDocument(doc);
+			System.out.println(s3.documentExists(doc));
 			pageContent.append(getStatusPage());
 		}
 		else if (pathInfo.equalsIgnoreCase("/workerstatus"))

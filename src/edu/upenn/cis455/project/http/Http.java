@@ -10,8 +10,49 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.net.ssl.HttpsURLConnection;
+
 public class Http
 {
+
+	public static HttpResponse parseResponse(HttpsURLConnection connection)
+			throws IOException
+	{
+		// connection.setDoInput(true);
+		InputStream connectionInputStream = connection.getInputStream();
+		InputStreamReader connectionInputStreamReader = new InputStreamReader(
+				connectionInputStream);
+		BufferedReader connectionBufferedReader = new BufferedReader(
+				connectionInputStreamReader);
+		HttpResponse response = parseResponse(connectionBufferedReader);
+		response.setResponseCode("" + connection.getResponseCode());
+		// get the first line -
+		if (connection.getHeaderFields() != null
+				&& connection.getHeaderFields().get(null) != null
+				&& connection.getHeaderFields().get(null).get(0) != null)
+		{
+			String[] firstLineSplit = connection.getHeaderFields().get(null)
+					.get(0).split(" ");
+			if (firstLineSplit.length < 3)
+			{
+				return null;
+			}
+			if (firstLineSplit[0].trim().split("/").length < 2)
+			{
+				return null;
+			}
+			response.setProtocol((firstLineSplit[0].trim().split("/")[0]));
+			response.setVersion((firstLineSplit[0].trim().split("/")[1]));
+			response.setResponseCode(firstLineSplit[1].trim());
+			response.setResponseCodeString(firstLineSplit[2].trim());
+		}
+		response.setHeaders(connection.getHeaderFields());
+		connectionBufferedReader.close();
+		connectionInputStreamReader.close();
+		connectionInputStream.close();
+		return response;
+	}
+
 	/**
 	 * Parses the response.
 	 *

@@ -1,7 +1,18 @@
 <project name="project" default="all" basedir="./">
+	<property name="shared.root" location="${basedir}"/>
+	<property name="file.separator" location="/"/>
+	<property name="project.root" location="${basedir}"/>
+	<property name="build.dir" location="${project.root}"/>
+	<property name="build.target.dir" location="${project.root}${file.separator}target"/>
+	<property name="web-inf.dir" location="${build.target.dir}${file.separator}WEB-INF"/>
+	<property name="inputlib.dir"  location="${basedir}${file.separator}lib"/>
+	<property name="web-inf.lib.dir" location="${web-inf.dir}${file.separator}lib"/>
+
 	<target name="init">
 		<mkdir dir="target/master/WEB-INF/classes"/>
 		<mkdir dir="target/worker/WEB-INF/classes"/>
+		<mkdir dir="target/master/WEB-INF/lib"/>
+		<mkdir dir="target/worker/WEB-INF/lib"/>
 		<mkdir dir="classes"/>
 	</target>
 
@@ -10,15 +21,10 @@
      debug="true" includeantruntime="false" >
 			<compilerarg value="-Xlint"/>
 			<classpath>
-				<pathelement path="lib/servlet-api.jar"/>
-				<pathelement path="lib/jsoup-1.8.3.jar"/>
-				<pathelement path="lib/je-6.2.31.jar"/>
-				<pathelement path="lib/jtidy-r938.jar"/>
+				<fileset dir="${inputlib.dir}">
+					<include name="*.jar"/>
+				</fileset>
 				<pathelement path="/home/cis455/aws-java-sdk/1.10.35/lib/aws-java-sdk-1.10.35.jar" />
-				<pathelement path="lib/jackson-core-2.6.3.jar"/>
-				<pathelement path="lib/junit.jar"/>
-				<pathelement path = "lib/jackson-annotations-2.6.3.jar"/>
-				<pathelement path = "lib/jackson-databind-2.6.3.jar"/>
 			</classpath>
 		</javac>
 	</target>
@@ -28,15 +34,10 @@
      debug="true" includeantruntime="false" >
 			<compilerarg value="-Xlint"/>
 			<classpath>
-				<pathelement path="lib/servlet-api.jar"/>
-				<pathelement path="lib/jsoup-1.8.3.jar"/>
-				<pathelement path="lib/je-6.2.31.jar"/>
-				<pathelement path="lib/jtidy-r938.jar"/>
+				<fileset dir="${inputlib.dir}">
+					<include name="*.jar"/>
+				</fileset>
 				<pathelement path="/home/cis455/aws-java-sdk/1.10.35/lib/aws-java-sdk-1.10.35.jar" />
-				<pathelement path="lib/jackson-core-2.6.3.jar"/>
-				<pathelement path="lib/junit.jar"/>
-				<pathelement path = "lib/jackson-annotations-2.6.3.jar"/>
-				<pathelement path = "lib/jackson-databind-2.6.3.jar"/>
 			</classpath>
 		</javac>
 	</target>
@@ -45,6 +46,16 @@
 	<target name="crawler" depends="war-master,war-worker"/>
 
 	<target name="war-master" depends="compile-master">
+		<copy todir="target/master/WEB-INF/lib" overwrite="true">
+			<fileset dir="${inputlib.dir}">
+				<include name="*.jar"/>
+			</fileset>
+		</copy>
+		<copy todir="target/master/WEB-INF/lib" overwrite="true">
+			<fileset dir="/home/cis455/aws-java-sdk/1.10.35/lib">
+				<include name="aws-java-sdk-1.10.35.jar"/>
+			</fileset>
+		</copy>
 		<jar destfile="master.war">
 			<fileset dir="target/master/" includes="WEB-INF/classes/**/*.class"/>
 			<fileset dir="target/master/" includes="WEB-INF/lib/*.jar"/>
@@ -53,6 +64,16 @@
 	</target>
 
 	<target name="war-worker" depends="compile-worker">
+		<copy todir="target/worker/WEB-INF/lib" overwrite="true">
+			<fileset dir="${inputlib.dir}">
+				<include name="*.jar"/>
+			</fileset>
+		</copy>
+		<copy todir="target/worker/WEB-INF/lib" overwrite="true">
+			<fileset dir="/home/cis455/aws-java-sdk/1.10.35/lib">
+				<include name="aws-java-sdk-1.10.35.jar"/>
+			</fileset>
+		</copy>
 		<jar destfile="worker.war">
 			<fileset dir="target/worker/" includes="WEB-INF/classes/**/*.class"/>
 			<fileset dir="target/worker/" includes="WEB-INF/lib/*.jar"/>
