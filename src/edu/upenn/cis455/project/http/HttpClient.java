@@ -72,9 +72,9 @@ public class HttpClient
 				return false;
 			}
 			
-//			if(!connection.getHeaderField("Content-Language").equals("en")){
-//				return false;
-//			}
+			if(connection.getHeaderField("Content-Language")!=null && !connection.getHeaderField("Content-Language").equals("en")){
+				return false;
+			}
 			
 			Integer length = connection.getContentLength();
 			if(length > CrawlWorkerServlet.max_size*1000000){
@@ -99,7 +99,7 @@ public class HttpClient
 			
 			if(connection.getResponseCode() == 301){
 				String location = connection.getHeaderField("Location");
-	//			System.out.println("Redirected to: "+location);
+				System.out.println("Redirected to: "+location);
 				urlQueue.enqueue(location);
 			}
 			
@@ -108,9 +108,9 @@ public class HttpClient
 				return false;
 			}
 			
-//			if(!connection.getHeaderField("Content-Language").equals("en")){
-//			return false;
-//		}
+			if(connection.getHeaderField("Content-Language")!=null && !connection.getHeaderField("Content-Language").equals("en")){
+			return false;
+		}
 			
 			Integer length = connection.getContentLength();
 			if(length > CrawlWorkerServlet.max_size*1000000){
