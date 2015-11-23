@@ -105,6 +105,8 @@ public class CrawlWorkerServlet extends HttpServlet
 			addToQueue(request.getParameter("urls"));
 			System.out.println("crawl worker : queue - "+urlQueue);
 			// if status is idle then spawn crawl thread
+			boolean isCrawling = false;
+			
 			synchronized (status)
 			{
 				if (status.getStatus().equals(WorkerStatus.statusType.idle))
@@ -113,17 +115,23 @@ public class CrawlWorkerServlet extends HttpServlet
 					status.setLastCrawledUrl("NA");
 					status.setPagesCrawled("0");
 					status.setStatus(WorkerStatus.statusType.crawling);
+					isCrawling = false;
+				}
+				else if(status.getStatus().equals(WorkerStatus.statusType.crawling)){
+					isCrawling = true;
 				}
 			}
 			
 			
-			//Start crawler threads
-			Thread [] threads = new Thread[threadCount];
-			for(int i=0;i<threadCount;i++){
-				CrawlerThread crawlerThread = new CrawlerThread(urlQueue, status, self_id, this.workers.size(), crawledDocs);
-				Thread thread = new Thread(crawlerThread);
-				thread.start();
-				threads[i] = thread;
+			//Start crawler threads only if crawling has not already started
+			if(!isCrawling){
+				Thread [] threads = new Thread[threadCount];
+				for(int i=0;i<threadCount;i++){
+					CrawlerThread crawlerThread = new CrawlerThread(urlQueue, status, self_id, this.workers.size(), crawledDocs);
+					Thread thread = new Thread(crawlerThread);
+					thread.start();
+					threads[i] = thread;
+				}
 			}
 			
 			//Check condition for pushdata

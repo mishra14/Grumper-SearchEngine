@@ -64,7 +64,8 @@ public class CrawlerThread implements Runnable{
 			 */
 			int idx = self_id;
 			try
-			{
+			{	
+				System.out.println("DOMAIN being hashed: "+domain);
 				idx = Hash.hashKey(domain, num_workers);
 			}
 			catch (NoSuchAlgorithmException e1)

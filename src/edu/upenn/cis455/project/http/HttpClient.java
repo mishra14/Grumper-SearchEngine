@@ -9,7 +9,10 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
+
 import javax.net.ssl.HttpsURLConnection;
+
+import edu.upenn.cis455.project.bean.Queue;
 import edu.upenn.cis455.project.bean.RobotsInfo;
 import edu.upenn.cis455.project.crawler.CrawlWorkerServlet;
 import edu.upenn.cis455.project.parsers.RobotParser;

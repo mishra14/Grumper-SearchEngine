@@ -113,7 +113,7 @@ public class S3DocumentDA
 				ObjectMapper mapper = new ObjectMapper();
 				mapper.setVisibility(PropertyAccessor.ALL, Visibility.NONE);
 				mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
-				doc = mapper.readValue(new String(bytes), DocumentRecord.class);
+				doc = mapper.readValue(new String(bytes, "utf-8"), DocumentRecord.class);
 			}
 			catch (AmazonS3Exception ase)
 			{

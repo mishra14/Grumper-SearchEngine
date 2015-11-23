@@ -107,14 +107,6 @@ public class CrawlMasterServlet extends HttpServlet
 		}
 		else if (pathInfo.equalsIgnoreCase("/status"))
 		{
-			S3DocumentDA s3 = new S3DocumentDA();
-			DocumentRecord doc = new DocumentRecord("http://ankitmishra.me",
-					"This is a test document String", (new Date()).getTime());
-			System.out.println(doc);
-			s3.putDocument(doc);
-			System.out.println(s3.getDocument(doc.getDocumentId()));
-			//s3.deleteDocument(doc);
-			System.out.println(s3.documentExists(doc));
 			pageContent.append(getStatusPage());
 		}
 		else if (pathInfo.equalsIgnoreCase("/workerstatus"))
