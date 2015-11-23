@@ -1,9 +1,6 @@
 package edu.upenn.cis455.project.crawler;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -13,7 +10,6 @@ import edu.upenn.cis455.project.bean.RobotsInfo;
 import edu.upenn.cis455.project.crawler.info.URLInfo;
 import edu.upenn.cis455.project.http.HttpClient;
 import edu.upenn.cis455.project.parsers.HtmlParser;
-import edu.upenn.cis455.project.storage.DBWrapper;
 import edu.upenn.cis455.project.storage.RobotsInfoDA;
 import edu.upenn.cis455.project.storage.S3DocumentDA;
 
@@ -78,37 +74,31 @@ public class CrawlerThread implements Runnable{
 			
 			if(idx!=self_id){
 				System.out.println("Writing url ["+url+"] to worker "+idx);
-				PrintWriter out;
-				try {
-					out = new PrintWriter(new BufferedWriter(new FileWriter("url/"+idx+".txt", true)));
-					out.println(url);
-					out.close();
-				} catch (IOException e) {
-					System.out.println("Could not write to file: "+e);
-				}
+				WriteToFile.write(url, idx);
 				continue;
 			}
 			
 			/**
 			 * Check if document already exists in db. Then send head to check if modified
 			 */
-//			S3DocumentDA s3 = new S3DocumentDA();
-//			DocumentRecord doc = s3.getDocument(url);
-//			
-//			if(doc!=null){
-//				long last = doc.getLastCrawled();
-//				Date date = new Date(last);
-//				try
-//				{
-//					if(!httpclient.sendHead(url, date)){
-//						continue;
-//					}
-//				}
-//				catch (IOException e)
-//				{
-//					System.out.println("Could not send head request: "+e);
-//				}
-//			}
+			
+			S3DocumentDA s3 = new S3DocumentDA();
+			DocumentRecord doc = s3.getDocument(url);
+			
+			if(doc!=null){
+				long last = doc.getLastCrawled();
+				Date date = new Date(last);
+				try
+				{
+					if(!httpclient.sendHead(url, date)){
+						continue;
+					}
+				}
+				catch (IOException e)
+				{
+					System.out.println("Could not send head request: "+e);
+				}
+			}
 			
 			//check if robots.txt exists 
 			if(RobotsInfoDA.contains(domain)){
@@ -121,7 +111,7 @@ public class CrawlerThread implements Runnable{
 					continue;
 				}
 				
-				System.out.println("Agent match: "+agent_match);
+//				System.out.println("Agent match: "+agent_match);
 				
 				if(info.getRobotsInfo() == null){
 					System.out.println("robots info is null");

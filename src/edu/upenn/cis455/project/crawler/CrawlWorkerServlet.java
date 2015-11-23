@@ -6,6 +6,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -22,6 +24,8 @@ public class CrawlWorkerServlet extends HttpServlet
 	
 	//Max size in megabytes
 	public static final int max_size = 1;
+	public static final int threshold = 5000;
+	
 
 	private List<String> workers;
 	private WorkerStatus status;
@@ -121,6 +125,11 @@ public class CrawlWorkerServlet extends HttpServlet
 				thread.start();
 				threads[i] = thread;
 			}
+			
+			//Check condition for pushdata
+			TimerTask timerTask = new PushToDB(this.workers.size(),this.crawledDocs);
+			Timer timer = new Timer(true);
+			timer.scheduleAtFixedRate(timerTask, 0, 60000);
 			
 		}
 		else if (pathInfo.equalsIgnoreCase("/pushdata"))
