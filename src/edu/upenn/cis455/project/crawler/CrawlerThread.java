@@ -121,7 +121,14 @@ public class CrawlerThread implements Runnable{
 					continue;
 				}
 				
-				int delay = info.getRobotsInfo().getCrawlDelay(agent_match);
+				System.out.println("Agent match: "+agent_match);
+				
+				if(info.getRobotsInfo() == null){
+					System.out.println("robots info is null");
+				}
+				
+				Integer delay = info.getRobotsInfo().getCrawlDelay(agent_match);
+				
 				Date lastAccessed = info.getLastAccessed();
 				Date currentTime = new Date();
 				
@@ -193,11 +200,12 @@ public class CrawlerThread implements Runnable{
 			}else{
 				//Robots info for this url does not exist
 				System.out.println("Robots txt does not exists");
-				urlQueue.enqueue(url);
+				String old_url = url;
 				url = protocol+domain+"/robots.txt";
 				try
 				{
 					httpclient.fetchRobots(url,domain);
+					urlQueue.enqueue(old_url);
 				}
 				catch (Exception e)
 				{

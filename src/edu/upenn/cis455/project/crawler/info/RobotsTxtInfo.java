@@ -100,6 +100,10 @@ public class RobotsTxtInfo
 
 	public int getCrawlDelay(String key)
 	{
+		if(crawlDelays.get(key) == null){
+//			System.out.println("Crawl delay not set for this agent: "+key);
+			return 1;
+		}
 		return crawlDelays.get(key);
 	}
 
