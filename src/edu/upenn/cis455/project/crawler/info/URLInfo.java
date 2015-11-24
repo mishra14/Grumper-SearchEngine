@@ -6,6 +6,7 @@ public class URLInfo
 	private int portNo;
 	private String filePath;
 	private String protocol;
+	public boolean invalid;
 
 
 	/**
@@ -14,10 +15,15 @@ public class URLInfo
 	 */
 	public URLInfo(String docURL)
 	{	
-		if (docURL == null || docURL.equals(""))
+		invalid = false;
+		
+		if (docURL == null || docURL.equals("")){
+			invalid = true;
 			return;
+		}
 		docURL = docURL.trim();
 		if ((!docURL.startsWith("http://") && !docURL.startsWith("https://")) || docURL.length() < 8){
+			invalid = true;
 			return;
 		}
 		

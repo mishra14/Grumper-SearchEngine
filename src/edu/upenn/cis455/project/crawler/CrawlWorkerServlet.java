@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 import edu.upenn.cis455.project.bean.DocumentRecord;
 import edu.upenn.cis455.project.bean.Queue;
 import edu.upenn.cis455.project.storage.DBWrapper;
+import edu.upenn.cis455.project.storage.QueueDA;
 
 public class CrawlWorkerServlet extends HttpServlet
 {
@@ -33,6 +34,9 @@ public class CrawlWorkerServlet extends HttpServlet
 	private Queue<String> urlQueue;
 	private String port;
 	private ArrayList<DocumentRecord> crawledDocs;
+	
+	private TimerTask timerTask;
+	private Timer timer;
 	
 
 	public void init()
@@ -59,7 +63,6 @@ public class CrawlWorkerServlet extends HttpServlet
 			e.printStackTrace();
 		}
 		workers = new ArrayList<String>();
-		urlQueue = new Queue<String>();
 		crawledDocs = new ArrayList<DocumentRecord>();
 		
 		//Setup db wrapper
@@ -71,9 +74,26 @@ public class CrawlWorkerServlet extends HttpServlet
 		{
 			System.out.println("Could not open DB Wrapper: "+e);
 		}
+		
+		urlQueue = QueueDA.getQueue();
+		if(urlQueue == null){
+			urlQueue = new Queue<String>();
+		}
+		
+		//Start the timer task to push data to db
+		timerTask = new PushToDB(this.workers.size(),this.crawledDocs, this.urlQueue);
+		timer = new Timer(true);
+		timer.scheduleAtFixedRate(timerTask, 60000, 60000);
 	}
 	
 	public void destroy(){
+		
+		//Force push any remaining data to db
+		timer.cancel();
+		timer.schedule(timerTask, 0);
+		
+		//Write current state of queue to db so that crawler can pick up where it left from
+		
 		
 		DBWrapper.closeDBWrapper();
 		
@@ -133,11 +153,6 @@ public class CrawlWorkerServlet extends HttpServlet
 					threads[i] = thread;
 				}
 			}
-			
-			//Check condition for pushdata
-			TimerTask timerTask = new PushToDB(this.workers.size(),this.crawledDocs);
-			Timer timer = new Timer(true);
-			timer.scheduleAtFixedRate(timerTask, 0, 60000);
 			
 		}
 		else if (pathInfo.equalsIgnoreCase("/pushdata"))
