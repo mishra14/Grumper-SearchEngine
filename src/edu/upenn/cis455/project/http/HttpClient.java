@@ -158,7 +158,9 @@ public class HttpClient
 		Integer length = null;
 		if(url.startsWith("https://")){
 			HttpsURLConnection connection = (HttpsURLConnection) req_url.openConnection();
+			connection.setDoOutput(true);
 			connection.setRequestMethod("GET");
+			connection.setChunkedStreamingMode(0);
 			connection.setRequestProperty("User-Agent", "cis455crawler");
 			input = connection.getInputStream();
 			
@@ -167,6 +169,8 @@ public class HttpClient
 		}else if(url.startsWith("http://")){
 			HttpURLConnection connection = (HttpURLConnection) req_url.openConnection();
 			connection.setRequestMethod("GET");
+			connection.setDoOutput(true);
+			connection.setChunkedStreamingMode(0);
 			connection.setRequestProperty("User-Agent", "cis455crawler");
 			input = connection.getInputStream();
 			
