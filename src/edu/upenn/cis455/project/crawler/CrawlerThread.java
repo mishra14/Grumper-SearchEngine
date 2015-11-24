@@ -54,6 +54,11 @@ public class CrawlerThread implements Runnable{
 			
 			URLInfo urlinfo = new URLInfo(url);
 			
+			if(urlinfo.invalid){
+				System.out.println("URL- "+url+"is invalid");
+				continue;
+			}
+			
 			String domain = urlinfo.getHostName();
 			String filepath = urlinfo.getFilePath();
 			String protocol = urlinfo.getProtocol();
@@ -66,7 +71,6 @@ public class CrawlerThread implements Runnable{
 			int idx = self_id;
 			try
 			{	
-				System.out.println("DOMAIN being hashed: "+domain);
 				idx = Hash.hashKey(domain, num_workers);
 			}
 			catch (NoSuchAlgorithmException e1)
@@ -93,6 +97,7 @@ public class CrawlerThread implements Runnable{
 				try
 				{
 					if(!httpclient.sendHead(url, date)){
+						//System.out.println("Moving on");
 						continue;
 					}
 				}
@@ -110,6 +115,7 @@ public class CrawlerThread implements Runnable{
 				if(agent_match.equals("No agent found")){
 					//No matching user agent was found
 					//DBWrapper.closeDBWrapper();
+					//System.out.println("Moving on");
 					continue;
 				}
 				
@@ -128,10 +134,11 @@ public class CrawlerThread implements Runnable{
 				if((currentTime.getTime() - lastAccessed.getTime()) < delay*1000){
 					urlQueue.enqueue(url);
 					//DBWrapper.closeDBWrapper();
+					//System.out.println("Moving on");
 					continue;
 				}
 				
-				System.out.println("IN THREAD: url- "+url);
+//				System.out.println("IN THREAD: url- "+url);
 
 				//Send HEAD request to check if robots txt has been modified
 				String robots = protocol+domain+"/robots.txt";
@@ -158,6 +165,7 @@ public class CrawlerThread implements Runnable{
 					}
 					urlQueue.enqueue(url);
 					//DBWrapper.closeDBWrapper();
+					//System.out.println("Moving on");
 					continue;
 				}
 				
@@ -186,6 +194,7 @@ public class CrawlerThread implements Runnable{
 				if(disallowed && !allowed){
 					//DBWrapper.closeDBWrapper();
 					System.out.println("URL: "+url+" IS NOT ALLOWED");
+					//System.out.println("Moving on");
 					continue;
 				}
 				
@@ -206,6 +215,7 @@ public class CrawlerThread implements Runnable{
 					
 				}
 				//DBWrapper.closeDBWrapper();
+				//System.out.println("Moving on");
 				continue;
 			}
 			
@@ -226,6 +236,8 @@ public class CrawlerThread implements Runnable{
 					//DBWrapper.closeDBWrapper();
 
 				}else{
+					System.out.println("Document cannot be fetched. Head returned false");
+					//System.out.println("Moving on");
 					continue;
 				}
 			}
@@ -248,6 +260,9 @@ public class CrawlerThread implements Runnable{
 			if(content_type.startsWith("text/html")){
 				HtmlParser.parse(document, url, urlQueue);
 			}
+			
+//			System.out.println("Document for url: "+url);
+//			System.out.println(document);
 			
 			//TODO add document to db
 			DocumentRecord docrecord = new DocumentRecord(url,document,current.getTime());

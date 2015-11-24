@@ -2,6 +2,8 @@ package edu.upenn.cis455.project.bean;
 
 import java.util.ArrayList;
 
+import com.sleepycat.persist.model.Persistent;
+
 /**
  * generic blocking queue implementation to hold different types of data.
  *
@@ -9,6 +11,7 @@ import java.util.ArrayList;
  * @param <T>
  *            the generic type
  */
+@Persistent
 public class Queue<T>
 {
 

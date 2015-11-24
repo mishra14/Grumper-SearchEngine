@@ -53,6 +53,7 @@ public class HttpClient
 			connection.setInstanceFollowRedirects(false);
 			connection.setRequestMethod("HEAD");
 			connection.setRequestProperty("User-Agent", "cis455crawler");
+			connection.setRequestProperty("Accept", "text/*");
 			
 			if(lastAccessed!=null){
 				SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
@@ -89,6 +90,7 @@ public class HttpClient
 			connection.setInstanceFollowRedirects(false);
 			connection.setRequestMethod("HEAD");
 			connection.setRequestProperty("User-Agent", "cis455crawler");
+			connection.setRequestProperty("Accept", "text/*");
 			
 			if(lastAccessed!=null){
 				SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
@@ -109,7 +111,7 @@ public class HttpClient
 			}
 			
 			if(connection.getHeaderField("Content-Language")!=null && !connection.getHeaderField("Content-Language").equals("en")){
-			return false;
+				return false;
 		}
 			
 			Integer length = connection.getContentLength();
@@ -162,6 +164,7 @@ public class HttpClient
 			connection.setRequestMethod("GET");
 			connection.setChunkedStreamingMode(0);
 			connection.setRequestProperty("User-Agent", "cis455crawler");
+			connection.setRequestProperty("Accept", "text/*");
 			input = connection.getInputStream();
 			
 			length = connection.getContentLength();
@@ -172,6 +175,7 @@ public class HttpClient
 			connection.setDoOutput(true);
 			connection.setChunkedStreamingMode(0);
 			connection.setRequestProperty("User-Agent", "cis455crawler");
+			connection.setRequestProperty("Accept", "text/*");
 			input = connection.getInputStream();
 			
 			length = connection.getContentLength();
