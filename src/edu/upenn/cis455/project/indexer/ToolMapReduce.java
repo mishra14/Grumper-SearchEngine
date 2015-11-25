@@ -3,11 +3,9 @@ package edu.upenn.cis455.project.indexer;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
-import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.Tool;
@@ -28,7 +26,7 @@ public class ToolMapReduce extends Configured implements Tool {
  
         // Create job
         //Job job = new Job(conf, "Tool Job");
-        Job job = Job.getInstance(getConf(), ToolMapReduce.class.getCanonicalName());
+        Job job = Job.getInstance(new Configuration(), ToolMapReduce.class.getCanonicalName());
         job.setJarByClass(ToolMapReduce.class);
  
         // Setup MapReduce job
@@ -38,11 +36,11 @@ public class ToolMapReduce extends Configured implements Tool {
  
         // Specify key / value
         job.setOutputKeyClass(Text.class);
-        job.setOutputValueClass(IntWritable.class);
+        job.setOutputValueClass(Text.class);
  
         // Input
         FileInputFormat.addInputPath(job, new Path(args[0]));
-        job.setInputFormatClass(ContentInputFormat.class);
+        job.setInputFormatClass(WholeFileInputFormat.class);
  
         // Output
         FileOutputFormat.setOutputPath(job, new Path(args[1]));
