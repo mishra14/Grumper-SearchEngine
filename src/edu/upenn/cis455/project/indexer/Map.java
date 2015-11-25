@@ -28,10 +28,12 @@ public class Map extends Mapper<NullWritable, BytesWritable, Text, Text> {
 	    String line = doc.getDocumentString();
 	    url.set(doc.getDocumentId().trim());
 	
-	    String actualContent = getHtmlText(line);
-	    StringTokenizer tokenizer = new StringTokenizer(actualContent, " ,.?\"");
+	    String rawContent = getHtmlText(line);
+	    StringTokenizer tokenizer = new StringTokenizer(rawContent, " ,.?\"");
 	    while (tokenizer.hasMoreTokens()) {
-	        word.set(tokenizer.nextToken().toLowerCase().replaceAll("[^A-Za-z0-9 ]", ""));
+	    	String currWord = tokenizer.nextToken();
+	    	currWord = currWord.toLowerCase().replaceAll("[^a-z0-9 ]", "").trim();
+	        word.set(currWord);
 	        context.write(word, url);
         }
     }
