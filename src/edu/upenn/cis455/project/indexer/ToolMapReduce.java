@@ -42,7 +42,7 @@ public class ToolMapReduce extends Configured implements Tool {
  
         // Input
         FileInputFormat.addInputPath(job, new Path(args[0]));
-        job.setInputFormatClass(TextInputFormat.class);
+        job.setInputFormatClass(ContentInputFormat.class);
  
         // Output
         FileOutputFormat.setOutputPath(job, new Path(args[1]));
