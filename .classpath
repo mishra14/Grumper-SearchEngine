@@ -11,5 +11,7 @@
 	<classpathentry kind="lib" path="lib/je-6.4.9.jar"/>
 	<classpathentry kind="con" path="com.amazonaws.eclipse.sdk.AWS_JAVA_SDK"/>
 	<classpathentry kind="lib" path="/home/cis455/git/cis455project/lib/jackson-core-2.6.3.jar"/>
+	<classpathentry kind="lib" path="/home/cis455/git/cis455project/lib/hadoop-common-2.0.2-alpha.jar"/>
+	<classpathentry kind="lib" path="/home/cis455/git/cis455project/lib/hadoop-mapreduce-client-core-2.0.2-alpha.jar"/>
 	<classpathentry kind="output" path="target/classes/"/>
 </classpath>
