@@ -33,7 +33,8 @@ public class Map extends Mapper<NullWritable, BytesWritable, Text, Text> {
 	    while (tokenizer.hasMoreTokens()) {
 	    	String currWord = tokenizer.nextToken();
 	    	currWord = currWord.toLowerCase().replaceAll("[^a-z0-9 ]", "").trim();
-	        word.set(currWord);
+	    	String stemmedWord = stem(currWord);
+	        word.set(stemmedWord);
 	        context.write(word, url);
         }
     }
@@ -58,6 +59,17 @@ public class Map extends Mapper<NullWritable, BytesWritable, Text, Text> {
 			e.printStackTrace();
 		}
 		return doc;
+	}
+
+	public String stem(String word)
+	{
+		System.out.println("received word: " + word);
+		Stemmer stemmer = new Stemmer();
+		char[] charArray = word.toCharArray();
+		stemmer.add(charArray, word.length());
+		stemmer.stem();
+		String stemmedWord = stemmer.toString();
+		return stemmedWord;
 	}
 	
 }
