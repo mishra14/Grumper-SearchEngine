@@ -1,3 +1,5 @@
+package edu.upenn.cis455.project.indexer;
+
 import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
