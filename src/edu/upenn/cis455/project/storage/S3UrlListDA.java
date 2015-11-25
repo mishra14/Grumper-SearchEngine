@@ -27,13 +27,13 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+
 import edu.upenn.cis455.project.bean.UrlList;
+import edu.upenn.cis455.project.crawler.Hash;
 
 public class S3UrlListDA
 {
 	private String bucketName;
-	private String tableName;
-	private DynamoDA<String> dynamo;
 	private AmazonS3 s3client;
 
 	public S3UrlListDA()
@@ -74,8 +74,6 @@ public class S3UrlListDA
 		}
 
 		this.bucketName = "edu.upenn.cis455.project.urls";
-		this.tableName = "edu.upenn.cis455.project.documents";
-		this.dynamo = new DynamoDA<String>(tableName, String.class);
 		BasicAWSCredentials awsCreds = new BasicAWSCredentials(accessKey,
 				secretKey);
 		this.s3client = new AmazonS3Client(awsCreds);
@@ -86,10 +84,11 @@ public class S3UrlListDA
 		boolean result = true;
 		try
 		{
-			String key = dynamo.getValue("documentUrl", urlList.getParentUrl(), "s3Key");
-			if(key==null)
+			String key = Hash.hashKey(urlList.getParentUrl());
+
+			if (key == null)
 			{
-				result=false;
+				result = false;
 			}
 		}
 		catch (AmazonS3Exception ase)
@@ -98,48 +97,53 @@ public class S3UrlListDA
 			result = false;
 			// }
 		}
+		catch (NoSuchAlgorithmException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return result;
 	}
 
 	public UrlList getUrlList(String url)
 	{
 		UrlList urlList = null;
-		// first get hash key from dynamo db
-		String key = dynamo.getValue("documentUrl", url, "s3Key");
-		if (key != null)
+		try
 		{
-			// then get document from s3
-			try
+			String key = Hash.hashKey(url);
+			GetObjectRequest req = new GetObjectRequest(bucketName, key);
+			S3Object s3Object = s3client.getObject(req);
+			InputStream objectData = s3Object.getObjectContent();
+			BufferedReader reader = new BufferedReader(new InputStreamReader(
+					objectData));
+			StringBuilder s3Content = new StringBuilder();
+			String line;
+			while ((line = reader.readLine()) != null)
 			{
-				GetObjectRequest req = new GetObjectRequest(bucketName, key);
-				S3Object s3Object = s3client.getObject(req);
-				InputStream objectData = s3Object.getObjectContent();
-		        BufferedReader reader = new BufferedReader(new InputStreamReader(objectData));
-		        StringBuilder s3Content = new StringBuilder();
-		        String line;
-				while((line=reader.readLine())!=null)
-				{
-					s3Content.append(line+"\r\n");
-				}
-				reader.close();
-				objectData.close();
-				ObjectMapper mapper = new ObjectMapper();
-				mapper.setVisibility(PropertyAccessor.ALL, Visibility.NONE);
-				mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
-				urlList = mapper.readValue(s3Content.toString(),
-						UrlList.class);
+				s3Content.append(line + "\r\n");
 			}
-			catch (AmazonS3Exception ase)
-			{
-				System.out.println("S3UrlListDA : document does not exist");
-				ase.printStackTrace();
-			}
-			catch (IOException e)
-			{
-				System.out
-						.println("S3UrlListDA : IOException while fetching document from S3");
-				e.printStackTrace();
-			}
+			reader.close();
+			objectData.close();
+			ObjectMapper mapper = new ObjectMapper();
+			mapper.setVisibility(PropertyAccessor.ALL, Visibility.NONE);
+			mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
+			urlList = mapper.readValue(s3Content.toString(), UrlList.class);
+		}
+		catch (AmazonS3Exception ase)
+		{
+			System.out.println("S3UrlListDA : document does not exist");
+			ase.printStackTrace();
+		}
+		catch (IOException e)
+		{
+			System.out
+					.println("S3UrlListDA : IOException while fetching document from S3");
+			e.printStackTrace();
+		}
+		catch (NoSuchAlgorithmException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		return urlList;
 	}
@@ -149,24 +153,24 @@ public class S3UrlListDA
 		try
 		{
 			// hash url to get key
-			String s3Key = dynamo.getValue("documentUrl", urlList.getParentUrl(), "s3Key");
-			
+			String s3Key = Hash.hashKey(urlList.getParentUrl());
+
 			// put document into s3
 			ObjectMapper mapper = new ObjectMapper();
 			mapper.setVisibility(PropertyAccessor.ALL, Visibility.NONE);
 			mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
 			ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
 			String json = ow.writeValueAsString(urlList);
-			ByteArrayInputStream inputStream = new ByteArrayInputStream(json.getBytes());
+			ByteArrayInputStream inputStream = new ByteArrayInputStream(
+					json.getBytes());
 			ObjectMetadata omd = new ObjectMetadata();
 			omd.setContentLength(json.getBytes().length);
 			PutObjectRequest request = new PutObjectRequest(bucketName, s3Key,
 					inputStream, omd);
 			s3client.putObject(request);
-			
+
 			// No need to put into dynamo as it should already be there
-			
-			
+
 			/*
 			ObjectMapper mapper = new ObjectMapper();
 			mapper.setVisibility(PropertyAccessor.ALL, Visibility.NONE);
@@ -189,16 +193,21 @@ public class S3UrlListDA
 					.println("S3UrlListDA : json processing excecption exception");
 			e.printStackTrace();
 		}
+		catch (NoSuchAlgorithmException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public void deleteUrlList(UrlList urlList)
 	{
 
 		// first get hash key from dynamo db
-		String s3Key = dynamo.getValue("documentUrl", urlList.getParentUrl(), "s3Key");
 		try
 		{
-			s3client.deleteObject(bucketName,s3Key);
+			String s3Key = Hash.hashKey(urlList.getParentUrl());
+			s3client.deleteObject(bucketName, s3Key);
 		}
 		catch (AmazonClientException e)
 		{
@@ -207,18 +216,23 @@ public class S3UrlListDA
 							+ urlList.getParentUrl());
 			e.printStackTrace();
 		}
+		catch (NoSuchAlgorithmException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
-	public static void main(String[] args) throws IOException, NoSuchAlgorithmException
+	public static void main(String[] args) throws IOException,
+			NoSuchAlgorithmException
 	{
 		S3UrlListDA s3 = new S3UrlListDA();
-		String parentUrl = "https://www.wikidata.org/wiki/Q914807#mw-head";
+		String parentUrl = "www.yahoo.com";
 		Set<String> urls = new HashSet<String>();
-		urls.add("http://www.hostip.info/contrib/geo-hostip.inc.php.gz");
-		urls.add("https://www.mediawiki.org/wiki/Help:Contents/bcc");
-		urls.add("https://www.wikidata.org/wiki/Q4980478");
-		
-		UrlList urlList = new UrlList(parentUrl, urls, true, new Date().getTime());
+		urls.add("www.google.com");
+		urls.add("www.amazon.com");
+		UrlList urlList = new UrlList(parentUrl, urls, true,
+				new Date().getTime());
 		s3.putUrlList(urlList);
 		System.out.println(s3.getUrlList(parentUrl));
 	}
