@@ -1,3 +1,5 @@
+package edu.upenn.cis455.project.indexer;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,6 +24,9 @@ public class Reduce extends Reducer<Text, Text, Text, Text>
 		
 		context.write(key, new Text(value));
     }
+	
+	
+	  
 	
 	private int computeDF( Iterable<Text> docIDs){
 		 Set<String> docIDset = new HashSet<>();
@@ -53,7 +58,10 @@ public class Reduce extends Reducer<Text, Text, Text, Text>
 		  for (String docID: tf.keySet()){
 			  System.err.println("Compute Postings : in postings :" + docID.toString()+":" + tf.get(docID)+ " ");
 			  postings.append(docID.toString()+":" + tf.get(docID)+ " ");
+				  tf.put(docID, 1);
+			  }
 		  }
+		  
 		  return postings.toString();
 		  
 	  }

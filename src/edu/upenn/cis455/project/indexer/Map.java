@@ -1,3 +1,5 @@
+package edu.upenn.cis455.project.indexer;
+
 import java.io.IOException;
 import java.util.StringTokenizer;
 
@@ -9,7 +11,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 public class Map extends Mapper<NullWritable, BytesWritable, Text, Text> {
-    
 	private final Text url = new Text();
 	@Override
     public void map(NullWritable key, BytesWritable value, Context context) 
