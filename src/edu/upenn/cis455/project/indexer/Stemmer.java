@@ -1,3 +1,5 @@
+package edu.upenn.cis455.project.indexer;
+
 import java.io.*;
 
 /**
@@ -382,10 +384,19 @@ class Stemmer
          {  System.out.println("error reading " + args[i]);
             break;
          }
+         
+         in.close();
       }
       catch (FileNotFoundException e)
       {  System.out.println("file " + args[i] + " not found");
          break;
       }
+	catch (IOException e)
+	{
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+      
+      
    }
 }
