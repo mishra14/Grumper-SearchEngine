@@ -10,6 +10,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
+import test.edu.upenn.cis455.project.DynamoDBtest;
 import edu.upenn.cis455.project.scoring.TFIDF;
 
 public class Reduce extends Reducer<Text, Text, Text, Text>
@@ -24,9 +25,11 @@ public class Reduce extends Reducer<Text, Text, Text, Text>
 			throws IOException, InterruptedException {
 		setFieldsFromKey(key);
 		df = computeDF(values);
-		String postings = computePostings();  
-		String value = postings;
+		String postingsList = computePostings();  
+		String value = postingsList;
 		context.write(keyword, new Text(value));
+		DynamoDBtest dynamo = new DynamoDBtest();
+		dynamo.saveIndex(keyword.toString(), value);
     }
 	
 	private int computeDF( Iterable<Text> docIDs){
@@ -55,11 +58,17 @@ public class Reduce extends Reducer<Text, Text, Text, Text>
 		  
 		  StringBuilder postings = new StringBuilder();
 		
-		  System.err.println("Compute Postings : Computed tf: TF dict" + tf.toString());		
+		  System.err.println("Compute Postings : Computed tf: TF dict" + tf.toString());
+		  
+		  int size = tf.size() - 1;
+		  int i = 0;
 		  for (String docID: tf.keySet()){
 			  double tfidf = TFIDF.compute(tf.get(docID), df, bucketSize);
-			  System.err.println("Compute Postings : in postings :" + docID.toString()+":" + tf.get(docID)+ " ");
-			  postings.append(docID.toString()+":" + tfidf + " ");
+			  if (i < size )
+				  postings.append(docID.toString()+" " + tfidf + ",");
+			  else 
+				  postings.append(docID.toString()+" " + tfidf);
+			  i++;
 		  }
 		  return postings.toString();
 		  

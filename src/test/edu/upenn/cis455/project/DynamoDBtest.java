@@ -15,24 +15,23 @@ import edu.upenn.cis455.project.storage.Postings;
 
 public class DynamoDBtest
 {
-	private static AmazonDynamoDBClient db = new AmazonDynamoDBClient(
+	private AmazonDynamoDBClient db = new AmazonDynamoDBClient(
 			new DefaultAWSCredentialsProviderChain());
-	private static DynamoDBMapper mapper = new DynamoDBMapper(db);
-	private static String line = "duck	http://abc.com 0.3, http://espn.com 0.5";
-	private static String word;
-	private static HashMap<String, Float> allPostings;
+	private DynamoDBMapper mapper = new DynamoDBMapper(db);
+	private HashMap<String, Float> allPostings;
 	private final static int MAX_LIST = 80;
+	
+	
 
-	private static void saveIndex()
+	public void saveIndex(String word, String postingsList)
 	{
 
 		InvertedIndex index = new InvertedIndex();
 
-		parseInput();
+		parseInput(postingsList);
 		index.setWord(word);
 		int count = 0;
 		Iterator<Entry<String, Float>> it = allPostings.entrySet().iterator();
-		System.out.println("all:" + allPostings.toString());
 		ArrayList<Postings> postingList = new ArrayList<Postings>();
 		while (it.hasNext())
 		{
@@ -42,12 +41,10 @@ public class DynamoDBtest
 			posting.setPosting(pair.getKey().toString());
 			posting.setTfidf((float) pair.getValue());
 			postingList.add(posting);
-			System.out.println("adding - " + posting);
 			it.remove();
 			count++;
 			if (count >= MAX_LIST || !it.hasNext())
 			{
-				System.out.println("Post: " + postingList.toString());
 				index.setPostings(postingList);
 				mapper.save(index);
 				postingList = new ArrayList<Postings>();
@@ -59,28 +56,26 @@ public class DynamoDBtest
 
 	}
 
-	private static void parseInput()
+	public void parseInput(String postingsList)
 	{
 		allPostings = new HashMap<String, Float>();
 
-		String[] input = line.split("\t", 2);
+		//String[] input = line.split("\t", 2);
 
-		word = input[0];
-		String[] postings = input[1].split(",");
-		System.out.println("Word:" + word);
-		System.out.println("Whole list:" + input[1]);
+		//word = input[0];
+		String[] postings = postingsList.split(",");
+//		System.out.println("Word:" + word);
+//		System.out.println("Whole list:" + input[1]);
 
 		for (String posting : postings)
 		{
-			System.out.println("Posting:" + posting);
 			String[] pair = posting.trim().split(" ");
-			System.out.println("URL: " + pair[0] + " idf:" + pair[1]);
 			allPostings.put(pair[0].trim(), Float.parseFloat(pair[1].trim()));
 		}
 
 	}
 
-	private static void loadIndex()
+	public void loadIndex()
 	{
 		InvertedIndex queryIndex = new InvertedIndex();
 		queryIndex.setWord("duck");
@@ -94,12 +89,12 @@ public class DynamoDBtest
 		}
 	}
 
-	public static void main(String args[])
-
-	{
-		saveIndex();
-		System.out.println("done saving");
-		loadIndex();
-		System.out.println("done loading");
-	}
+//	public static void main(String args[])
+//
+//	{
+//		saveIndex();
+//		System.out.println("done saving");
+//		loadIndex();
+//		System.out.println("done loading");
+//	}
 }
