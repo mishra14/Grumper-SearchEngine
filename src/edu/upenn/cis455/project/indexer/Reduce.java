@@ -10,19 +10,23 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
+import edu.upenn.cis455.project.scoring.TFIDF;
+
 public class Reduce extends Reducer<Text, Text, Text, Text>
 {
 	private Log log = LogFactory.getLog(Reduce.class);
 	private HashMap<String, Integer> tf = null;
+	private Text keyword;
+	private int bucketSize, df;
 	
 	@Override
 	protected void reduce(Text key, Iterable<Text> values, Context context) 
 			throws IOException, InterruptedException {
-		int df = computeDF(values);
+		setFieldsFromKey(key);
+		df = computeDF(values);
 		String postings = computePostings();  
-		String value = String.valueOf(df) + ":{" + postings + "}" ;
-		
-		context.write(key, new Text(value));
+		String value = postings;
+		context.write(keyword, new Text(value));
     }
 	
 	private int computeDF( Iterable<Text> docIDs){
@@ -53,10 +57,18 @@ public class Reduce extends Reducer<Text, Text, Text, Text>
 		
 		  System.err.println("Compute Postings : Computed tf: TF dict" + tf.toString());		
 		  for (String docID: tf.keySet()){
+			  double tfidf = TFIDF.compute(tf.get(docID), df, bucketSize);
 			  System.err.println("Compute Postings : in postings :" + docID.toString()+":" + tf.get(docID)+ " ");
-			  postings.append(docID.toString()+":" + tf.get(docID)+ " ");
+			  postings.append(docID.toString()+":" + tfidf + " ");
 		  }
 		  return postings.toString();
 		  
+	  }
+	  
+	  private void setFieldsFromKey(Text key)
+	  {
+		  String[] keys = key.toString().split(" ");
+		  bucketSize = Integer.parseInt(keys[1]);
+		  keyword = new Text(keys[0]);
 	  }
 }

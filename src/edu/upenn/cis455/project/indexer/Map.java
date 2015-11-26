@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.StringTokenizer;
 
 import org.apache.hadoop.io.BytesWritable;
-import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.jsoup.Jsoup;
@@ -16,11 +15,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.upenn.cis455.project.bean.DocumentRecord;
 
-public class Map extends Mapper<NullWritable, BytesWritable, Text, Text> {
+public class Map extends Mapper<Text, BytesWritable, Text, Text> {
     
 	private final Text url = new Text();
 	@Override
-    public void map(NullWritable key, BytesWritable value, Context context) 
+    public void map(Text key, BytesWritable value, Context context) 
     		throws IOException, InterruptedException {
 	    Text word = new Text();
 	    DocumentRecord doc = getDocument(value);
@@ -34,7 +33,8 @@ public class Map extends Mapper<NullWritable, BytesWritable, Text, Text> {
 	    	String currWord = tokenizer.nextToken();
 	    	currWord = currWord.toLowerCase().replaceAll("[^a-z0-9 ]", "").trim();
 	    	String stemmedWord = stem(currWord);
-	        word.set(stemmedWord);
+	        word.set(stemmedWord + " " + key);
+	        
 	        context.write(word, url);
         }
     }

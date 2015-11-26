@@ -2,12 +2,9 @@ package edu.upenn.cis455.project.indexer.bigram;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.apache.hadoop.io.BytesWritable;
-import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.jsoup.Jsoup;
@@ -18,13 +15,14 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.upenn.cis455.project.bean.DocumentRecord;
+import edu.upenn.cis455.project.indexer.Stemmer;
 
-public class Map extends Mapper<NullWritable, BytesWritable, Text, Text> {
+public class Map extends Mapper<Text, BytesWritable, Text, Text> {
     
 	private final Text url = new Text();
 	private ArrayList<String>allWords;
 	@Override
-    public void map(NullWritable key, BytesWritable value, Context context) 
+    public void map(Text key, BytesWritable value, Context context) 
     		throws IOException, InterruptedException {
 	    Text bigram = new Text();
 	    DocumentRecord doc = getDocument(value);
@@ -36,7 +34,7 @@ public class Map extends Mapper<NullWritable, BytesWritable, Text, Text> {
 	    int numWords = allWords.size();
 	    
 	    for (int i = 0; i < numWords - 1; i++){
-	    	bigram.set(allWords.get(i) + " " + allWords.get(i + 1));
+	    	bigram.set(allWords.get(i) + " " + allWords.get(i + 1) + ";" + key);
 	    	context.write( new Text(bigram), url);
 	    }  
 	    
@@ -53,9 +51,9 @@ public class Map extends Mapper<NullWritable, BytesWritable, Text, Text> {
 		String word;
 		while (tokenizer.hasMoreTokens()) {
 			word = tokenizer.nextToken();
-	    	word = word.trim().toLowerCase().replaceAll("[^a-z0-9 ]", "");		
+	    	word = word.trim().toLowerCase().replaceAll("[^a-z0-9 ]", "");
 	    	if (!stopwords.contains(word) && !word.equals("")){
-	    		allWords.add(word);
+	    		allWords.add(stem(word));
 	    	}
 	    }
 	}
@@ -77,6 +75,17 @@ public class Map extends Mapper<NullWritable, BytesWritable, Text, Text> {
 			e.printStackTrace();
 		}
 		return doc;
+	}
+	
+	public String stem(String word)
+	{
+		System.out.println("received word: " + word);
+		Stemmer stemmer = new Stemmer();
+		char[] charArray = word.toCharArray();
+		stemmer.add(charArray, word.length());
+		stemmer.stem();
+		String stemmedWord = stemmer.toString();
+		return stemmedWord;
 	}
 	
 	private static ArrayList<String> stopwords =

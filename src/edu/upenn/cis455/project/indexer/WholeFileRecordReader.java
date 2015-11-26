@@ -1,6 +1,7 @@
 package edu.upenn.cis455.project.indexer;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
@@ -8,23 +9,28 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.IOUtils;
-import org.apache.hadoop.io.NullWritable;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
-public class WholeFileRecordReader  extends RecordReader<NullWritable, BytesWritable> {
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.ObjectListing;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
+
+public class WholeFileRecordReader  extends RecordReader<Text, BytesWritable> {
 	private FileSplit split;
 	private Configuration conf;
 	private boolean fileread = false;
 	private BytesWritable value = new BytesWritable();
-	
-
+	private int bucketSize;
+	private String crawlerBucket;
 	
 	@Override
-	public NullWritable getCurrentKey() throws IOException, InterruptedException {
-		return NullWritable.get();
+	public Text getCurrentKey() throws IOException, InterruptedException {
+		return new Text(String.valueOf(bucketSize));
 	}
 	  
 	@Override
@@ -40,6 +46,9 @@ public class WholeFileRecordReader  extends RecordReader<NullWritable, BytesWrit
                      throws IOException, InterruptedException {
              this.split = (FileSplit)split;
              this.conf = context.getConfiguration();
+             this.crawlerBucket = "pdeepti-test-bucket"; //TODO Use crawler bucket
+             setBucketSize();
+             
      }
 	
 	@Override
@@ -68,5 +77,19 @@ public class WholeFileRecordReader  extends RecordReader<NullWritable, BytesWrit
 	@Override
 	public BytesWritable getCurrentValue() throws IOException, InterruptedException {
 		return value;
+	}
+	
+	public void setBucketSize()
+	{
+		AmazonS3 s3client = new AmazonS3Client(); //TODO Need to add aws credentials here
+	    ObjectListing listing = s3client.listObjects(crawlerBucket);
+	    List<S3ObjectSummary> summaries = listing.getObjectSummaries();
+
+	    while (listing.isTruncated()) {
+	       listing = s3client.listNextBatchOfObjects (listing);
+	       summaries.addAll (listing.getObjectSummaries());
+	    }
+	    
+	    bucketSize = summaries.size();
 	}
 }

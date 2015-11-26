@@ -4,12 +4,14 @@
 	<classpathentry kind="lib" path="lib/jtidy-r938.jar"/>
 	<classpathentry kind="lib" path="lib/junit.jar"/>
 	<classpathentry kind="lib" path="lib/servlet-api.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/commons-logging-1.2.jar"/>
+	<classpathentry kind="lib" path="lib/hadoop-mapreduce-client-core-2.0.2-alpha.jar"/>
+	<classpathentry kind="lib" path="lib/hadoop-common-2.0.2-alpha.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
 	<classpathentry kind="lib" path="lib/je-6.2.31.jar"/>
 	<classpathentry kind="lib" path="lib/easymock-3.4.jar"/>
 	<classpathentry kind="con" path="com.amazonaws.eclipse.sdk.AWS_JAVA_SDK"/>
-	<classpathentry kind="lib" path="/home/cis455/git/cis455project/lib/json-20140107.jar"/>
-	<classpathentry kind="lib" path="/home/cis455/git/cis455project/lib/hadoop-core-1.2.1.jar"/>
-	<classpathentry kind="lib" path="/home/cis455/git/cis455project/lib/jsoup-1.8.3.jar"/>
+	<classpathentry kind="lib" path="/Users/Deepti/MyClasses/IWS/project/cis455project/lib/json-20140107.jar"/>
+	<classpathentry kind="lib" path="/Users/Deepti/MyClasses/IWS/project/cis455project/lib/jsoup-1.8.3.jar"/>
 	<classpathentry kind="output" path="target/classes/"/>
 </classpath>

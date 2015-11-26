@@ -10,7 +10,7 @@ import java.io.*;
   * by calling one of the various stem(something) methods.
   */
 
-class Stemmer
+public class Stemmer
 {  private char[] b;
    private int i,     /* offset into b */
                i_end, /* offset to end of stemmed word */
@@ -384,10 +384,19 @@ class Stemmer
          {  System.out.println("error reading " + args[i]);
             break;
          }
+         
+         in.close();
       }
       catch (FileNotFoundException e)
       {  System.out.println("file " + args[i] + " not found");
          break;
       }
+	catch (IOException e)
+	{
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+      
+      
    }
 }
