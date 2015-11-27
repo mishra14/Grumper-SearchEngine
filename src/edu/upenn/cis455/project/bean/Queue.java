@@ -1,8 +1,12 @@
 package edu.upenn.cis455.project.bean;
 
+import java.io.BufferedReader;
 import java.util.ArrayList;
 
 import com.sleepycat.persist.model.Persistent;
+
+import edu.upenn.cis455.project.crawler.FileIO;
+import edu.upenn.cis455.project.storage.UrlDA;
 
 /**
  * generic blocking queue implementation to hold different types of data.
@@ -17,9 +21,11 @@ public class Queue<T>
 
 	/** The queue. */
 	private ArrayList<T> queue;
+	public static int MAX = 5000;
 
 	/**
 	 * Instantiates a new queue.
+	 * @param br 
 	 */
 	public Queue()
 	{
@@ -52,10 +58,16 @@ public class Queue<T>
 	 * @param t
 	 *            the t
 	 */
-	public synchronized void enqueue(T t)
+	public synchronized boolean enqueue(T t)
 	{
-		queue.add(queue.size(), t); // add element to the end of the array list
-		this.notify();
+		if(queue.size() < MAX){
+			queue.add(queue.size(), t); // add element to the end of the array list
+			this.notify();
+			return true;
+		}
+		
+		return false;
+		
 	}
 
 	/**
@@ -66,6 +78,7 @@ public class Queue<T>
 	public synchronized T dequeue()
 	{
 		return queue.remove(0); // remove element from the beginning of
+		
 	}
 
 	/**

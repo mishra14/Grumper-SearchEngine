@@ -1,5 +1,6 @@
 package edu.upenn.cis455.project.crawler;
 
+import java.math.BigInteger;
 import java.util.Date;
 
 /**
@@ -24,11 +25,13 @@ public class WorkerStatus
 
 	private String pagesCrawled;
 	
-	private Integer numPagesCrawled;
+	private Long numPagesCrawled;
 
 	private statusType status;
 
 	private long timestamp;
+	
+	private BigInteger one;
 
 	public WorkerStatus(String port, String lastCrawledUrl,
 			String pagesCrawled, statusType status)
@@ -39,7 +42,8 @@ public class WorkerStatus
 		this.pagesCrawled = pagesCrawled;
 		this.status = status;
 		this.timestamp = (new Date()).getTime();
-		this.numPagesCrawled = 0;
+		this.numPagesCrawled = new Long("0");
+		one = new BigInteger("1");
 	}
 
 	public String getPort()
@@ -94,6 +98,7 @@ public class WorkerStatus
 	
 	public void incrementCount(){
 		this.numPagesCrawled++;
+		System.out.println("!!!!!!!!!!!!!!!!!!!!!!INCREMENTING by 1: "+numPagesCrawled.toString());
 		setPagesCrawled(numPagesCrawled.toString());
 	}
 	

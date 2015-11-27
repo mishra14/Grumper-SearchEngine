@@ -7,11 +7,13 @@ import org.jsoup.parser.Parser;
 import org.jsoup.select.Elements;
 
 import edu.upenn.cis455.project.bean.Queue;
+import edu.upenn.cis455.project.storage.UrlDA;
 
 
 public class HtmlParser
 {
 	public static void parse(String content, String url, Queue<String> urlQueue){
+		System.out.println("PARSING: "+url);
 		Document doc = Jsoup.parse(content, url, Parser.htmlParser());
 	    extractLinks(doc, urlQueue);
 	}
@@ -20,7 +22,11 @@ public class HtmlParser
 		Elements links = doc.select("a[href]");
 		for (Element link : links) {
             String link_to_be_added = link.attr("abs:href");
-            urlQueue.enqueue(link_to_be_added);
+            boolean added = urlQueue.enqueue(link_to_be_added);
+            if(!added){
+//            	System.out.println("[CAPACITY EXCEEDED] Adding to db");
+            	UrlDA.putUrl(link_to_be_added);
+            }
         }
 	}
 	
