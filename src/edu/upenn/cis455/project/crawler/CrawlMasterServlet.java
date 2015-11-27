@@ -10,8 +10,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.http.*;
+
 import edu.upenn.cis455.project.bean.DocumentRecord;
+import edu.upenn.cis455.project.crawler.info.URLInfo;
 import edu.upenn.cis455.project.http.Http;
 import edu.upenn.cis455.project.http.HttpResponse;
 import edu.upenn.cis455.project.storage.S3DocumentDA;
@@ -78,7 +81,7 @@ public class CrawlMasterServlet extends HttpServlet
 			}
 			// send the urls to all the active workers
 
-			pageContent.append("Recieved urls - " + urlString);
+			pageContent.append("Received urls - " + urlString);
 
 			// redirect to the status page
 			// response.sendRedirect("/master/status");
@@ -226,17 +229,22 @@ public class CrawlMasterServlet extends HttpServlet
 		Map<String, StringBuilder> urlMapping = new HashMap<String, StringBuilder>();
 		for (String url : urls)
 		{
-			int index = Hash.hashKey(url, activeWorkers.size());
+			System.out.println("FOR URL: "+url);
+			URLInfo info = new URLInfo(url);
+			int index = Hash.hashKey(info.getHostName(), activeWorkers.size());
+			System.out.println("Hashed Index: "+index);
 			String worker = activeWorkers.get(index);
 			if (urlMapping.containsKey(worker))
 			{
 				StringBuilder value = urlMapping.get(worker);
 				urlMapping.put(worker, value.append(";" + url));
+				System.out.println("Worker: "+worker+" has "+value.toString());
 			}
 			else
 			{
 				StringBuilder value = new StringBuilder();
 				urlMapping.put(worker, value.append(url));
+				System.out.println("Worker: "+worker+" has "+value.toString());
 			}
 		}
 		sendJob(urlMapping, activeWorkers, crawlThreads);
@@ -249,8 +257,7 @@ public class CrawlMasterServlet extends HttpServlet
 		StringBuilder workerString = new StringBuilder();
 		for (int i = 0; i < activeWorkers.size(); i++)
 		{
-			workerString
-					.append("worker" + (i + 1) + "=" + activeWorkers.get(i));
+			workerString.append("worker" + (i + 1) + "=" + activeWorkers.get(i));
 			if (i < activeWorkers.size() - 1)
 			{
 				workerString.append("&");
@@ -258,6 +265,10 @@ public class CrawlMasterServlet extends HttpServlet
 		}
 		for (String worker : activeWorkers)
 		{
+			System.out.println("[SendJob] Worker "+worker+"has : "+urlMapping.get(worker));
+			if(urlMapping.get(worker) == null)
+				urlMapping.put(worker, new StringBuilder());
+			
 			String urls = urlMapping.get(worker).toString();
 			String body = "urls=" + urls + "&" + "crawlthreads=" + crawlThreads
 					+ "&" + "numworkers=" + activeWorkers.size() + "&"

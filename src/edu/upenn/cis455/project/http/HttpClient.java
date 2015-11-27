@@ -57,7 +57,7 @@ public class HttpClient
 			
 			if(lastAccessed!=null){
 				SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
-				sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+//				sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
 				String d = sdf.format(lastAccessed);
 				connection.setRequestProperty("If-Modified-Since", d);
 			}
@@ -94,7 +94,7 @@ public class HttpClient
 			
 			if(lastAccessed!=null){
 				SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
-				sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+//				sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
 				String d = sdf.format(lastAccessed);
 				connection.setRequestProperty("If-Modified-Since", d);
 			}
@@ -134,8 +134,13 @@ public class HttpClient
 	 */
 	public void fetchRobots(String robots,String domain) throws Exception
 	{
+		
 		String robots_doc = fetch(robots);
 		//Store robots in db
+		if(robots_doc == null){
+			throw new Exception();
+		}
+		
 		RobotParser parser = new RobotParser();
 		parser.parse(robots_doc);
 		RobotsInfo info = new RobotsInfo();
@@ -160,26 +165,29 @@ public class HttpClient
 		Integer length = null;
 		if(url.startsWith("https://")){
 			HttpsURLConnection connection = (HttpsURLConnection) req_url.openConnection();
-			connection.setDoOutput(true);
 			connection.setRequestMethod("GET");
-			connection.setChunkedStreamingMode(0);
 			connection.setRequestProperty("User-Agent", "cis455crawler");
 			connection.setRequestProperty("Accept", "text/*");
-			input = connection.getInputStream();
-			
-			length = connection.getContentLength();
-			content_type = connection.getContentType();
+			if(connection.getResponseCode() == 200){
+				input = connection.getInputStream();
+				length = connection.getContentLength();
+				content_type = connection.getContentType();
+			}else{
+				return null;
+			}
 		}else if(url.startsWith("http://")){
 			HttpURLConnection connection = (HttpURLConnection) req_url.openConnection();
 			connection.setRequestMethod("GET");
-			connection.setDoOutput(true);
-			connection.setChunkedStreamingMode(0);
 			connection.setRequestProperty("User-Agent", "cis455crawler");
 			connection.setRequestProperty("Accept", "text/*");
-			input = connection.getInputStream();
 			
-			length = connection.getContentLength();
-			content_type = connection.getContentType();
+			if(connection.getResponseCode()==200){
+				input = connection.getInputStream();
+				length = connection.getContentLength();
+				content_type = connection.getContentType();
+			}else{
+				return null;
+			}
 		}
 		
 		BufferedReader br = new BufferedReader(new InputStreamReader(input));
@@ -199,9 +207,11 @@ public class HttpClient
 	}
 	
 	
-
-	
-
-	
-
+//	public static void main(String[] args) throws IOException{
+//		HttpClient client = new HttpClient(null);
+//		Date date = new Date("Thu Nov 26 23:15:56 EST 2015");
+//		System.out.println(client.sendHead("http://www.nytimes.com/robots.txt",date));
+////		System.out.println(client.fetch("http://www.nytimes.com/robots.txt"));
+//	}
+//	
 }

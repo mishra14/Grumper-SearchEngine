@@ -1,10 +1,16 @@
 package edu.upenn.cis455.project.crawler;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -38,7 +44,6 @@ public class CrawlWorkerServlet extends HttpServlet
 	private TimerTask timerTask;
 	private Timer timer;
 	
-
 	public void init()
 	{
 		System.out.println("crawl worker servlet started");
@@ -68,7 +73,7 @@ public class CrawlWorkerServlet extends HttpServlet
 		//Setup db wrapper
 		try
 		{
-			DBWrapper.openDBWrapper("/usr/share/jetty/webapps/db");
+			DBWrapper.openDBWrapper("./db");
 		}
 		catch (Exception e)
 		{
@@ -77,26 +82,27 @@ public class CrawlWorkerServlet extends HttpServlet
 		
 		urlQueue = QueueDA.getQueue();
 		if(urlQueue == null){
+			System.out.println("New url queue");
 			urlQueue = new Queue<String>();
 		}
 		
 		//Start the timer task to push data to db
-		timerTask = new PushToDB(this.workers.size(),this.crawledDocs, this.urlQueue);
+		timerTask = new PushToDB(this.workers.size(),this.workers,this.crawledDocs);
 		timer = new Timer(true);
 		timer.scheduleAtFixedRate(timerTask, 60000, 60000);
 	}
 	
 	public void destroy(){
 		
+		System.out.println("DESTROY METHOD CALLED!!!");
 		//Force push any remaining data to db
 		timer.cancel();
-		timer.schedule(timerTask, 0);
+		new PushToDB(this.workers.size(),workers,this.crawledDocs).run();
 		
-		//Write current state of queue to db so that crawler can pick up where it left from
-		
-		
+		//Put current state of urlQueue onto berkeley db
+		QueueDA.putQueue(urlQueue, new Date());
+		System.out.println("URL PUSHED!!!");
 		DBWrapper.closeDBWrapper();
-		
 	}
 
 	public void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -158,7 +164,7 @@ public class CrawlWorkerServlet extends HttpServlet
 		else if (pathInfo.equalsIgnoreCase("/pushdata"))
 		{
 			// add these new urls into the frontier
-			System.out.println("crawl worker : /pushdata received");
+			System.out.println("[CRAWL WORKER] PUSHDATA RECEIVED");
 			response.setContentType("text/html");
 			PrintWriter out = response.getWriter();
 			out.print("<html>" + pageContent.toString() + "</html>");
