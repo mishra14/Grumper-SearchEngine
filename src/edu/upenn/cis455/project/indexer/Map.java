@@ -32,10 +32,13 @@ public class Map extends Mapper<Text, BytesWritable, Text, Text> {
 	    while (tokenizer.hasMoreTokens()) {
 	    	String currWord = tokenizer.nextToken();
 	    	currWord = currWord.toLowerCase().replaceAll("[^a-z0-9 ]", "").trim();
-	    	String stemmedWord = stem(currWord);
-	        word.set(stemmedWord + " " + key);
+	    	//String stemmedWord = stem(currWord);
+	    	if (!currWord.isEmpty()){
+	    		word.set(currWord + " " + key);
+	    		context.write(word, url);
+	    	}
 	        
-	        context.write(word, url);
+	       
         }
     }
 	

@@ -26,7 +26,7 @@ public class WholeFileRecordReader  extends RecordReader<Text, BytesWritable> {
 	private boolean fileread = false;
 	private BytesWritable value = new BytesWritable();
 	private int bucketSize;
-	private String crawlerBucket;
+	private String crawlerBucket = "indexer-test-data";;
 	
 	@Override
 	public Text getCurrentKey() throws IOException, InterruptedException {
@@ -46,7 +46,7 @@ public class WholeFileRecordReader  extends RecordReader<Text, BytesWritable> {
                      throws IOException, InterruptedException {
              this.split = (FileSplit)split;
              this.conf = context.getConfiguration();
-             this.crawlerBucket = "pdeepti-test-bucket"; //TODO Use crawler bucket
+             //this.crawlerBucket = "emr-job-aayushi/input"; //TODO Use crawler bucket
              setBucketSize();
              
      }
@@ -84,7 +84,7 @@ public class WholeFileRecordReader  extends RecordReader<Text, BytesWritable> {
 		AmazonS3 s3client = new AmazonS3Client(); //TODO Need to add aws credentials here
 	    ObjectListing listing = s3client.listObjects(crawlerBucket);
 	    List<S3ObjectSummary> summaries = listing.getObjectSummaries();
-
+	
 	    while (listing.isTruncated()) {
 	       listing = s3client.listNextBatchOfObjects (listing);
 	       summaries.addAll (listing.getObjectSummaries());

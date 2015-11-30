@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
@@ -16,7 +18,7 @@ import edu.upenn.cis455.project.storage.Postings;
 public class DynamoDBtest
 {
 	private AmazonDynamoDBClient db = new AmazonDynamoDBClient(
-			new DefaultAWSCredentialsProviderChain());
+			new BasicAWSCredentials("AKIAJW5SHL6JM2RZLTXQ", "+U+QT1nqEUzVEREpZZjYSmUdwHA/3Enb3L3i2n9N"));
 	private DynamoDBMapper mapper = new DynamoDBMapper(db);
 	private HashMap<String, Float> allPostings;
 	private final static int MAX_LIST = 80;
@@ -75,10 +77,10 @@ public class DynamoDBtest
 
 	}
 
-	public void loadIndex()
+	public void loadIndex(String word)
 	{
 		InvertedIndex queryIndex = new InvertedIndex();
-		queryIndex.setWord("duck");
+		queryIndex.setWord(word);
 		DynamoDBQueryExpression<InvertedIndex> query = new DynamoDBQueryExpression<InvertedIndex>()
 				.withHashKeyValues(queryIndex);
 		PaginatedQueryList<InvertedIndex> resultList = mapper.query(
@@ -90,9 +92,11 @@ public class DynamoDBtest
 	}
 
 //	public static void main(String args[])
-//
 //	{
-//		saveIndex();
+//		DynamoDBtest dynamo = new DynamoDBtest();
+//		dynamo.saveIndex("humpty", "google.com 0.8");;
+//		
+//		
 //		System.out.println("done saving");
 //		loadIndex();
 //		System.out.println("done loading");

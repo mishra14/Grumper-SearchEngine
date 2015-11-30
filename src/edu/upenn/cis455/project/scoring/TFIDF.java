@@ -7,4 +7,5 @@ public class TFIDF
 		double tfidf = tf * Math.log(numdocs/df);
 		return tfidf;
 	}
+	
 }
