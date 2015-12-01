@@ -2,8 +2,11 @@ package edu.upenn.cis455.project.searchengine;
 
 import java.io.*;
 import java.util.concurrent.*;
+import java.util.*;
 
 import javax.servlet.http.*;
+
+import edu.upenn.cis455.project.storage.Postings;
 
 public class SearchEngine extends HttpServlet
 {
@@ -12,9 +15,13 @@ public class SearchEngine extends HttpServlet
 	 */
 	private static final long serialVersionUID = 1L;
 	private int maxResults = 10;
+	private int resultCount = 0;
 	private int initialCapacity = 100;
 	private Heap unigramUrls = new Heap(initialCapacity);
 	private Heap bigramUrls = new Heap(initialCapacity);
+	private Heap trigramUrls = new Heap(initialCapacity);
+	//private ArrayList<Postings> finalResultUrls = new ArrayList<Postings>();
+	private ArrayList<String> finalResultUrls = new ArrayList<String>();
 
 	public void init()
 	{
@@ -53,16 +60,39 @@ public class SearchEngine extends HttpServlet
 			queryTerms = searchQuery.split(" ");
 			//TODO preprocess query
 			
-			if (queryTerms.length >= 2)
+			if (queryTerms.length >= 3)
 			{
+				Callable<Heap> callableUnigrams = new GetScoresCallable("UnigramIndex", queryTerms);
 				Callable<Heap> callableBigrams = new GetScoresCallable("BigramIndex", queryTerms);
-				//Callable<Heap> callableUnigrams = new GetScoresCallable("UnigramIndex", queryTerms);
-				//Future<Heap> unigramFuture = pool.submit(callableUnigrams);
+				Callable<Heap> callableTrigrams = new GetScoresCallable("TrigramIndex", queryTerms);
+				Future<Heap> unigramFuture = pool.submit(callableUnigrams);
+				Future<Heap> bigramFuture = pool.submit(callableBigrams);
+				Future<Heap> trigramFuture = pool.submit(callableTrigrams);
+
+				try
+				{
+					unigramUrls = unigramFuture.get();
+					bigramUrls = bigramFuture.get();
+					trigramUrls = trigramFuture.get();
+				}
+				catch (InterruptedException | ExecutionException e)
+				{
+					e.printStackTrace();
+				}
+				
+				getRankedResults();
+			}
+			
+			else if (queryTerms.length >= 2)
+			{
+				Callable<Heap> callableUnigrams = new GetScoresCallable("UnigramIndex", queryTerms);
+				Callable<Heap> callableBigrams = new GetScoresCallable("BigramIndex", queryTerms);
+				Future<Heap> unigramFuture = pool.submit(callableUnigrams);
 				Future<Heap> bigramFuture = pool.submit(callableBigrams);
 
 				try
 				{
-					//unigramUrls = unigramFuture.get();
+					unigramUrls = unigramFuture.get();
 					bigramUrls = bigramFuture.get();
 				}
 				catch (InterruptedException | ExecutionException e)
@@ -93,12 +123,41 @@ public class SearchEngine extends HttpServlet
 	
 	private void getRankedResults()
 	{
-		int numResults = Math.min(maxResults, unigramUrls.size());
-		if (!bigramUrls.isEmpty())
+		if (resultCount < maxResults && !trigramUrls.isEmpty())
 		{
-			for (int i = 0; i < numResults; i++)
+			getRankedResults(trigramUrls);
+		}
+		
+		if (resultCount < maxResults && !bigramUrls.isEmpty())
+		{
+			System.out.println("bigrams:");
+			getRankedResults(bigramUrls);
+		}
+		
+		if (resultCount < maxResults && !unigramUrls.isEmpty())
+		{
+			System.out.println("unigrams");
+			getRankedResults(unigramUrls);
+		}
+		
+		for (String result: finalResultUrls)
+		{
+			System.out.println(result);
+		}
+		
+	}
+	
+	private void getRankedResults(Heap scoringFunction)
+	{
+		int numResults = Math.min(maxResults - resultCount, scoringFunction.size());
+		
+		for (int i = 0; i < numResults; i++)
+		{
+			String result = scoringFunction.remove().getPosting();
+			if (!finalResultUrls.contains(result))
 			{
-				System.out.println(unigramUrls.remove());
+				finalResultUrls.add(result);
+				resultCount++;
 			}
 		}
 	}
@@ -106,7 +165,7 @@ public class SearchEngine extends HttpServlet
 	public static void main(String args[]) throws IOException
 	{
 		SearchEngine searchEngine = new SearchEngine();
-		searchEngine.search("rule");
+		//searchEngine.search("rule");
 		//searchEngine.search("or");
 		//searchEngine.search("quite");
 		//searchEngine.search("being");
@@ -116,7 +175,7 @@ public class SearchEngine extends HttpServlet
 //		searchEngine.search("choose");
 //		searchEngine.search("map"); 
 //		searchEngine.search("log");
-//		searchEngine.search("mashed potatoes");
+		searchEngine.search("mashed potatoes and");
 //		searchEngine.search("data contribute");
 		//searchEngine.search("cookies melissa");
 

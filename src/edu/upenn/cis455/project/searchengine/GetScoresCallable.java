@@ -27,7 +27,7 @@ public class GetScoresCallable implements Callable<Heap>
 	@Override
 	public Heap call() throws Exception
 	{
-		System.out.println("in callable");
+		//System.out.println("in callable");
 		matchedUrls = new Heap(initialCapacity);
 		
 		if (tablename.equals("UnigramIndex"))
@@ -49,7 +49,7 @@ public class GetScoresCallable implements Callable<Heap>
 		{
 			getProximity();
 		}
-		System.out.println("size of matched urls: " + matchedUrls.size());
+		//System.out.println("size of matched urls: " + matchedUrls.size());
 		return matchedUrls;
 	}
 	
@@ -57,10 +57,13 @@ public class GetScoresCallable implements Callable<Heap>
 	{
 		for (int i = 0; i < query.length; i++)
 		{
+			ArrayList<Postings> postings = new ArrayList<Postings>();
 			String term = query[i];
 			PaginatedQueryList<InvertedIndex> resultList = dbAccessor.loadIndex(term);
-			System.out.println("result list");
-			ArrayList<Postings> postings = resultList.get(0).getPostings();
+			if (!resultList.isEmpty())
+			{
+				postings = resultList.get(0).getPostings();
+			}
 			matchedUrls.addAll(postings);
 		}
 	}
@@ -69,11 +72,15 @@ public class GetScoresCallable implements Callable<Heap>
 	{
 		for (int i = 0; i < query.length - 1; i++)
 		{
+			ArrayList<Postings> postings = new ArrayList<Postings>();
 			StringBuffer term = new StringBuffer();
 			term.append(query[i] + " ");
 			term.append(query[i+1]);
 			PaginatedQueryList<InvertedIndex> resultList = dbAccessor.loadIndex(term.toString());
-			ArrayList<Postings> postings = resultList.get(0).getPostings();
+			if (!resultList.isEmpty())
+			{
+				postings = resultList.get(0).getPostings();
+			}
 			matchedUrls.addAll(postings);
 		}
 	}
@@ -82,12 +89,16 @@ public class GetScoresCallable implements Callable<Heap>
 	{
 		for (int i = 0; i < query.length - 2; i++)
 		{
+			ArrayList<Postings> postings = new ArrayList<Postings>();
 			StringBuffer term = new StringBuffer();
 			term.append(query[i] + " ");
 			term.append(query[i+1] + " ");
 			term.append(query[i+2]);
 			PaginatedQueryList<InvertedIndex> resultList = dbAccessor.loadIndex(term.toString());
-			ArrayList<Postings> postings = resultList.get(0).getPostings();
+			if (!resultList.isEmpty())
+			{
+				postings = resultList.get(0).getPostings();
+			}
 			matchedUrls.addAll(postings);
 		}
 	}
