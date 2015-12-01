@@ -32,18 +32,12 @@ public class Map extends Mapper<NullWritable, BytesWritable, Text, Text> {
 	    Float urlRank = new Float(1);
 	    if(item!=null)
 	    {
-	    	urlRank = item.getFloat("pageRank");
+	    	urlRank = item.getFloat("rank");
 	    }
 	    Float edgeWeight = urlRank/forwardLinks.size();
 	    for(String forwardLink : forwardLinks)
 	    {
-		    item = dynamo.getItem("hostName", forwardLink);
-		    Float linkRank = new Float(1);
-		    if(item!=null)
-		    {
-		    	linkRank = item.getFloat("pageRank");
-		    }
-		    Float rankVar = edgeWeight * linkRank;
+		    Float rankVar = edgeWeight ;
 	    	String rankString=rankVar.toString();
 	    	context.write(new Text(forwardLink), new Text(rankString));
 	    }
