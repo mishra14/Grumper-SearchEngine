@@ -99,7 +99,7 @@ public class HttpClient
 				SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
 //				sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
 				String d = sdf.format(lastAccessed);
-				System.out.println(d);
+//				System.out.println(d);
 				connection.setRequestProperty("If-Modified-Since", d);
 			}
 			

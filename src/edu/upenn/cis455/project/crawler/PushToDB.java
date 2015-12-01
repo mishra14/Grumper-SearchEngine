@@ -45,12 +45,14 @@ public class PushToDB extends TimerTask
 			numWorkers = workers.size();
 		}
 		
-//		System.out.println("!!!!!!!!!!!!!!!!!! SENDING PUSHDATA !!!!!!!!!!!!!!!!!!!!!!!!!!!");
+		System.out.println("[PUSHDB] Numworkers: "+numWorkers);
 		for(int i=0;i<numWorkers;i++){
 			File file = new File("./"+i+".txt");
 			
 			if(!file.exists())
 				continue;
+			
+			System.out.println("File: "+file.getName());
 			
 			BufferedReader br = null;
 			try
@@ -59,11 +61,11 @@ public class PushToDB extends TimerTask
 			}
 			catch (FileNotFoundException e)
 			{
-				System.out.println("Error sending pushdata");
+				System.out.println("Error Getting Buffered Reader");
 				e.printStackTrace();
 			}
-			StringBuilder body = new StringBuilder();
 			
+			StringBuilder body = new StringBuilder();
 			ArrayList<String> post = new ArrayList<String>();
 			
 			try
@@ -79,6 +81,8 @@ public class PushToDB extends TimerTask
 						body.append(br.readLine());
 					}
 				}
+				
+				post.add(body.toString());
 			}
 			
 			catch (IOException e)
@@ -114,13 +118,16 @@ public class PushToDB extends TimerTask
 			int port = url.getPort() == -1 ? url.getDefaultPort() : url.getPort();
 			Socket socket = null;
 			PrintWriter clientSocketOut = null;
+			HttpResponse response = null;
 			try
 			{
-				socket = new Socket(host, port);
-				clientSocketOut = new PrintWriter(new OutputStreamWriter(
-						socket.getOutputStream()));
-				
 				for(String post_body: post){
+					
+					System.out.println("[PUSHDATA] Opening new socket for port: "+port);
+					socket = new Socket(host, port);
+					clientSocketOut = new PrintWriter(new OutputStreamWriter(
+							socket.getOutputStream()));
+					
 					clientSocketOut.print("POST " + url.toString() + " HTTP/1.0\r\n");
 					clientSocketOut.print("Content-Length:" + post_body.length() + "\r\n");
 					clientSocketOut
@@ -131,41 +138,31 @@ public class PushToDB extends TimerTask
 					clientSocketOut.print("\r\n");
 					clientSocketOut.flush();
 					System.out.println("Sent Post");
-				}
-			}
-			catch (IOException e)
-			{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-			HttpResponse response = null;
-			try
-			{
-				if(socket!=null){
-					response = Http.parseResponse(socket);
-					if (!response.getResponseCode().equalsIgnoreCase("200"))
-					{
-						System.out.println("[WORKER] : worker " + current_worker
-								+ "DID NOT ACCEPT the crawl job");
-						
+					
+					response = null;
+					if(socket!=null){
+						response = Http.parseResponse(socket);
+						if (response!=null && !response.getResponseCode().equalsIgnoreCase("200"))
+						{
+							System.out.println("[WORKER] : worker " + current_worker
+									+ "DID NOT ACCEPT the crawl job");
+							
+						}else{
+							System.out.println(current_worker+" ACCEPTED JOB!!");
+						}
 					}
+					
+					if(clientSocketOut != null){
+						clientSocketOut.close();
+						System.out.println("PrintWriter closed");
+					}
+					
+					if(socket!=null){
+						socket.close();
+						System.out.println("Socket closed");
+					}
+					
 				}
-			}
-			catch (IOException e1)
-			{
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-			
-			if(clientSocketOut != null)
-				clientSocketOut.close();
-			
-			try
-			{
-				if(socket!=null)
-					socket.close();
-			
 			}
 			catch (IOException e)
 			{
@@ -173,7 +170,8 @@ public class PushToDB extends TimerTask
 				e.printStackTrace();
 			}
 			
-			if(response.getResponseCode().equalsIgnoreCase("200")){
+			
+			if(response!=null && response.getResponseCode().equalsIgnoreCase("200")){
 				boolean result = file.delete();
 				if(!result){
 					System.out.println("FILE WAS NOT DELETED: "+file.getName());

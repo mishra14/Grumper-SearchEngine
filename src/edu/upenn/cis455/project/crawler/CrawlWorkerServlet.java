@@ -113,7 +113,7 @@ public class CrawlWorkerServlet extends HttpServlet
 	public void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws java.io.IOException
 	{
-		System.out.println("crawl worker : post received");
+//		System.out.println("crawl worker : post received");
 		String pathInfo = request.getPathInfo();
 		StringBuilder pageContent = new StringBuilder();
 		if (pathInfo.equalsIgnoreCase("/runcrawl")) // run crawl
@@ -157,7 +157,7 @@ public class CrawlWorkerServlet extends HttpServlet
 			//Start crawler threads only if crawling has not already started
 			if(!isCrawling){
 				Thread [] threads = new Thread[threadCount];
-				System.out.println("STARTING IN WORKER: "+self_id+" NUMTHREADS: "+threadCount);
+//				System.out.println("STARTING IN WORKER: "+self_id+" NUMTHREADS: "+threadCount);
 				for(int i=0;i<threadCount;i++){
 					CrawlerThread crawlerThread = new CrawlerThread(urlQueue, status, self_id, crawledDocs, urlMappings);
 					Thread thread = new Thread(crawlerThread);
@@ -170,22 +170,18 @@ public class CrawlWorkerServlet extends HttpServlet
 		else if (pathInfo.equalsIgnoreCase("/pushdata"))
 		{
 			// add these new urls into the frontier
-			System.out.println("[CRAWL WORKER] PUSHDATA RECEIVED");
-//			response.setContentType("text/html");
-//			PrintWriter out = response.getWriter();
-//			out.print("<html>" + pageContent.toString() + "</html>");
-//			response.flushBuffer();
+			System.out.println("[CRAWL WORKER] PUSHDATA RECEIVED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 			addToQueue(request.getParameter("urls"));
 //			System.out.println("Crawl worker : Queue - "+urlQueue);
 		}
 		else if (pathInfo.equalsIgnoreCase("/updateWorkers"))
 		{
 			// add these new urls into the frontier
-			System.out.println("crawl worker : /updateworkers received");
-			response.setContentType("text/html");
-			PrintWriter out = response.getWriter();
-			out.print("<html>" + pageContent.toString() + "</html>");
-			response.flushBuffer();
+//			System.out.println("crawl worker : /updateworkers received");
+//			response.setContentType("text/html");
+//			PrintWriter out = response.getWriter();
+//			out.print("<html>" + pageContent.toString() + "</html>");
+//			response.flushBuffer();
 			updateWorkerList(request);
 		}
 	}
@@ -193,7 +189,7 @@ public class CrawlWorkerServlet extends HttpServlet
 	private int getSelfId(String ip)
 	{
 		String local = ip+":"+this.port;
-		System.out.println("local ip: "+local);
+//		System.out.println("local ip: "+local);
 		int i;
 		for(i=0;i<this.workers.size();i++){
 			if(workers.get(i).equals(local))
@@ -207,6 +203,7 @@ public class CrawlWorkerServlet extends HttpServlet
 	{
 		if(urlString == null){
 			System.out.println("urlString is null");
+			return;
 		}
 		String[] urls = urlString.split(";");
 		urlQueue.enqueueAll(new ArrayList<String>(Arrays.asList(urls)));
@@ -233,6 +230,6 @@ public class CrawlWorkerServlet extends HttpServlet
 				}
 			}
 		}
-		System.out.println("crawl worker : updated qorker list to - " + workers);
+//		System.out.println("crawl worker : updated qorker list to - " + workers);
 	}
 }
