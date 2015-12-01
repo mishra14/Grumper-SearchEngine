@@ -11,18 +11,14 @@ import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.TimerTask;
 
 import edu.upenn.cis455.project.bean.DocumentRecord;
-import edu.upenn.cis455.project.bean.Queue;
 import edu.upenn.cis455.project.bean.UrlList;
 import edu.upenn.cis455.project.http.Http;
 import edu.upenn.cis455.project.http.HttpResponse;
-import edu.upenn.cis455.project.storage.DBWrapper;
-import edu.upenn.cis455.project.storage.QueueDA;
 import edu.upenn.cis455.project.storage.S3DocumentDA;
 import edu.upenn.cis455.project.storage.S3UrlListDA;
 
@@ -49,14 +45,12 @@ public class PushToDB extends TimerTask
 			numWorkers = workers.size();
 		}
 		
-		System.out.println("Number of workers: "+numWorkers);
+//		System.out.println("!!!!!!!!!!!!!!!!!! SENDING PUSHDATA !!!!!!!!!!!!!!!!!!!!!!!!!!!");
 		for(int i=0;i<numWorkers;i++){
 			File file = new File("./"+i+".txt");
 			
-			if(!file.exists()){
-				System.out.println("File "+file.getName()+" does not exist!");
+			if(!file.exists())
 				continue;
-			}
 			
 			BufferedReader br = null;
 			try
@@ -171,6 +165,7 @@ public class PushToDB extends TimerTask
 			{
 				if(socket!=null)
 					socket.close();
+			
 			}
 			catch (IOException e)
 			{
@@ -178,7 +173,7 @@ public class PushToDB extends TimerTask
 				e.printStackTrace();
 			}
 			
-			if(response!=null && response.getResponseCode().equalsIgnoreCase("200")){
+			if(response.getResponseCode().equalsIgnoreCase("200")){
 				boolean result = file.delete();
 				if(!result){
 					System.out.println("FILE WAS NOT DELETED: "+file.getName());
@@ -189,7 +184,7 @@ public class PushToDB extends TimerTask
 			}
 		}
 		
-		System.out.println("!!!!!!!!!!!!!!!!!! FINISHED PUSHDATA !!!!!!!!!!!!!!!!!!!!!!!!!!!");
+//		System.out.println("!!!!!!!!!!!!!!!!!! FINISHED PUSHDATA !!!!!!!!!!!!!!!!!!!!!!!!!!!");
 		
 //		System.out.println("PUSHING TO DB");
 		S3DocumentDA s3 = new S3DocumentDA();

@@ -5,7 +5,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Set;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -15,7 +14,6 @@ import org.jsoup.select.Elements;
 
 import edu.upenn.cis455.project.bean.Queue;
 import edu.upenn.cis455.project.bean.UrlList;
-import edu.upenn.cis455.project.crawler.info.URLInfo;
 import edu.upenn.cis455.project.storage.UrlDA;
 
 
@@ -33,7 +31,6 @@ public class HtmlParser
 		Elements links = doc.select("a[href]");
 		for (Element link : links) {
             String link_to_be_added = link.attr("abs:href");
-            
             URL url = null;
 			try
 			{

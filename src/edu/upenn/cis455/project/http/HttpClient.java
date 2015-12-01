@@ -58,7 +58,7 @@ public class HttpClient
 			
 			if(lastAccessed!=null){
 				SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
-				sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+//				sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
 				String d = sdf.format(lastAccessed);
 				connection.setRequestProperty("If-Modified-Since", d);
 			}
@@ -97,7 +97,7 @@ public class HttpClient
 			
 			if(lastAccessed!=null){
 				SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
-				sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+//				sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
 				String d = sdf.format(lastAccessed);
 				System.out.println(d);
 				connection.setRequestProperty("If-Modified-Since", d);

@@ -187,7 +187,7 @@ public class CrawlerThread implements Runnable{
 //				}
 //				
 ////				System.out.println("Robots hasn't been modified");
-				
+
 				boolean allowed = false;
 				if(info.getRobotsInfo().getAllowedLinks(agent_match)!=null){
 					if(info.getRobotsInfo().getAllowedLinks(agent_match).contains(filepath)){
