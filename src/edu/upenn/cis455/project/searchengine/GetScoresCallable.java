@@ -1,30 +1,29 @@
 package edu.upenn.cis455.project.searchengine;
 
-import java.util.*;
-
-import test.edu.upenn.cis455.project.DynamoIndexerDA;
+import java.util.ArrayList;
+import java.util.concurrent.Callable;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedQueryList;
 
 import edu.upenn.cis455.project.storage.InvertedIndex;
 import edu.upenn.cis455.project.storage.Postings;
+import test.edu.upenn.cis455.project.DynamoIndexerDA;
 
-public class Unigrams implements Runnable
+public class GetScoresCallable implements Callable<Heap>
 {
 	private int initialCapacity = 100;
 	private Heap matchedUrls ;
 	private String[] query = new String[20];
 	private DynamoIndexerDA dbAccessor;
-
-	public Unigrams(String[] query)
+	
+	public GetScoresCallable(String tablename, String[] query)
 	{
 		this.query = query;
-		this.dbAccessor = new DynamoIndexerDA("UnigramIndex");
-		//createPriorityQueue();
+		this.dbAccessor = new DynamoIndexerDA(tablename);
 	}
 	
 	@Override
-	public void run()
+	public Heap call() throws Exception
 	{
 		matchedUrls = new Heap(initialCapacity);
 		for (int i = 0; i < query.length; i++)
@@ -34,11 +33,7 @@ public class Unigrams implements Runnable
 			ArrayList<Postings> postings = resultList.get(0).getPostings();
 			matchedUrls.addAll(postings);
 		}
-	}
-	
-	public Heap getMatchedUrls()
-	{
 		return matchedUrls;
 	}
-	
+
 }

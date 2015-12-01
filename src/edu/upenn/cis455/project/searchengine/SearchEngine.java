@@ -1,15 +1,9 @@
 package edu.upenn.cis455.project.searchengine;
 
 import java.io.*;
-import java.util.*;
+import java.util.concurrent.*;
 
 import javax.servlet.http.*;
-
-import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedQueryList;
-
-import edu.upenn.cis455.project.storage.InvertedIndex;
-import edu.upenn.cis455.project.storage.Postings;
-import test.edu.upenn.cis455.project.DynamoDBtest;
 
 public class SearchEngine extends HttpServlet
 {
@@ -18,8 +12,6 @@ public class SearchEngine extends HttpServlet
 	 */
 	private static final long serialVersionUID = 1L;
 	private int maxResults = 10;
-	private DynamoDBtest dbAccessor = new DynamoDBtest();
-	private String[] rankedresults = new String[maxResults];
 	private int initialCapacity = 100;
 	private Heap unigramUrls = new Heap(initialCapacity);
 	
@@ -48,7 +40,8 @@ public class SearchEngine extends HttpServlet
 	public void search(String searchQuery)
 	{
 		String[] queryTerms = new String[20];
-		Thread trigrams, bigrams, unigrams, proximity;
+		ExecutorService pool = Executors.newFixedThreadPool(4);
+		
 		if (searchQuery.isEmpty())
 		{
 			System.out.println("Please enter a search query!");
@@ -58,71 +51,35 @@ public class SearchEngine extends HttpServlet
 		{
 			queryTerms = searchQuery.split(" ");
 			//TODO preprocess query
-			if (queryTerms.length >= 3)
-			{
-				trigrams = new Thread(new Trigrams(queryTerms));
-				bigrams = new Thread(new Bigrams(queryTerms));
-				unigrams = new Thread(new Unigrams(queryTerms));
-				proximity = new Thread(new Proximity(queryTerms));
-				
-				trigrams.start();
-				bigrams.start();
-				unigrams.start();
-				proximity.start();
-			}
 			
-			else if (queryTerms.length >= 2)
-			{
-				bigrams = new Thread(new Bigrams(queryTerms));
-				unigrams = new Thread(new Unigrams(queryTerms));
-				proximity = new Thread(new Proximity(queryTerms));
-				
-				bigrams.start();
-				unigrams.start();
-				proximity.start();
-			}
 			
-			else
+			if (queryTerms.length == 1)
 			{
-				Unigrams unigramsObj = new Unigrams(queryTerms);
-				unigrams = new Thread(unigramsObj);
-				unigrams.start();
+				Callable<Heap> callableUnigrams = new GetScoresCallable("UnigramIndex", queryTerms);
+				Future<Heap> unigramFuture = pool.submit(callableUnigrams);
 				try
 				{
-					unigrams.join();
+					unigramUrls = unigramFuture.get();
 				}
-				catch (InterruptedException e)
+				catch (InterruptedException | ExecutionException e)
 				{
 					e.printStackTrace();
 				}
-				unigramUrls = unigramsObj.getMatchedUrls();
-				rankResults();
+				
+				getRankedResults();
 			}
 		}
 	}
 	
-	private void rankResults()
+	private void getRankedResults()
 	{
 		int numResults = Math.min(maxResults, unigramUrls.size());
 		if (!unigramUrls.isEmpty())
 		{
 			for (int i = 0; i < numResults; i++)
 			{
-				System.out.println(unigramUrls.remove());
+				System.out.println(unigramUrls.remove().getPosting());
 			}
-		}
-	}
-	
-	private void singleWordQuery(String query)
-	{
-		PaginatedQueryList<InvertedIndex> resultList = dbAccessor.loadIndex(query);
-		ArrayList<Postings> postings = resultList.get(0).getPostings();
-		int numResults = Math.min(postings.size(), maxResults);
-		System.out.println("num of matces found: " + postings.size());
-
-		for (int i = 0; i < numResults; i++)
-		{
-			System.out.println(postings.get(i).getPosting());
 		}
 	}
 	
