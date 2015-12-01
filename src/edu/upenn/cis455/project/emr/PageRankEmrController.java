@@ -1,5 +1,6 @@
 package edu.upenn.cis455.project.emr;
 
+
 public class PageRankEmrController
 {
 
@@ -17,14 +18,14 @@ public class PageRankEmrController
 		String tableName = "edu.upenn.cis455.project.pagerank";
 		String primaryKeyName = "hostName";
 		String valueKeyName = "rank";
-		EmrController controller = new EmrController(emrInputPath,
-				emrOutputBucketName, emrOutputPrefix, emrJarPath, emrStepName,
-				clusterId, tableName, "hostName", "rank");
 		/*EmrController controller = new EmrController(emrInputPath,
+				emrOutputBucketName, emrOutputPrefix, emrJarPath, emrStepName,
+				clusterId, tableName, "hostName", "rank");*/
+		EmrController controller = new EmrController(emrInputPath,
 				emrOutputBucketName, emrOutputPrefix, clusterLogPath,
 				emrJarPath, emrStepName, clusterName, ec2AccessKeyName,
 				tableName, primaryKeyName, valueKeyName);
-		controller.createCluster();*/
+		controller.createCluster();
 		controller.setIterative(true);
 		int i = 0;
 		do
@@ -36,6 +37,7 @@ public class PageRankEmrController
 					+ controller.isDone());
 		}
 		while (!controller.isDone());
+		controller.terminateCluster();
 		System.out.println("Page rank terminated");
 	}
 

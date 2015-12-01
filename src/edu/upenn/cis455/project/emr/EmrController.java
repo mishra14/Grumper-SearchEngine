@@ -37,6 +37,7 @@ import com.amazonaws.services.elasticmapreduce.model.JobFlowInstancesConfig;
 import com.amazonaws.services.elasticmapreduce.model.RunJobFlowRequest;
 import com.amazonaws.services.elasticmapreduce.model.RunJobFlowResult;
 import com.amazonaws.services.elasticmapreduce.model.StepConfig;
+import com.amazonaws.services.elasticmapreduce.model.TerminateJobFlowsRequest;
 import com.amazonaws.services.elasticmapreduce.util.StepFactory;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest;
@@ -54,7 +55,7 @@ import edu.upenn.cis455.project.storage.S3EmrDA;
 public class EmrController
 {
 	private static final int MAX_LIST_SIZE = 1000;
-	private static final Double DELTA = 0.001;
+	private static final Double DELTA = 0.00001;
 	private String emrInputPath;
 	private String emrOutputBucketName;
 	private String emrOutputPrefix;
@@ -294,7 +295,6 @@ public class EmrController
 								.withSlaveInstanceType("m1.large"));
 
 		RunJobFlowResult flowResult = emr.runJobFlow(request);
-
 		DescribeClusterRequest clusterRequest = new DescribeClusterRequest();
 		clusterRequest.setClusterId(flowResult.getJobFlowId());
 		DescribeClusterResult clusterResult;
@@ -320,6 +320,33 @@ public class EmrController
 			}
 		}
 		return flowResult.getJobFlowId();
+	}
+
+	public void terminateCluster() throws InterruptedException
+	{
+		TerminateJobFlowsRequest terminateRequest = new TerminateJobFlowsRequest()
+				.withJobFlowIds(clusterId);
+		AmazonElasticMapReduce emr = new AmazonElasticMapReduceClient();
+		emr.terminateJobFlows(terminateRequest);
+
+		DescribeClusterRequest clusterRequest = new DescribeClusterRequest();
+		clusterRequest.setClusterId(clusterId);
+		DescribeClusterResult clusterResult;
+		while (true)
+		{
+			clusterResult = emr.describeCluster(clusterRequest);
+			System.out.println(clusterResult.getCluster().getStatus());
+			if (!clusterResult.getCluster().getStatus().getState()
+					.equals("TERMINATING"))
+			{
+				Thread.sleep(30000);
+			}
+			else
+			{
+				break;
+			}
+		}
+
 	}
 
 	public void batchWriteEmrResults(List<EmrResult> results)
@@ -458,8 +485,7 @@ public class EmrController
 			justKeys.add(new KeyVersion(result.getKey()));
 		}
 		multiObjectDeleteRequest.setKeys(justKeys);
-		// Execute DeleteObjects - Amazon S3 add delete marker for each object
-		// deletion. The objects no disappear from your bucket (verify).
+
 		DeleteObjectsResult delObjRes = null;
 		try
 		{
