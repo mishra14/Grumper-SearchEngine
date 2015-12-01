@@ -14,7 +14,8 @@ public class SearchEngine extends HttpServlet
 	private int maxResults = 10;
 	private int initialCapacity = 100;
 	private Heap unigramUrls = new Heap(initialCapacity);
-	
+	private Heap bigramUrls = new Heap(initialCapacity);
+
 	public void init()
 	{
 		
@@ -52,8 +53,27 @@ public class SearchEngine extends HttpServlet
 			queryTerms = searchQuery.split(" ");
 			//TODO preprocess query
 			
+			if (queryTerms.length >= 2)
+			{
+				Callable<Heap> callableBigrams = new GetScoresCallable("BigramIndex", queryTerms);
+				//Callable<Heap> callableUnigrams = new GetScoresCallable("UnigramIndex", queryTerms);
+				//Future<Heap> unigramFuture = pool.submit(callableUnigrams);
+				Future<Heap> bigramFuture = pool.submit(callableBigrams);
+
+				try
+				{
+					//unigramUrls = unigramFuture.get();
+					bigramUrls = bigramFuture.get();
+				}
+				catch (InterruptedException | ExecutionException e)
+				{
+					e.printStackTrace();
+				}
+				
+				getRankedResults();
+			}
 			
-			if (queryTerms.length == 1)
+			else
 			{
 				Callable<Heap> callableUnigrams = new GetScoresCallable("UnigramIndex", queryTerms);
 				Future<Heap> unigramFuture = pool.submit(callableUnigrams);
@@ -74,11 +94,11 @@ public class SearchEngine extends HttpServlet
 	private void getRankedResults()
 	{
 		int numResults = Math.min(maxResults, unigramUrls.size());
-		if (!unigramUrls.isEmpty())
+		if (!bigramUrls.isEmpty())
 		{
 			for (int i = 0; i < numResults; i++)
 			{
-				System.out.println(unigramUrls.remove().getPosting());
+				System.out.println(unigramUrls.remove());
 			}
 		}
 	}
@@ -86,8 +106,7 @@ public class SearchEngine extends HttpServlet
 	public static void main(String args[]) throws IOException
 	{
 		SearchEngine searchEngine = new SearchEngine();
-		//search.singleWordQuery("walnut");
-		//searchEngine.search("rule");
+		searchEngine.search("rule");
 		//searchEngine.search("or");
 		//searchEngine.search("quite");
 		//searchEngine.search("being");
@@ -96,8 +115,11 @@ public class SearchEngine extends HttpServlet
 //		searchEngine.search("side");
 //		searchEngine.search("choose");
 //		searchEngine.search("map"); 
-		searchEngine.search("log");
-		
+//		searchEngine.search("log");
+//		searchEngine.search("mashed potatoes");
+//		searchEngine.search("data contribute");
+		//searchEngine.search("cookies melissa");
+
 	}
 	private String searchPage = "<form action=\"/search\" method=\"post\"> "
 			+ "<center>Name of Search Engine</center> <br> " //TODO name of engine
