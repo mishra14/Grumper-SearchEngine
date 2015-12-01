@@ -10,20 +10,24 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperConfig;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
 import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedQueryList;
 import edu.upenn.cis455.project.storage.InvertedIndex;
 import edu.upenn.cis455.project.storage.Postings;
 
-public class DynamoDBtest
+public class DynamoIndexerDA
 {
 	private AmazonDynamoDBClient db = new AmazonDynamoDBClient(
 			new BasicAWSCredentials("AKIAJW5SHL6JM2RZLTXQ", "+U+QT1nqEUzVEREpZZjYSmUdwHA/3Enb3L3i2n9N"));
 	private DynamoDBMapper mapper = new DynamoDBMapper(db);
 	private HashMap<String, Float> allPostings;
 	private final static int MAX_LIST = 80;
+	private String tableName;
 	
-	
+	public DynamoIndexerDA(String tableName){
+		this.tableName = tableName;
+	}
 
 	public void saveIndex(String word, String postingsList)
 	{
@@ -48,7 +52,7 @@ public class DynamoDBtest
 			if (count >= MAX_LIST || !it.hasNext())
 			{
 				index.setPostings(postingList);
-				mapper.save(index);
+				mapper.save(index, new DynamoDBMapperConfig(new DynamoDBMapperConfig.TableNameOverride(tableName)));
 				postingList = new ArrayList<Postings>();
 				count = 0;
 
@@ -93,12 +97,15 @@ public class DynamoDBtest
 
 //	public static void main(String args[])
 //	{
-//		DynamoDBtest dynamo = new DynamoDBtest();
+//		String tableName = "BigramIndex";
+//		DynamoIndexerDA dynamo = new DynamoIndexerDA(tableName);
+//		
+//	
 //		dynamo.saveIndex("humpty", "google.com 0.8");;
 //		
 //		
 //		System.out.println("done saving");
-//		loadIndex();
+//		dynamo.loadIndex("humpty");
 //		System.out.println("done loading");
 //	}
 }

@@ -25,7 +25,7 @@ public class WholeFileRecordReader  extends RecordReader<Text, BytesWritable> {
 	private boolean fileread = false;
 	private BytesWritable value = new BytesWritable();
 	private int bucketSize;
-	private String crawlerBucket;
+	private static final String crawlerBucket = "indexer-test-data";;
 
 	
 	@Override
@@ -46,7 +46,6 @@ public class WholeFileRecordReader  extends RecordReader<Text, BytesWritable> {
                      throws IOException, InterruptedException {
              this.split = (FileSplit)split;
              this.conf = context.getConfiguration();
-             this.crawlerBucket = "pdeepti-test-bucket"; //TODO Use crawler bucket
              setBucketSize();
      }
 	
