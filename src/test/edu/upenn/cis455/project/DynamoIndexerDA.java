@@ -1,5 +1,10 @@
 package test.edu.upenn.cis455.project;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -7,7 +12,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperConfig;
@@ -18,17 +22,50 @@ import edu.upenn.cis455.project.storage.Postings;
 
 public class DynamoIndexerDA
 {
-	private AmazonDynamoDBClient db = new AmazonDynamoDBClient(
-			new BasicAWSCredentials("AKIAJW5SHL6JM2RZLTXQ", "+U+QT1nqEUzVEREpZZjYSmUdwHA/3Enb3L3i2n9N"));
-	private DynamoDBMapper mapper = new DynamoDBMapper(db);
+	private String AWSAccessKeyId;
+	private String AWSSecretKey;
+	private AmazonDynamoDBClient db;
+	private DynamoDBMapper mapper;
+	private DynamoDBMapperConfig config;
 	private HashMap<String, Float> allPostings;
 	private final static int MAX_LIST = 80;
 	private String tableName;
 	
 	public DynamoIndexerDA(String tableName){
 		this.tableName = tableName;
+		this.config = new DynamoDBMapperConfig(new DynamoDBMapperConfig.TableNameOverride(this.tableName));
+		setDB();
+		mapper = new DynamoDBMapper(db);
 	}
 
+	private void setDB(){
+		File file = new File ("rootkey.csv");
+		FileReader reader;
+		try
+		{
+			reader = new FileReader(file);
+			BufferedReader br = new BufferedReader(reader);
+			String line = br.readLine();
+			AWSAccessKeyId = line.split("=")[1].trim();
+			line = br.readLine();
+			AWSSecretKey = line.split("=")[1].trim();
+			db = new AmazonDynamoDBClient(
+					new BasicAWSCredentials(AWSAccessKeyId, AWSSecretKey));
+			br.close();
+			
+		}
+		catch (FileNotFoundException e)
+		{
+			
+			e.printStackTrace();
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+		
+		
+	}
 	public void saveIndex(String word, String postingsList)
 	{
 
@@ -52,7 +89,10 @@ public class DynamoIndexerDA
 			if (count >= MAX_LIST || !it.hasNext())
 			{
 				index.setPostings(postingList);
-				mapper.save(index, new DynamoDBMapperConfig(new DynamoDBMapperConfig.TableNameOverride(tableName)));
+				System.out.println("INDEX " + index);
+				System.out.println("Table " + tableName);
+
+				mapper.save(index, config);
 				postingList = new ArrayList<Postings>();
 				count = 0;
 
@@ -81,31 +121,32 @@ public class DynamoIndexerDA
 
 	}
 
-	public void loadIndex(String word)
+	public PaginatedQueryList<InvertedIndex> loadIndex(String word)
 	{
 		InvertedIndex queryIndex = new InvertedIndex();
 		queryIndex.setWord(word);
 		DynamoDBQueryExpression<InvertedIndex> query = new DynamoDBQueryExpression<InvertedIndex>()
 				.withHashKeyValues(queryIndex);
 		PaginatedQueryList<InvertedIndex> resultList = mapper.query(
-				InvertedIndex.class, query);
-		for (InvertedIndex index : resultList)
-		{
-			System.out.println(index);
-		}
+				InvertedIndex.class, query, config);
+//		for (InvertedIndex index : resultList)
+//		{
+//			System.out.println(index);
+//		}
+		return resultList;
 	}
 
 //	public static void main(String args[])
 //	{
-//		String tableName = "BigramIndex";
+//		String tableName = "UnigramIndex";
 //		DynamoIndexerDA dynamo = new DynamoIndexerDA(tableName);
 //		
 //	
-//		dynamo.saveIndex("humpty", "google.com 0.8");;
+//		dynamo.saveIndex("Dumpty", "google.com 0.8");;
 //		
 //		
 //		System.out.println("done saving");
-//		dynamo.loadIndex("humpty");
+//		dynamo.loadIndex("dumpty");
 //		System.out.println("done loading");
 //	}
 }
