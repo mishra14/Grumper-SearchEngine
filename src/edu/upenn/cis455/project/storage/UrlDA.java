@@ -11,7 +11,7 @@ import edu.upenn.cis455.project.bean.UrlRecord;
 
 public class UrlDA
 {
-	public static ArrayList<String> getURLS(){ //Return null if no queue exists
+	public synchronized static ArrayList<String> getURLS(){ //Return null if no queue exists
 		
 		ArrayList <String> urls = null;
 		if (DBWrapper.getStore() != null){
@@ -23,6 +23,7 @@ public class UrlDA
 					urls = new ArrayList<String>();
 					for(UrlRecord record : url_cursor){
 						urls.add(record.getUrl());
+						System.out.println("Added in urlDA : "+record.getUrl());
 						url_cursor.delete();
 						idx++;
 						if(idx == Queue.MAX)

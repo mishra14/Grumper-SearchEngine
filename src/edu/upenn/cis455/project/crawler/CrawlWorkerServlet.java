@@ -1,10 +1,5 @@
 package edu.upenn.cis455.project.crawler;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -21,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import edu.upenn.cis455.project.bean.DocumentRecord;
 import edu.upenn.cis455.project.bean.Queue;
+import edu.upenn.cis455.project.bean.UrlList;
 import edu.upenn.cis455.project.storage.DBWrapper;
 import edu.upenn.cis455.project.storage.QueueDA;
 
@@ -35,11 +31,13 @@ public class CrawlWorkerServlet extends HttpServlet
 	
 
 	private List<String> workers;
+	private int numWorkers;
 	private WorkerStatus status;
 	private WorkerPingThread pingThread;
 	private Queue<String> urlQueue;
 	private String port;
 	private ArrayList<DocumentRecord> crawledDocs;
+	private ArrayList<UrlList> urlMappings;
 	
 	private TimerTask timerTask;
 	private Timer timer;
@@ -69,6 +67,7 @@ public class CrawlWorkerServlet extends HttpServlet
 		}
 		workers = new ArrayList<String>();
 		crawledDocs = new ArrayList<DocumentRecord>();
+		urlMappings = new ArrayList<UrlList>();
 		
 		//Setup db wrapper
 		try
@@ -87,7 +86,8 @@ public class CrawlWorkerServlet extends HttpServlet
 		}
 		
 		//Start the timer task to push data to db
-		timerTask = new PushToDB(this.workers.size(),this.workers,this.crawledDocs);
+		timerTask = new PushToDB(this.workers, this.crawledDocs, this.urlMappings);
+		
 		timer = new Timer(true);
 		timer.scheduleAtFixedRate(timerTask, 60000, 60000);
 	}
@@ -97,7 +97,7 @@ public class CrawlWorkerServlet extends HttpServlet
 		System.out.println("DESTROY METHOD CALLED!!!");
 		//Force push any remaining data to db
 		timer.cancel();
-		new PushToDB(this.workers.size(),workers,this.crawledDocs).run();
+		new PushToDB(workers,this.crawledDocs,this.urlMappings).run();
 		
 		//Put current state of urlQueue onto berkeley db
 		QueueDA.putQueue(urlQueue, new Date());
@@ -129,7 +129,7 @@ public class CrawlWorkerServlet extends HttpServlet
 			int self_id = getSelfId(request.getLocalAddr());
 			
 			addToQueue(request.getParameter("urls"));
-			System.out.println("crawl worker : queue - "+urlQueue);
+//			System.out.println("crawl worker : queue - "+urlQueue);
 			// if status is idle then spawn crawl thread
 			boolean isCrawling = false;
 			
@@ -152,8 +152,9 @@ public class CrawlWorkerServlet extends HttpServlet
 			//Start crawler threads only if crawling has not already started
 			if(!isCrawling){
 				Thread [] threads = new Thread[threadCount];
+				System.out.println("STARTING IN WORKER: "+self_id+" NUMTHREADS: "+threadCount);
 				for(int i=0;i<threadCount;i++){
-					CrawlerThread crawlerThread = new CrawlerThread(urlQueue, status, self_id, this.workers.size(), crawledDocs);
+					CrawlerThread crawlerThread = new CrawlerThread(urlQueue, status, self_id, crawledDocs, urlMappings);
 					Thread thread = new Thread(crawlerThread);
 					thread.start();
 					threads[i] = thread;
@@ -165,12 +166,12 @@ public class CrawlWorkerServlet extends HttpServlet
 		{
 			// add these new urls into the frontier
 			System.out.println("[CRAWL WORKER] PUSHDATA RECEIVED");
-			response.setContentType("text/html");
-			PrintWriter out = response.getWriter();
-			out.print("<html>" + pageContent.toString() + "</html>");
-			response.flushBuffer();
+//			response.setContentType("text/html");
+//			PrintWriter out = response.getWriter();
+//			out.print("<html>" + pageContent.toString() + "</html>");
+//			response.flushBuffer();
 			addToQueue(request.getParameter("urls"));
-			System.out.println("crawl worker : queue - "+urlQueue);
+//			System.out.println("Crawl worker : Queue - "+urlQueue);
 		}
 		else if (pathInfo.equalsIgnoreCase("/updateWorkers"))
 		{
@@ -199,27 +200,33 @@ public class CrawlWorkerServlet extends HttpServlet
 
 	private void addToQueue(String urlString)
 	{
+		if(urlString == null){
+			System.out.println("urlString is null");
+		}
 		String[] urls = urlString.split(";");
 		urlQueue.enqueueAll(new ArrayList<String>(Arrays.asList(urls)));
 	}
 
 	private void updateWorkerList(HttpServletRequest request)
 	{
-		int numWorkers = Integer
+		numWorkers = Integer
 				.valueOf(request.getParameter("numworkers") == null ? "0"
 						: request.getParameter("numworkers"));
-		List<String> workerList = new ArrayList<String>();
-		for (int i = 0; i < numWorkers; i++)
-		{
-			String worker = request.getParameter("worker" + (i + 1));
-			if (worker != null)
-			{
-				workerList.add(worker);
-			}
-		}
+		
+		CrawlerThread.num_workers = numWorkers;
+//		System.out.println("[NUMWORKERS] : "+numWorkers);
+//		List<String> workerList = new ArrayList<String>();
 		synchronized (workers)
 		{
-			workers = workerList;
+			workers.clear();
+			for (int i = 0; i < numWorkers; i++)
+			{
+				String worker = request.getParameter("worker" + (i + 1));
+				if (worker != null)
+				{
+					this.workers.add(worker);
+				}
+			}
 		}
 		System.out.println("crawl worker : updated qorker list to - " + workers);
 	}

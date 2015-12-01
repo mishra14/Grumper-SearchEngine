@@ -1,12 +1,8 @@
 package edu.upenn.cis455.project.bean;
 
-import java.io.BufferedReader;
 import java.util.ArrayList;
 
 import com.sleepycat.persist.model.Persistent;
-
-import edu.upenn.cis455.project.crawler.FileIO;
-import edu.upenn.cis455.project.storage.UrlDA;
 
 /**
  * generic blocking queue implementation to hold different types of data.
@@ -93,6 +89,7 @@ public class Queue<T>
 		{
 			enqueue(t); // add all elements from the list
 		}
+		
 	}
 
 	/* (non-Javadoc)

@@ -1,6 +1,5 @@
 package edu.upenn.cis455.project.crawler;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -9,7 +8,7 @@ import java.util.Date;
 import edu.upenn.cis455.project.bean.DocumentRecord;
 import edu.upenn.cis455.project.bean.Queue;
 import edu.upenn.cis455.project.bean.RobotsInfo;
-import edu.upenn.cis455.project.bean.UrlRecord;
+import edu.upenn.cis455.project.bean.UrlList;
 import edu.upenn.cis455.project.crawler.info.URLInfo;
 import edu.upenn.cis455.project.http.HttpClient;
 import edu.upenn.cis455.project.parsers.HtmlParser;
@@ -22,15 +21,16 @@ public class CrawlerThread implements Runnable{
 	private Queue<String> urlQueue;
 	private WorkerStatus status;
 	private int self_id;
-	private int num_workers;
+	public static int num_workers;
 	private ArrayList<DocumentRecord> crawledDocs;
+	private ArrayList<UrlList> urlMappings;
 	
-	public CrawlerThread(Queue<String> urlQueue, WorkerStatus status, int self_id, int num_workers,ArrayList<DocumentRecord> crawledDocs){
+	public CrawlerThread(Queue<String> urlQueue, WorkerStatus status, int self_id, ArrayList<DocumentRecord> crawledDocs, ArrayList<UrlList> urlMappings){
 		this.urlQueue = urlQueue;
 		this.status = status;
 		this.self_id = self_id;
-		this.num_workers = num_workers;
 		this.crawledDocs = crawledDocs;
+		this.urlMappings = urlMappings;
 	}
 	
 	@Override
@@ -45,7 +45,7 @@ public class CrawlerThread implements Runnable{
 				urlQueue.enqueueAll(urls);
 				try
 				{	
-					Thread.sleep(5000);
+					urlQueue.wait();
 				}
 				catch (InterruptedException e)
 				{
@@ -53,6 +53,7 @@ public class CrawlerThread implements Runnable{
 				}
 				
 			}else{
+//				System.out.println("Queue is not empty");
 				url = urlQueue.dequeue();
 			}
 			
@@ -106,6 +107,10 @@ public class CrawlerThread implements Runnable{
 				{
 					if(!httpclient.sendHead(url, date)){
 						//System.out.println("Moving on");
+						if(httpclient.response_code >= 400){
+							System.out.println("Deleting record for: "+url);
+							s3.deleteDocument(doc);
+						}
 						continue;
 					}
 				}
@@ -147,41 +152,41 @@ public class CrawlerThread implements Runnable{
 					continue;
 				}
 				
-				System.out.println("IN THREAD: url- "+url);
-
-				//Send HEAD request to check if robots txt has been modified
-				String robots = protocol+domain+"/robots.txt";
-				boolean modified = false;
-				
-				try
-				{
+//				System.out.println("IN THREAD: url- "+url);
+//
+//				//Send HEAD request to check if robots txt has been modified
+//				String robots = protocol+domain+"/robots.txt";
+//				boolean modified = false;
+//				
+//				try
+//				{
 //					System.out.println("Last Accessed: "+lastAccessed.toString()+" for domain "+domain);
-					modified = httpclient.sendHead(robots,lastAccessed);
-				}
-				catch (IOException e)
-				{
-					System.out.println("Error sending HEAD request: "+e);
-				}
-				
-				if(modified){
-					//If it has been modified, fetch updated robots
-					try
-					{
-						System.out.println("Robots.txt has been modified");
-						httpclient.fetchRobots(robots,domain);
-					}
-					catch (Exception e)
-					{
-						System.out.println("Error fetching Robots.txt modified: "+e);
-					}
-//					System.out.println("Enqueuing url");
-					urlQueue.enqueue(url);
-					//DBWrapper.closeDBWrapper();
-					//System.out.println("Moving on");
-					continue;
-				}
-				
-//				System.out.println("Robots hasn't been modified");
+//					modified = httpclient.sendHead(robots,lastAccessed);
+//				}
+//				catch (IOException e)
+//				{
+//					System.out.println("Error sending HEAD request: "+e);
+//				}
+//				
+//				if(modified){
+//					//If it has been modified, fetch updated robots
+//					try
+//					{
+//						System.out.println("Robots.txt has been modified");
+//						httpclient.fetchRobots(robots,domain);
+//					}
+//					catch (Exception e)
+//					{
+//						System.out.println("Error fetching Robots.txt modified: "+e);
+//					}
+////					System.out.println("Enqueuing url");
+//					urlQueue.enqueue(url);
+//					//DBWrapper.closeDBWrapper();
+//					//System.out.println("Moving on");
+//					continue;
+//				}
+//				
+////				System.out.println("Robots hasn't been modified");
 				
 				boolean allowed = false;
 				if(info.getRobotsInfo().getAllowedLinks(agent_match)!=null){
@@ -271,7 +276,7 @@ public class CrawlerThread implements Runnable{
 			
 			//Parse html documents for links
 			if(content_type!=null && content_type.startsWith("text/html")){
-				HtmlParser.parse(document, url, urlQueue);
+				HtmlParser.parse(document, url, urlQueue, urlMappings);
 			}
 			
 //			System.out.println("Document for url: "+url);

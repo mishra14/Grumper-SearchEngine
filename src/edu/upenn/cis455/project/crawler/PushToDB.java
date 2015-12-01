@@ -12,38 +12,51 @@ import java.net.Socket;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.TimerTask;
 
 import edu.upenn.cis455.project.bean.DocumentRecord;
 import edu.upenn.cis455.project.bean.Queue;
+import edu.upenn.cis455.project.bean.UrlList;
 import edu.upenn.cis455.project.http.Http;
 import edu.upenn.cis455.project.http.HttpResponse;
 import edu.upenn.cis455.project.storage.DBWrapper;
 import edu.upenn.cis455.project.storage.QueueDA;
 import edu.upenn.cis455.project.storage.S3DocumentDA;
+import edu.upenn.cis455.project.storage.S3UrlListDA;
 
 public class PushToDB extends TimerTask
 {
-	private int numWorkers;
+	
 	private ArrayList<DocumentRecord> crawledDocs;
 	private List<String>workers;
+	private ArrayList<UrlList> urlMappings;
 	
-	public PushToDB(int numWorkers, List<String> workers, ArrayList<DocumentRecord> crawledDocs){
-		this.numWorkers = numWorkers;
+	public PushToDB(List<String> workers, ArrayList<DocumentRecord> crawledDocs, ArrayList<UrlList> urlMappings){
 		this.crawledDocs = crawledDocs;
 		this.workers = workers;
+		this.urlMappings = urlMappings;
 	}
 	
 	@Override
 	public void run()
 	{
-//		System.out.println("!!!!!!!!!!!!!!!!!! SENDING PUSHDATA !!!!!!!!!!!!!!!!!!!!!!!!!!!");
+		System.out.println("!!!!!!!!!!!!!!!!!! SENDING PUSHDATA !!!!!!!!!!!!!!!!!!!!!!!!!!!");
+		int numWorkers;
+		
+		synchronized(workers){
+			numWorkers = workers.size();
+		}
+		
+		System.out.println("Number of workers: "+numWorkers);
 		for(int i=0;i<numWorkers;i++){
 			File file = new File("./"+i+".txt");
 			
-			if(!file.exists())
+			if(!file.exists()){
+				System.out.println("File "+file.getName()+" does not exist!");
 				continue;
+			}
 			
 			BufferedReader br = null;
 			try
@@ -57,22 +70,42 @@ public class PushToDB extends TimerTask
 			}
 			StringBuilder body = new StringBuilder();
 			
+			ArrayList<String> post = new ArrayList<String>();
+			
 			try
 			{
 				body.append(br.readLine());
 				String line;
 				while((line=br.readLine())!=null){
 					body.append(";"+line);
+					if(body.toString().getBytes().length > 180000){
+						System.out.println("SIZE EXCEEDED");
+						post.add(body.toString());
+						body = new StringBuilder();
+						body.append(br.readLine());
+					}
 				}
 			}
+			
 			catch (IOException e)
 			{
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			
-			String workerUrl = "http://" + this.workers.get(i) + "/worker/pushdata";
-			System.out.println("Worker : sending pushdata to - " + workerUrl);
+//			System.out.println("SIZE OF POST BODY: "+body.toString().getBytes().length);
+			String current_worker;
+			
+			synchronized(workers){
+				if(i>=workers.size()){
+					break;
+				}else{
+					current_worker = workers.get(i);
+				}
+			}
+			
+			String workerUrl = "http://" + current_worker + "/worker/pushdata";
+			System.out.println("[Worker] : Sending Pushdata to - " + workerUrl);
 			URL url = null;
 			try
 			{
@@ -92,6 +125,19 @@ public class PushToDB extends TimerTask
 				socket = new Socket(host, port);
 				clientSocketOut = new PrintWriter(new OutputStreamWriter(
 						socket.getOutputStream()));
+				
+				for(String post_body: post){
+					clientSocketOut.print("POST " + url.toString() + " HTTP/1.0\r\n");
+					clientSocketOut.print("Content-Length:" + post_body.length() + "\r\n");
+					clientSocketOut
+							.print("Content-Type:application/x-www-form-urlencoded\r\n");
+					clientSocketOut.print("\r\n");
+					clientSocketOut.print("urls="+post_body);
+					clientSocketOut.print("\r\n");
+					clientSocketOut.print("\r\n");
+					clientSocketOut.flush();
+					System.out.println("Sent Post");
+				}
 			}
 			catch (IOException e)
 			{
@@ -99,25 +145,17 @@ public class PushToDB extends TimerTask
 				e.printStackTrace();
 			}
 			
-			clientSocketOut.print("POST " + url.toString() + " HTTP/1.0\r\n");
-			clientSocketOut.print("Content-Length:" + body.toString().length() + "\r\n");
-			clientSocketOut
-					.print("Content-Type:application/x-www-form-urlencoded\r\n");
-			clientSocketOut.print("\r\n");
-			clientSocketOut.print(body.toString());
-			clientSocketOut.print("\r\n");
-			clientSocketOut.print("\r\n");
-			clientSocketOut.flush();
-			
 			HttpResponse response = null;
 			try
 			{
-				response = Http.parseResponse(socket);
-				if (!response.getResponseCode().equalsIgnoreCase("200"))
-				{
-					System.out.println("Master : worker " + workers.get(i)
-							+ "did not accept the crawl job");
-					
+				if(socket!=null){
+					response = Http.parseResponse(socket);
+					if (!response.getResponseCode().equalsIgnoreCase("200"))
+					{
+						System.out.println("[WORKER] : worker " + current_worker
+								+ "DID NOT ACCEPT the crawl job");
+						
+					}
 				}
 			}
 			catch (IOException e1)
@@ -126,11 +164,13 @@ public class PushToDB extends TimerTask
 				e1.printStackTrace();
 			}
 			
+			if(clientSocketOut != null)
+				clientSocketOut.close();
 			
-			clientSocketOut.close();
 			try
 			{
-				socket.close();
+				if(socket!=null)
+					socket.close();
 			}
 			catch (IOException e)
 			{
@@ -138,17 +178,18 @@ public class PushToDB extends TimerTask
 				e.printStackTrace();
 			}
 			
-			if(response.getResponseCode().equalsIgnoreCase("200")){
+			if(response!=null && response.getResponseCode().equalsIgnoreCase("200")){
 				boolean result = file.delete();
 				if(!result){
 					System.out.println("FILE WAS NOT DELETED: "+file.getName());
 				}else{
 					System.out.println("FILE WAS DELETED SUCCESSFULLY!!");
 				}
+				System.out.println("[PushToDB] Sent pushdata successfully!!");
 			}
 		}
 		
-//		System.out.println("!!!!!!!!!!!!!!!!!! FINISHED PUSHDATA !!!!!!!!!!!!!!!!!!!!!!!!!!!");
+		System.out.println("!!!!!!!!!!!!!!!!!! FINISHED PUSHDATA !!!!!!!!!!!!!!!!!!!!!!!!!!!");
 		
 //		System.out.println("PUSHING TO DB");
 		S3DocumentDA s3 = new S3DocumentDA();
@@ -161,7 +202,25 @@ public class PushToDB extends TimerTask
 			crawledDocs.clear();
 		}
 		
-//		System.out.println("!!!!!!!!!!!!!!!!!!!!!!!! FINISHED PUSHING TO DB !!!!!!!!!!!!!!!!!!!!!!!!!!!1");
+		S3UrlListDA urlDA = new S3UrlListDA();
+		
+		synchronized(urlMappings){
+			for(UrlList urllist: urlMappings){
+				UrlList dbEntry = urlDA.getUrlList(urllist.getParentUrl());
+				if(dbEntry!=null){
+					HashSet <String> combinedSet = new HashSet<String>();
+					combinedSet.addAll(dbEntry.getUrls());
+					combinedSet.addAll(urllist.getUrls());
+					dbEntry.setUrls(combinedSet);
+					urlDA.putUrlList(dbEntry);
+				}else{
+					System.out.println("[Domain Does Not Exist] Adding url Mapping for : "+urllist.getParentUrl());
+					urlDA.putUrlList(urllist);
+				}
+			}
+		}
+		
+		System.out.println("!!!!!!!!!!!!!!!!!!!!!!!! FINISHED PUSHING TO DB !!!!!!!!!!!!!!!!!!!!!!!!!!!1");
 		
 	}
 	

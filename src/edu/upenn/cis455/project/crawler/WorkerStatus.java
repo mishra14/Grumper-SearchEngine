@@ -98,7 +98,7 @@ public class WorkerStatus
 	
 	public void incrementCount(){
 		this.numPagesCrawled++;
-		System.out.println("!!!!!!!!!!!!!!!!!!!!!!INCREMENTING by 1: "+numPagesCrawled.toString());
+//		System.out.println("!!!!!!!!!!!!!!!!!!!!!!INCREMENTING by 1: "+numPagesCrawled.toString());
 		setPagesCrawled(numPagesCrawled.toString());
 	}
 	

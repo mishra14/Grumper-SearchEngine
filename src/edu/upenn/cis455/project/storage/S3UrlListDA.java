@@ -85,9 +85,9 @@ public class S3UrlListDA
 		try
 		{
 			String key = Hash.hashKey(urlList.getParentUrl());
-
 			if (key == null)
 			{
+				System.out.println("Key is null");
 				result = false;
 			}
 		}
@@ -227,13 +227,15 @@ public class S3UrlListDA
 			NoSuchAlgorithmException
 	{
 		S3UrlListDA s3 = new S3UrlListDA();
-		String parentUrl = "www.yahoo.com";
+		String parentUrl = "money.usnews.com";
 		Set<String> urls = new HashSet<String>();
 		urls.add("www.google.com");
 		urls.add("www.amazon.com");
 		UrlList urlList = new UrlList(parentUrl, urls, true,
 				new Date().getTime());
-		s3.putUrlList(urlList);
-		System.out.println(s3.getUrlList(parentUrl));
+//		s3.putUrlList(urlList);
+//		System.out.println(s3.getUrlList(parentUrl));
+		
+		System.out.println(s3.urlListExists(urlList));
 	}
 }

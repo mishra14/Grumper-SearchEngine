@@ -22,6 +22,7 @@ public class HttpClient
 {
 	private Queue<String> urlQueue;
 	private String content_type = null;
+	public int response_code = 0;
 	
 	public HttpClient(Queue<String> urlQueue){
 		this.urlQueue = urlQueue;
@@ -57,10 +58,12 @@ public class HttpClient
 			
 			if(lastAccessed!=null){
 				SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
-//				sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+				sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
 				String d = sdf.format(lastAccessed);
 				connection.setRequestProperty("If-Modified-Since", d);
 			}
+			
+			this.response_code = connection.getResponseCode();
 			
 			if(connection.getResponseCode() == 301){
 				String location = connection.getHeaderField("Location");
@@ -94,11 +97,15 @@ public class HttpClient
 			
 			if(lastAccessed!=null){
 				SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
-//				sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+				sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
 				String d = sdf.format(lastAccessed);
+				System.out.println(d);
 				connection.setRequestProperty("If-Modified-Since", d);
 			}
 			
+			this.response_code = connection.getResponseCode();
+			
+//			System.out.println(connection.getResponseCode());
 			if(connection.getResponseCode() == 301){
 				String location = connection.getHeaderField("Location");
 				System.out.println("Redirected to: "+location);
@@ -209,9 +216,9 @@ public class HttpClient
 	
 //	public static void main(String[] args) throws IOException{
 //		HttpClient client = new HttpClient(null);
-//		Date date = new Date("Thu Nov 26 23:15:56 EST 2015");
-//		System.out.println(client.sendHead("http://www.nytimes.com/robots.txt",date));
-////		System.out.println(client.fetch("http://www.nytimes.com/robots.txt"));
+//		Date date = new Date("Mon Nov 30 15:12:28 EST 2015");
+//		System.out.println(client.sendHead("http://time.com/robots.txt",date));
+////		System.out.println(client.fetch("http://www.usnews.com/robots.txt"));
 //	}
-//	
+	
 }
