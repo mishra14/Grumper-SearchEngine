@@ -7,7 +7,8 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMarshalling;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBRangeKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 
-@DynamoDBTable(tableName = "UnigramIndex")
+
+@DynamoDBTable(tableName = "CUSTOM_TABLE_NAME")
 public class InvertedIndex
 {
 	private String word;

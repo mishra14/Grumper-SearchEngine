@@ -13,9 +13,8 @@ import org.jsoup.nodes.Document;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import edu.upenn.cis455.project.bean.DocumentRecord;
-import edu.upenn.cis455.project.indexer.Stemmer;
+//import edu.upenn.cis455.project.indexer.Stemmer;
 
 public class Map extends Mapper<Text, BytesWritable, Text, Text> {
     
@@ -50,13 +49,13 @@ public class Map extends Mapper<Text, BytesWritable, Text, Text> {
 	
 	public void getAllWords(String content){
 		allWords = new ArrayList<String>();
-		StringTokenizer tokenizer = new StringTokenizer(content, " ,.?\"");
+		StringTokenizer tokenizer = new StringTokenizer(content, " ,.?\"!-");
 		String word;
 		while (tokenizer.hasMoreTokens()) {
 			word = tokenizer.nextToken();
 	    	word = word.trim().toLowerCase().replaceAll("[^a-z0-9 ]", "");
 	    	if (!stopwords.contains(word) && !word.equals("")){
-	    		allWords.add(stem(word));
+	    		allWords.add(word);
 	    	}
 	    }
 	}
@@ -80,16 +79,16 @@ public class Map extends Mapper<Text, BytesWritable, Text, Text> {
 		return doc;
 	}
 	
-	public String stem(String word)
-	{
-		System.out.println("received word: " + word);
-		Stemmer stemmer = new Stemmer();
-		char[] charArray = word.toCharArray();
-		stemmer.add(charArray, word.length());
-		stemmer.stem();
-		String stemmedWord = stemmer.toString();
-		return stemmedWord;
-	}
+//	public String stem(String word)
+//	{
+//		System.out.println("received word: " + word);
+//		Stemmer stemmer = new Stemmer();
+//		char[] charArray = word.toCharArray();
+//		stemmer.add(charArray, word.length());
+//		stemmer.stem();
+//		String stemmedWord = stemmer.toString();
+//		return stemmedWord;
+//	}
 	
 	private static ArrayList<String> stopwords =
 			new ArrayList<String> (Arrays.asList(("a,about,above,"

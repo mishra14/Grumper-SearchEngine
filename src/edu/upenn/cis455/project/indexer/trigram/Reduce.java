@@ -10,6 +10,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
 import edu.upenn.cis455.project.scoring.TFIDF;
+import test.edu.upenn.cis455.project.DynamoIndexerDA;
 
 public class Reduce extends Reducer<Text, Text, Text, Text>
 {
@@ -17,7 +18,8 @@ public class Reduce extends Reducer<Text, Text, Text, Text>
 	private HashMap<String, Integer> tf = null;
 	private Text keyword;
 	private int bucketSize, df;
-	
+	private static final String tablename = "TrigramIndex";
+
 	@Override
 	protected void reduce(Text key, Iterable<Text> values, Context context) 
 			throws IOException, InterruptedException {
@@ -25,8 +27,9 @@ public class Reduce extends Reducer<Text, Text, Text, Text>
 		df = computeDF(values);
 		String postings = computePostings();  
 		String value = postings;
-		
 		context.write(keyword, new Text(value));
+		DynamoIndexerDA dynamo = new DynamoIndexerDA(tablename);
+		dynamo.saveIndex(keyword.toString(), value);
     }
 	
 	private int computeDF( Iterable<Text> docIDs){
@@ -55,11 +58,16 @@ public class Reduce extends Reducer<Text, Text, Text, Text>
 		  
 		  StringBuilder postings = new StringBuilder();
 		
-		  System.err.println("Compute Postings : Computed tf: TF dict" + tf.toString());		
+		  int size = tf.size() - 1;
+		  int i = 0;
+		  
 		  for (String docID: tf.keySet()){
 			  double tfidf = TFIDF.compute(tf.get(docID), df, bucketSize);
-			  System.err.println("Compute Postings : in postings :" + docID.toString()+":" + tf.get(docID)+ " ");
-			  postings.append(docID.toString()+":" + tfidf+ " ");
+			  if (i < size )
+				  postings.append(docID.toString()+" " + tfidf + ",");
+			  else 
+				  postings.append(docID.toString()+" " + tfidf);
+			  i++;
 		  }
 		  return postings.toString();
 		  

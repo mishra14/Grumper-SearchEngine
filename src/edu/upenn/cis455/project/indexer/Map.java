@@ -64,15 +64,15 @@ public class Map extends Mapper<Text, BytesWritable, Text, Text> {
 		return doc;
 	}
 
-	public String stem(String word)
-	{
-		System.out.println("received word: " + word);
-		Stemmer stemmer = new Stemmer();
-		char[] charArray = word.toCharArray();
-		stemmer.add(charArray, word.length());
-		stemmer.stem();
-		String stemmedWord = stemmer.toString();
-		return stemmedWord;
-	}
-	
+//	public String stem(String word)
+//	{
+//		System.out.println("received word: " + word);
+//		Stemmer stemmer = new Stemmer();
+//		char[] charArray = word.toCharArray();
+//		stemmer.add(charArray, word.length());
+//		stemmer.stem();
+//		String stemmedWord = stemmer.toString();
+//		return stemmedWord;
+//	}
+//	
 }

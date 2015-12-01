@@ -10,7 +10,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
-import test.edu.upenn.cis455.project.DynamoDBtest;
+import test.edu.upenn.cis455.project.DynamoIndexerDA;
 import edu.upenn.cis455.project.scoring.TFIDF;
 
 public class Reduce extends Reducer<Text, Text, Text, Text>
@@ -19,6 +19,7 @@ public class Reduce extends Reducer<Text, Text, Text, Text>
 	private HashMap<String, Integer> tf = null;
 	private Text keyword;
 	private int bucketSize, df;
+	private static final String tablename = "UnigramIndex";
 	
 	@Override
 	protected void reduce(Text key, Iterable<Text> values, Context context) 
@@ -28,7 +29,7 @@ public class Reduce extends Reducer<Text, Text, Text, Text>
 		String postingsList = computePostings();  
 		String value = postingsList;
 		context.write(keyword, new Text(value));
-		DynamoDBtest dynamo = new DynamoDBtest();
+		DynamoIndexerDA dynamo = new DynamoIndexerDA(tablename);
 		dynamo.saveIndex(keyword.toString(), value);
     }
 	
