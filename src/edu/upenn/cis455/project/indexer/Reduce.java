@@ -1,6 +1,8 @@
 package edu.upenn.cis455.project.indexer;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -10,15 +12,16 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
-import test.edu.upenn.cis455.project.DynamoIndexerDA;
+import edu.upenn.cis455.project.dynamoDA.DynamoIndexerDA;
 import edu.upenn.cis455.project.scoring.TFIDF;
+import edu.upenn.cis455.project.scoring.URLTFIDF;
 
 public class Reduce extends Reducer<Text, Text, Text, Text>
 {
 	private Log log = LogFactory.getLog(Reduce.class);
-	private HashMap<String, Integer> tf = null;
+	private static HashMap<String, Integer> tf = null;
 	private Text keyword;
-	private int bucketSize, df;
+	private static int bucketSize, df;
 	private static final String tablename = "UnigramIndex";
 	
 	@Override
@@ -26,11 +29,10 @@ public class Reduce extends Reducer<Text, Text, Text, Text>
 			throws IOException, InterruptedException {
 		setFieldsFromKey(key);
 		df = computeDF(values);
-		String postingsList = computePostings();  
-		String value = postingsList;
-		context.write(keyword, new Text(value));
+		String postingsList = createPostingsList();  
+		context.write(keyword, new Text(postingsList));
 		DynamoIndexerDA dynamo = new DynamoIndexerDA(tablename);
-		dynamo.saveIndex(keyword.toString(), value);
+		dynamo.saveIndex(keyword.toString(), postingsList);
     }
 	
 	private int computeDF( Iterable<Text> docIDs){
@@ -45,6 +47,7 @@ public class Reduce extends Reducer<Text, Text, Text, Text>
 				  System.err.println("Compute Postings : Doc ID in tf" + docID.toString());
 				  int count = tf.get(docID);
 				  tf.put(docID, count + 1);
+				  
 			  }
 			  else {
 				  System.err.println("Compute Postings : Doc ID new" + docID.toString());
@@ -55,24 +58,34 @@ public class Reduce extends Reducer<Text, Text, Text, Text>
 		  return docIDset.size();
 	  }
 	  
-	  private String computePostings(){
+	  private ArrayList<URLTFIDF> sortPostings(){
+		 
+		  ArrayList<URLTFIDF> postingsList = new ArrayList<URLTFIDF>();
 		  
+		  for(String docID: tf.keySet()){
+			  float idf = TFIDF.getIDF(df, bucketSize);
+			  float tfidf = TFIDF.getTFIDF(tf.get(docID), idf);
+			  URLTFIDF newPostings = new URLTFIDF(docID, tfidf, idf);
+			  postingsList.add(newPostings);
+		  }
+		  Collections.sort(postingsList);
+		  return postingsList;
+		  
+	  }
+	  
+	  private String createPostingsList(){
 		  StringBuilder postings = new StringBuilder();
-		
-		  System.err.println("Compute Postings : Computed tf: TF dict" + tf.toString());
-		  
-		  int size = tf.size() - 1;
+		  ArrayList<URLTFIDF> postingsList = sortPostings();
+		  int size = postingsList.size() - 1;
 		  int i = 0;
-		  for (String docID: tf.keySet()){
-			  double tfidf = TFIDF.compute(tf.get(docID), df, bucketSize);
+		  for(URLTFIDF pair : postingsList){
 			  if (i < size )
-				  postings.append(docID.toString()+" " + tfidf + ",");
+				  postings.append(pair.getURL()+ " " + pair.getTFIDF() + " "+ pair.getIDF() +",");
 			  else 
-				  postings.append(docID.toString()+" " + tfidf);
+				  postings.append(pair.getURL()+ " " + pair.getTFIDF() + " " + pair.getIDF());
 			  i++;
 		  }
 		  return postings.toString();
-		  
 	  }
 	  
 	  private void setFieldsFromKey(Text key)
@@ -81,4 +94,7 @@ public class Reduce extends Reducer<Text, Text, Text, Text>
 		  bucketSize = Integer.parseInt(keys[1]);
 		  keyword = new Text(keys[0]);
 	  }
+	  
+	  
+	 
 }

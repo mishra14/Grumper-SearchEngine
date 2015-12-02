@@ -1,4 +1,4 @@
-package test.edu.upenn.cis455.project;
+package edu.upenn.cis455.project.dynamoDA;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -27,18 +27,19 @@ public class DynamoIndexerDA
 	private AmazonDynamoDBClient db;
 	private DynamoDBMapper mapper;
 	private DynamoDBMapperConfig config;
-	private HashMap<String, Float> allPostings;
+	//private HashMap<String, Float> allPostings;
 	private final static int MAX_LIST = 80;
 	private String tableName;
 	
 	public DynamoIndexerDA(String tableName){
 		this.tableName = tableName;
 		this.config = new DynamoDBMapperConfig(new DynamoDBMapperConfig.TableNameOverride(this.tableName));
-		setDB();
+		db = new AmazonDynamoDBClient();
+		//setupDB();
 		mapper = new DynamoDBMapper(db);
 	}
 
-	private void setDB(){
+	private void setupDB(){
 		File file = new File ("rootkey.csv");
 		FileReader reader;
 		try
@@ -66,59 +67,82 @@ public class DynamoIndexerDA
 		
 		
 	}
-	public void saveIndex(String word, String postingsList)
+	public void saveIndex(String word, String postingsString)
 	{
 
 		InvertedIndex index = new InvertedIndex();
-
-		parseInput(postingsList);
 		index.setWord(word);
+		//parseInput(postingsList);
+		ArrayList<Postings>allPostings = parseAllPostings(postingsString);
+		ArrayList<Postings> postingsList = new ArrayList<Postings>();
 		int count = 0;
-		Iterator<Entry<String, Float>> it = allPostings.entrySet().iterator();
-		ArrayList<Postings> postingList = new ArrayList<Postings>();
-		while (it.hasNext())
-		{
-			Map.Entry<String, Float> pair = (Map.Entry<String, Float>) it
-					.next();
-			Postings posting = new Postings();
-			posting.setPosting(pair.getKey().toString());
-			posting.setTfidf((float) pair.getValue());
-			postingList.add(posting);
-			it.remove();
-			count++;
-			if (count >= MAX_LIST || !it.hasNext())
-			{
-				index.setPostings(postingList);
-				System.out.println("INDEX " + index);
-				System.out.println("Table " + tableName);
-
+		int size = allPostings.size();
+		for (int i =0; i < size ; i++){
+			postingsList.add(allPostings.get(i));
+			count ++;
+			
+			if ( count >= MAX_LIST || i == size - 1){
+				index.setPostings(postingsList);
+				System.out.println("Saving Index: " + index.toString());
 				mapper.save(index, config);
-				postingList = new ArrayList<Postings>();
+				postingsList = new ArrayList<Postings>();
 				count = 0;
-
 			}
-
+			
 		}
+		
+//		Iterator<Entry<String, Float>> it = allPostings.entrySet().iterator();
+//		ArrayList<Postings> postingList = new ArrayList<Postings>();
+//		while (it.hasNext())
+//		{
+//			Map.Entry<String, Float> pair = (Map.Entry<String, Float>) it
+//					.next();
+//			Postings posting = new Postings();
+//			posting.setPosting(pair.getKey().toString());
+//			posting.setTfidf((float) pair.getValue());
+//			postingList.add(posting);
+//			it.remove();
+//			count++;
+//			if (count >= MAX_LIST || !it.hasNext())
+//			{
+//				index.setPostings(postingList);
+//				mapper.save(index, config);
+//				postingList = new ArrayList<Postings>();
+//				count = 0;
+//
+//			}
+//
+//		}
 
 	}
 
-	public void parseInput(String postingsList)
-	{
-		allPostings = new HashMap<String, Float>();
-
-		//String[] input = line.split("\t", 2);
-
-		//word = input[0];
-		String[] postings = postingsList.split(",");
-//		System.out.println("Word:" + word);
-//		System.out.println("Whole list:" + input[1]);
-
-		for (String posting : postings)
+//	public void parseInput(String postingsList)
+//	{
+//		allPostings = new HashMap<String, Float>();
+//		String[] postings = postingsList.split(",");
+//		for (String posting : postings)
+//		{
+//			String[] pair = posting.trim().split(" ");
+//			allPostings.put(pair[0].trim(), Float.parseFloat(pair[1].trim()));
+//		}
+//
+//	}
+	
+	public ArrayList<Postings> parseAllPostings(String postingsList){
+		ArrayList<Postings> list = new ArrayList<Postings>();
+		String[] postingsContent = postingsList.split(",");
+		for (String posting : postingsContent)
 		{
-			String[] pair = posting.trim().split(" ");
-			allPostings.put(pair[0].trim(), Float.parseFloat(pair[1].trim()));
+			Postings postings = new Postings();
+			String[] pair = posting.trim().split(" ", 2);
+			postings.setPosting(pair[0]);
+			pair = pair[1].split(" ");
+			postings.setTfidf(Float.parseFloat(pair[0].trim()));
+			postings.setIdf(Float.parseFloat(pair[1].trim()));
+			list.add(postings);
+			
 		}
-
+		return list;
 	}
 
 	public PaginatedQueryList<InvertedIndex> loadIndex(String word)
@@ -129,10 +153,10 @@ public class DynamoIndexerDA
 				.withHashKeyValues(queryIndex);
 		PaginatedQueryList<InvertedIndex> resultList = mapper.query(
 				InvertedIndex.class, query, config);
-//		for (InvertedIndex index : resultList)
-//		{
-//			System.out.println(index);
-//		}
+		for (InvertedIndex index : resultList)
+		{
+			System.out.println(index);
+		}
 		return resultList;
 	}
 
@@ -142,11 +166,11 @@ public class DynamoIndexerDA
 //		DynamoIndexerDA dynamo = new DynamoIndexerDA(tableName);
 //		
 //	
-//		dynamo.saveIndex("Dumpty", "google.com 0.8");;
+//		dynamo.saveIndex("Dumpty", "google.com 0.8 0.4");;
 //		
 //		
 //		System.out.println("done saving");
-//		dynamo.loadIndex("dumpty");
+//		dynamo.loadIndex("Dumpty");
 //		System.out.println("done loading");
 //	}
 }

@@ -1,6 +1,8 @@
 package edu.upenn.cis455.project.indexer;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.StringTokenizer;
 
 import org.apache.hadoop.io.BytesWritable;
@@ -23,7 +25,6 @@ public class Map extends Mapper<Text, BytesWritable, Text, Text> {
     		throws IOException, InterruptedException {
 	    Text word = new Text();
 	    DocumentRecord doc = getDocument(value);
-	    
 	    String line = doc.getDocumentString();
 	    url.set(doc.getDocumentId().trim());
 	
@@ -43,8 +44,7 @@ public class Map extends Mapper<Text, BytesWritable, Text, Text> {
     }
 	
 	
-	
-	public String getHtmlText(String html)
+	private String getHtmlText(String html)
 	{
 		Document doc = Jsoup.parse(html.replaceAll("(?i)<br[^>]*>", "<pre>\n</pre>"));
 		String textContent = doc.select("body").text();
@@ -64,15 +64,6 @@ public class Map extends Mapper<Text, BytesWritable, Text, Text> {
 		return doc;
 	}
 
-//	public String stem(String word)
-//	{
-//		System.out.println("received word: " + word);
-//		Stemmer stemmer = new Stemmer();
-//		char[] charArray = word.toCharArray();
-//		stemmer.add(charArray, word.length());
-//		stemmer.stem();
-//		String stemmedWord = stemmer.toString();
-//		return stemmedWord;
-//	}
-//	
+	
+	
 }

@@ -4,6 +4,7 @@ public class Postings
 {
 	String posting;
 	float tfidf;
+	float idf;
 	
 	public void setPosting(String posting){
 		this.posting = posting;
@@ -20,11 +21,20 @@ public class Postings
 	public float getTfidf(){
 		return this.tfidf;
 	}
+	
+	public void setIdf(float idf){
+		this.idf = idf;
+	}
+	
+	public float getIdf(){
+		return this.idf;
+	}
+
 
 	@Override
 	public String toString()
 	{
-		return "Postings [posting=" + posting + ", tfidf=" + tfidf + "]";
+		return "Postings [posting=" + posting + ", tfidf=" + tfidf + ", idf=" + idf +"]";
 	}
 	
 	

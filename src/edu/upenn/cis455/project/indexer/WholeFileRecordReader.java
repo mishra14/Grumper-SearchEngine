@@ -26,7 +26,7 @@ public class WholeFileRecordReader  extends RecordReader<Text, BytesWritable> {
 	private boolean fileread = false;
 	private BytesWritable value = new BytesWritable();
 	private int bucketSize;
-	private static final String crawlerBucket = "indexer-test-data";;
+	private static final String crawlerBucket = "indexer-test-data";
 	
 	@Override
 	public Text getCurrentKey() throws IOException, InterruptedException {
