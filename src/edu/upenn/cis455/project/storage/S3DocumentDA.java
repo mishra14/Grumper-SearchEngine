@@ -114,12 +114,13 @@ public class S3DocumentDA
 				GetObjectRequest req = new GetObjectRequest(bucketName, key);
 				S3Object s3Object = s3client.getObject(req);
 				InputStream objectData = s3Object.getObjectContent();
-		        BufferedReader reader = new BufferedReader(new InputStreamReader(objectData));
-		        StringBuilder s3Content = new StringBuilder();
-		        String line;
-				while((line=reader.readLine())!=null)
+				BufferedReader reader = new BufferedReader(
+						new InputStreamReader(objectData));
+				StringBuilder s3Content = new StringBuilder();
+				String line;
+				while ((line = reader.readLine()) != null)
 				{
-					s3Content.append(line+"\r\n");
+					s3Content.append(line + "\r\n");
 				}
 				reader.close();
 				objectData.close();
@@ -150,24 +151,24 @@ public class S3DocumentDA
 		{
 			// hash url to get key
 			String s3Key = Hash.hashKey(doc.getDocumentString());
-			
+
 			// put document into s3
 			ObjectMapper mapper = new ObjectMapper();
 			mapper.setVisibility(PropertyAccessor.ALL, Visibility.NONE);
 			mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
 			ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
 			String json = ow.writeValueAsString(doc);
-			ByteArrayInputStream inputStream = new ByteArrayInputStream(json.getBytes());
+			ByteArrayInputStream inputStream = new ByteArrayInputStream(
+					json.getBytes());
 			ObjectMetadata omd = new ObjectMetadata();
 			omd.setContentLength(json.getBytes().length);
 			PutObjectRequest request = new PutObjectRequest(bucketName, s3Key,
 					inputStream, omd);
 			s3client.putObject(request);
-			
+
 			// put the key into dynamo
 			dynamo.putItem("documentUrl", doc.getDocumentId(), "s3Key", s3Key);
-			
-			
+
 			/*
 			ObjectMapper mapper = new ObjectMapper();
 			mapper.setVisibility(PropertyAccessor.ALL, Visibility.NONE);
@@ -237,6 +238,30 @@ public class S3DocumentDA
 		}
 	}
 
+	public String getHashCodeFromDynamo(String url)
+	{
+		// first get hash key from dynamo db
+		String key = dynamo.getValue("documentUrl", url, "s3Key");
+		return key;
+	}
+
+	public void deleteDocumentWithHashCode(String hashCode)
+	{
+		if (hashCode != null)
+		{
+			try
+			{
+				s3client.deleteObject(bucketName, hashCode);
+			}
+			catch (AmazonClientException e)
+			{
+				System.out
+						.println("S3DocumentDA : Exception while deleting document with id - "
+								+ hashCode);
+				e.printStackTrace();
+			}
+		}
+	}
 	/*public static void main(String[] args) throws IOException, NoSuchAlgorithmException
 	{
 		S3DocumentDA s3 = new S3DocumentDA();
@@ -278,9 +303,9 @@ public class S3DocumentDA
 		GetObjectRequest req = new GetObjectRequest(s3.bucketName, key2);
 		S3Object s3Object = s3.s3client.getObject(req);
 		InputStream objectData = s3Object.getObjectContent();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(objectData));
-        StringBuilder s3Content = new StringBuilder();
-        String line;
+	    BufferedReader reader = new BufferedReader(new InputStreamReader(objectData));
+	    StringBuilder s3Content = new StringBuilder();
+	    String line;
 		while((line=reader.readLine())!=null)
 		{
 			s3Content.append(line+"\r\n");
