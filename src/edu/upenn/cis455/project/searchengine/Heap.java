@@ -2,35 +2,49 @@ package edu.upenn.cis455.project.searchengine;
 
 import java.util.*;
 
-import edu.upenn.cis455.project.storage.Postings;
-
 public class Heap
 {
-	private PriorityQueue<Postings> myHeap;
+	private PriorityQueue<UrlScores> myHeap;
 	
 	public Heap(int initialCapacity)
 	{
-		myHeap = new PriorityQueue<Postings>(initialCapacity, 
-				new Comparator<Postings>()
+		
+		myHeap = new PriorityQueue<UrlScores>(initialCapacity, 
+				new Comparator<UrlScores>()
 				{
-					public int compare(Postings p1, Postings p2)
+			public int compare(UrlScores url1, UrlScores url2)
+			{
+				
+				if (url1.getCount() > url2.getCount())
+					return -1;
+				else if (url1.getCount() == url2.getCount())
+				{
+					if (url1.getTfidf() > url2.getTfidf())
 					{
-						if (p1.getTfidf() > p2.getTfidf())
-							return -1;
-						else if (p1.getTfidf() == p2.getTfidf())
-							return 0;
-						else
-							return 1;
+						return -1;
 					}
+					
+					else if (url1.getTfidf() == url2.getTfidf())
+					{
+						return 0;
+					}
+					
+					else
+						return 1;
+				}
+				else
+					return 1;
+			}
 				});
+		
 	}
 	
-	public void addAll(ArrayList<Postings> postings)
+	public void addAll(Collection<UrlScores> scores)
 	{
-		myHeap.addAll(postings);
+		myHeap.addAll(scores);
 	}
 	
-	public Postings remove()
+	public UrlScores remove()
 	{
 		return myHeap.remove();
 	}

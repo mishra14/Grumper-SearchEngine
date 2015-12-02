@@ -1,6 +1,7 @@
 package edu.upenn.cis455.project.searchengine;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.concurrent.Callable;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedQueryList;
@@ -12,10 +13,10 @@ import test.edu.upenn.cis455.project.DynamoIndexerDA;
 public class GetScoresCallable implements Callable<Heap>
 {
 	private int initialCapacity = 100;
-	private Heap matchedUrls ;
-	private ArrayList<String> query = new ArrayList<String>();
+	private Heap matchedUrls;
 	private DynamoIndexerDA dbAccessor;
 	private String tablename;
+	private ArrayList<String> query;
 	
 	public GetScoresCallable(String tablename, ArrayList<String> query)
 	{
@@ -23,13 +24,12 @@ public class GetScoresCallable implements Callable<Heap>
 		this.query = query;
 		this.dbAccessor = new DynamoIndexerDA(tablename);
 	}
-	
+
 	@Override
 	public Heap call() throws Exception
 	{
-		//System.out.println("in callable");
-		matchedUrls = new Heap(initialCapacity);
 		
+		matchedUrls = new Heap(initialCapacity);
 		if (tablename.equals("UnigramIndex"))
 		{
 			getUnigramScores();
@@ -47,7 +47,7 @@ public class GetScoresCallable implements Callable<Heap>
 		
 		else
 		{
-			getProximity();
+			//getProximity();
 		}
 		//System.out.println("size of matched urls: " + matchedUrls.size());
 		return matchedUrls;
@@ -61,9 +61,10 @@ public class GetScoresCallable implements Callable<Heap>
 			PaginatedQueryList<InvertedIndex> resultList = dbAccessor.loadIndex(term);
 			if (!resultList.isEmpty())
 			{
+				System.out.println("found matching urls for unigrams");
 				postings = resultList.get(0).getPostings();
+				computeUrlScores(postings);
 			}
-			matchedUrls.addAll(postings);
 		}
 	}
 	
@@ -79,8 +80,8 @@ public class GetScoresCallable implements Callable<Heap>
 			if (!resultList.isEmpty())
 			{
 				postings = resultList.get(0).getPostings();
+				computeUrlScores(postings);
 			}
-			matchedUrls.addAll(postings);
 		}
 	}
 	
@@ -97,14 +98,34 @@ public class GetScoresCallable implements Callable<Heap>
 			if (!resultList.isEmpty())
 			{
 				postings = resultList.get(0).getPostings();
+				computeUrlScores(postings);
 			}
-			matchedUrls.addAll(postings);
 		}
 	}
 	
-	private void getProximity()
+	private void computeUrlScores(ArrayList<Postings> postings)
 	{
+		HashMap<String, UrlScores> scores = new HashMap<String, UrlScores>();
+		for (Postings posting : postings)
+		{
+			String url = posting.getPosting();
+			System.out.println("found url: " + url);
+			Float tfidf = posting.getTfidf();
+			if (scores.containsKey(url))
+			{
+				UrlScores scoresObj = scores.get(url);
+				scoresObj.setCount(scoresObj.getCount() + 1);
+				scoresObj.setTfidf(scoresObj.getTfidf() + tfidf);
+			}
+			
+			else
+			{
+				UrlScores scoresObj = new UrlScores(url, tfidf, 1);
+				scores.put(url, scoresObj);
+			}
+		}
 		
+		matchedUrls.addAll(scores.values());
+		System.out.println("added: " + matchedUrls.size());
 	}
-
 }
