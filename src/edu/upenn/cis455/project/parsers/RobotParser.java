@@ -51,7 +51,13 @@ public class RobotParser
 					info.addDisallowedLink(last_agent, value);
 				}
 				else if(header.equals("crawl-delay")){
-					int val = Integer.parseInt(value);
+					
+					int val;
+					try{
+						val = Integer.parseInt(value);
+					}catch(NumberFormatException e){
+						val = 1;
+					}
 					info.addCrawlDelay(last_agent, val);
 				}
 				else if(header.equals("allow")){

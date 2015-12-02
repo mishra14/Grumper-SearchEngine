@@ -40,7 +40,7 @@ public class DBWrapper
 		envConfig.setAllowCreate(true);
 		storeConfig.setAllowCreate(true);
 		envConfig.setTransactional(true);
-		envConfig.setLockTimeout(1, TimeUnit.SECONDS);
+		envConfig.setLockTimeout(2, TimeUnit.SECONDS);
 		storeConfig.setTransactional(true);
 		env = new Environment(dbFile, envConfig);
 		store = new EntityStore(env, "Crawler Store", storeConfig);
@@ -73,17 +73,5 @@ public class DBWrapper
 	{
 		return store;
 	}
-
-	/*
-	 * public static void main(String args[]) throws Exception {
-	 * openDBWrapper("./db/"); 
-	 * System.out.println(UserDA.putUser(new User("ankit.mishra", "hie")));
-	 * System.out.println(UserDA.getUser("ankit.mishra")); 
-	 * XPath xPath = new XPath("/html"); 
-	 * System.out.println(XPathDA.putXPath(xPath));
-	 * System.out.println(XPathDA.getXPath(xPath.getxPath())); 
-	 * closeDBWrapper();
-	 * }
-	 */
-
+	
 }
