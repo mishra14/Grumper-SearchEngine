@@ -1,6 +1,7 @@
 package edu.upenn.cis455.project.storage;
 
 import java.io.File;
+import java.util.concurrent.TimeUnit;
 
 import com.sleepycat.je.DatabaseException;
 import com.sleepycat.je.Environment;
@@ -39,6 +40,7 @@ public class DBWrapper
 		envConfig.setAllowCreate(true);
 		storeConfig.setAllowCreate(true);
 		envConfig.setTransactional(true);
+		envConfig.setLockTimeout(1, TimeUnit.SECONDS);
 		storeConfig.setTransactional(true);
 		env = new Environment(dbFile, envConfig);
 		store = new EntityStore(env, "Crawler Store", storeConfig);

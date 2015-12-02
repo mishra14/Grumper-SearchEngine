@@ -11,20 +11,28 @@ import edu.upenn.cis455.project.bean.UrlRecord;
 
 public class UrlDA
 {
-	public synchronized static ArrayList<String> getURLS(){ //Return null if no queue exists
+	public static ArrayList<String> getURLS(){ //Return null if no queue exists
 		
 		ArrayList <String> urls = null;
 		if (DBWrapper.getStore() != null){
 			PrimaryIndex<String, UrlRecord> urlRecord = DBWrapper.getStore().getPrimaryIndex(String.class, UrlRecord.class);
 			if(urlRecord!=null){
 				EntityCursor<UrlRecord> url_cursor = urlRecord.entities();
+				if(url_cursor == null){
+					System.out.println("url cursor is null");
+				}
 				try{
 					int idx = 1;
 					urls = new ArrayList<String>();
-					for(UrlRecord record : url_cursor){
+					
+					for(UrlRecord record = url_cursor.first(); record!=null; record = url_cursor.nextNoDup()){
 						urls.add(record.getUrl());
 						System.out.println("Added in urlDA : "+record.getUrl());
-						url_cursor.delete();
+						if(record != null){
+							urlRecord.delete(record.getUrl());
+							System.out.println("DELETED URL FROM DB");
+						}
+						
 						idx++;
 						if(idx == Queue.MAX)
 							break;

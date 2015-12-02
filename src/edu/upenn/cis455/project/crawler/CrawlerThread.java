@@ -39,13 +39,14 @@ public class CrawlerThread implements Runnable{
 		while(true){
 			String url = null;
 			if(urlQueue.getSize() == 0){
+				
 				System.out.println("QUEUE EMPTY: Enqueing urls from db");
 				ArrayList<String> urls = UrlDA.getURLS();
 				System.out.println("SIZE of urlqueue from db: "+urls.size());
 				urlQueue.enqueueAll(urls);
 				try
 				{	
-					urlQueue.wait();
+					Thread.sleep(5000);
 				}
 				catch (InterruptedException e)
 				{
