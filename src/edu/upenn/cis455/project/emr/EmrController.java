@@ -1,10 +1,14 @@
 package edu.upenn.cis455.project.emr;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -42,20 +46,34 @@ import com.amazonaws.services.elasticmapreduce.util.StepFactory;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest.KeyVersion;
+import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.DeleteObjectsResult;
+import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ListObjectsRequest;
 import com.amazonaws.services.s3.model.MultiObjectDeleteException;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.MultiObjectDeleteException.DeleteError;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 
+import edu.upenn.cis455.project.bean.DocumentRecord;
 import edu.upenn.cis455.project.bean.EmrResult;
+import edu.upenn.cis455.project.crawler.Hash;
+import edu.upenn.cis455.project.storage.S3DocumentDA;
 import edu.upenn.cis455.project.storage.S3EmrDA;
 
 public class EmrController
 {
 	private static final int MAX_LIST_SIZE = 1000;
 	private static final Double DELTA = 0.00001;
+	private static final int DOCUMENTS_TO_MERGE = 10;
 	private String emrInputPath;
 	private String emrOutputBucketName;
 	private String emrOutputPrefix;
@@ -236,6 +254,31 @@ public class EmrController
 		return objectNames;
 	}
 
+	public List<String> getObjectNamesForBucket(String bucketName)
+	{
+		ListObjectsRequest listObjectsRequest = new ListObjectsRequest()
+				.withBucketName(bucketName);
+		ObjectListing objects = s3Client.listObjects(listObjectsRequest);
+		List<String> objectNames = new ArrayList<String>(objects
+				.getObjectSummaries().size());
+		Iterator<S3ObjectSummary> objectIter = objects.getObjectSummaries()
+				.iterator();
+		while (objectIter.hasNext())
+		{
+			objectNames.add(objectIter.next().getKey());
+		}
+		while (objects.isTruncated())
+		{
+			objects = s3Client.listNextBatchOfObjects(objects);
+			objectIter = objects.getObjectSummaries().iterator();
+			while (objectIter.hasNext())
+			{
+				objectNames.add(objectIter.next().getKey());
+			}
+		}
+		return objectNames;
+	}
+
 	public List<EmrResult> s3ToDynamo(List<String> objectNames)
 	{
 		List<EmrResult> results = new ArrayList<EmrResult>();
@@ -261,6 +304,52 @@ public class EmrController
 		// delete the output folder now
 		s3.deleteEmrResult(emrOutputPrefix);
 		return results;
+	}
+
+	public void mergeCrawledDocuments(List<String> objectNames)
+			throws NoSuchAlgorithmException, JsonProcessingException
+	{
+		String outputBucketName = "edu.upenn.cis455.project.indexer.documents";
+		List<DocumentRecord> mergedDocuments = new ArrayList<DocumentRecord>();
+		for (String object : objectNames)
+		{
+			DocumentRecord doc = getDocument(outputBucketName, object);
+			mergedDocuments.add(doc);
+			if (mergedDocuments.size() > DOCUMENTS_TO_MERGE)
+			{
+				// merge the list into 1 s3 object
+				writeDocuments(mergedDocuments, outputBucketName);
+				// clear the list
+				mergedDocuments.clear();
+			}
+		}
+		if (mergedDocuments.size() > 0)
+		{
+			// merge the list into 1 s3 object
+			writeDocuments(mergedDocuments, outputBucketName);
+			// clear the list
+			mergedDocuments.clear();
+		}
+	}
+
+	public void writeDocuments(List<DocumentRecord> mergedDocuments,
+			String bucketName) throws NoSuchAlgorithmException,
+			JsonProcessingException
+	{
+
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.setVisibility(PropertyAccessor.ALL, Visibility.NONE);
+		mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
+		ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
+		String json = ow.writeValueAsString(mergedDocuments);
+		String s3Key = Hash.hashKey(json);
+		ByteArrayInputStream inputStream = new ByteArrayInputStream(
+				json.getBytes());
+		ObjectMetadata omd = new ObjectMetadata();
+		omd.setContentLength(json.getBytes().length);
+		PutObjectRequest request = new PutObjectRequest(bucketName, s3Key,
+				inputStream, omd);
+		s3Client.putObject(request);
 	}
 
 	public String createCluster() throws InterruptedException
@@ -509,6 +598,43 @@ public class EmrController
 			}
 
 		}
+	}
+
+	public DocumentRecord getDocument(String bucketName, String prefix)
+	{
+		DocumentRecord doc = null;
+		try
+		{
+			GetObjectRequest req = new GetObjectRequest(bucketName, prefix);
+			S3Object s3Object = s3Client.getObject(req);
+			InputStream objectData = s3Object.getObjectContent();
+			BufferedReader reader = new BufferedReader(new InputStreamReader(
+					objectData));
+			StringBuilder s3Content = new StringBuilder();
+			String line;
+			while ((line = reader.readLine()) != null)
+			{
+				s3Content.append(line + "\r\n");
+			}
+			reader.close();
+			objectData.close();
+			ObjectMapper mapper = new ObjectMapper();
+			mapper.setVisibility(PropertyAccessor.ALL, Visibility.NONE);
+			mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
+			doc = mapper.readValue(s3Content.toString(), DocumentRecord.class);
+		}
+		catch (AmazonS3Exception ase)
+		{
+			System.out.println("S3EmrDA : document does not exist");
+			ase.printStackTrace();
+		}
+		catch (IOException e)
+		{
+			System.out
+					.println("S3EmrDA : IOException while fetching document from S3");
+			e.printStackTrace();
+		}
+		return doc;
 	}
 
 	public boolean isIterative()

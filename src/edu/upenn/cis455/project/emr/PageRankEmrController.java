@@ -1,10 +1,18 @@
 package edu.upenn.cis455.project.emr;
 
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+
+import edu.upenn.cis455.project.bean.DocumentRecord;
 
 public class PageRankEmrController
 {
 
-	public static void main(String[] args) throws InterruptedException
+	public static void main(String[] args) throws InterruptedException,
+			NoSuchAlgorithmException, JsonProcessingException
 	{
 		String emrInputPath = "s3://edu.upenn.cis455.project.url.test/";
 		String emrOutputBucketName = "edu.upenn.cis455.project.pagerank";
@@ -25,7 +33,7 @@ public class PageRankEmrController
 				emrOutputBucketName, emrOutputPrefix, clusterLogPath,
 				emrJarPath, emrStepName, clusterName, ec2AccessKeyName,
 				tableName, primaryKeyName, valueKeyName);
-		controller.createCluster();
+		/*controller.createCluster();
 		controller.setIterative(true);
 		int i = 0;
 		do
@@ -37,7 +45,17 @@ public class PageRankEmrController
 					+ controller.isDone());
 		}
 		while (!controller.isDone());
-		controller.terminateCluster();
+		controller.terminateCluster();*/
+		List<String> docs = controller
+				.getObjectNamesForBucket("edu.upenn.cis455.project.documents");
+		DocumentRecord doc1 = controller.getDocument("edu.upenn.cis455.project.documents", docs.get(0));
+		DocumentRecord doc2 = controller.getDocument("edu.upenn.cis455.project.documents", docs.get(1));
+		List<DocumentRecord> merged = new ArrayList<>();
+		merged.add(doc1);
+		merged.add(doc2);
+		controller.writeDocuments(merged, "edu.upenn.cis455.project.indexer.documents");
+		//controller.mergeCrawledDocuments(docs);
+		System.out.println(docs.size());
 		System.out.println("Page rank terminated");
 	}
 
