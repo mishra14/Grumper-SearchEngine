@@ -45,7 +45,7 @@ public class Map extends Mapper<Text, BytesWritable, Text, Text> {
 	
 	
 	private String getHtmlText(String html)
-	{
+	{ 
 		Document doc = Jsoup.parse(html.replaceAll("(?i)<br[^>]*>", "<pre>\n</pre>"));
 		String textContent = doc.select("body").text();
 		return textContent;

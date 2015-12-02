@@ -69,8 +69,7 @@ public class Reduce extends Reducer<Text, Text, Text, Text>
 			  postingsList.add(newPostings);
 		  }
 		  Collections.sort(postingsList);
-		  return postingsList;
-		  
+		  return postingsList; 
 	  }
 	  
 	  private String createPostingsList(){

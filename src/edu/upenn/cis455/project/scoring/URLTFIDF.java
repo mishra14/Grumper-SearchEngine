@@ -26,6 +26,7 @@ public class URLTFIDF implements Comparable<URLTFIDF>
 		return this.idf;
 	}
 
+
 	@Override
 	public int compareTo(URLTFIDF compareTFIDF){
 		int other = (int) ((URLTFIDF)compareTFIDF).getTFIDF();

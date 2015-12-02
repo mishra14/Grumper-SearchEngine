@@ -146,7 +146,7 @@ public class DynamoIndexerDA
 	}
 
 	public PaginatedQueryList<InvertedIndex> loadIndex(String word)
-	{
+	{	
 		InvertedIndex queryIndex = new InvertedIndex();
 		queryIndex.setWord(word);
 		DynamoDBQueryExpression<InvertedIndex> query = new DynamoDBQueryExpression<InvertedIndex>()

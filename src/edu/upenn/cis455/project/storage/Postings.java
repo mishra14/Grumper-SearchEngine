@@ -30,7 +30,6 @@ public class Postings
 		return this.idf;
 	}
 
-
 	@Override
 	public String toString()
 	{

@@ -37,7 +37,8 @@ public class WholeFileRecordReader  extends RecordReader<Text, BytesWritable> {
 	public float getProgress() throws IOException, InterruptedException {
         return 0;
 	}
-
+	
+	
 	@Override
 	public void close() throws IOException {}
 

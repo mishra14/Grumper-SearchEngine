@@ -18,6 +18,7 @@ public class PostingsMarshaller implements DynamoDBMarshaller<ArrayList<Postings
 			marshalled.append(posting.getPosting() 
 					+ " " + posting.getTfidf() + " " + posting.getIdf() + ",");
 			
+		
 		}
 		marshalled.deleteCharAt(marshalled.length() - 1);
 		System.out.println(marshalled.toString());

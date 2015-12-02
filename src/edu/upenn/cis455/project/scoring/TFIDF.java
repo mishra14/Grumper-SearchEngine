@@ -11,8 +11,6 @@ public class TFIDF
 	public static float getIDF(int df, int numdocs){
 		float idf = (float) Math.log(numdocs/df);
 		return idf;
-	}
-	
-	
+	}	
 
 }

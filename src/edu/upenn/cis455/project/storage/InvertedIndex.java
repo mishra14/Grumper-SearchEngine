@@ -42,5 +42,4 @@ public class InvertedIndex
 	{
 		return "InvertedIndex [word=" + word + ", postingsList=" + postingsList + "]";
 	}
-
 }
