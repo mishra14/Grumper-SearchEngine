@@ -47,7 +47,7 @@ public class SearchEngine extends HttpServlet
 	
 	public void search(String searchQuery)
 	{
-		String[] queryTerms = new String[20];
+		ArrayList<String> queryTerms = new ArrayList<String>();
 		ExecutorService pool = Executors.newFixedThreadPool(4);
 		
 		if (searchQuery.isEmpty())
@@ -57,10 +57,18 @@ public class SearchEngine extends HttpServlet
 		
 		else
 		{
-			queryTerms = searchQuery.split(" ");
-			//TODO preprocess query
+			queryTerms = getQueryTerms(searchQuery, false);
+			System.out.println("query terms: " + queryTerms.size());
 			
-			if (queryTerms.length >= 3)
+			if (queryTerms.size() == 0)
+			{
+				System.out.println("including stop word");
+				queryTerms = getQueryTerms(searchQuery, true);
+				System.out.println("query terms are now: " + queryTerms);
+				//TODO get proximity
+			}
+			
+			else if (queryTerms.size() >= 3)
 			{
 				Callable<Heap> callableUnigrams = new GetScoresCallable("UnigramIndex", queryTerms);
 				Callable<Heap> callableBigrams = new GetScoresCallable("BigramIndex", queryTerms);
@@ -83,7 +91,7 @@ public class SearchEngine extends HttpServlet
 				getRankedResults();
 			}
 			
-			else if (queryTerms.length >= 2)
+			else if (queryTerms.size() >= 2)
 			{
 				Callable<Heap> callableUnigrams = new GetScoresCallable("UnigramIndex", queryTerms);
 				Callable<Heap> callableBigrams = new GetScoresCallable("BigramIndex", queryTerms);
@@ -162,6 +170,21 @@ public class SearchEngine extends HttpServlet
 		}
 	}
 	
+	public ArrayList<String> getQueryTerms(String content, Boolean includeStopWords){
+		ArrayList<String> allTerms = new ArrayList<String>();
+		StringTokenizer tokenizer = new StringTokenizer(content, " ,.?\"!-");
+		String word;
+		while (tokenizer.hasMoreTokens()) {
+			word = tokenizer.nextToken();
+	    	word = word.trim().toLowerCase().replaceAll("[^a-z0-9 ]", "");
+	    	if (includeStopWords || (!stopwords.contains(word) && !word.equals(""))){
+	    		allTerms.add(word);
+	    	}
+	    }
+		
+		return allTerms;
+	}
+	
 	public static void main(String args[]) throws IOException
 	{
 		SearchEngine searchEngine = new SearchEngine();
@@ -175,7 +198,7 @@ public class SearchEngine extends HttpServlet
 //		searchEngine.search("choose");
 //		searchEngine.search("map"); 
 //		searchEngine.search("log");
-		searchEngine.search("mashed potatoes and");
+		searchEngine.search("am an and");
 //		searchEngine.search("data contribute");
 		//searchEngine.search("cookies melissa");
 
@@ -185,5 +208,27 @@ public class SearchEngine extends HttpServlet
 			+ "<center><input type=\"text\" name=\"query\"> </center>" + "<br><br>"
 			+ "<center><input type = \"submit\" value = \"submit\"></center>"  + "<br><br>"
 			+ "</form>";
+	
+	private static ArrayList<String> stopwords =
+			new ArrayList<String> (Arrays.asList(("a,about,above,"
+					+ "after,again,against,all,am,an,and,any,are,"
+					+ "aren't,as,at,be,because,been,before,being,"
+					+ "below,between,both,but,by,can't,cannot,could,"
+					+ "couldn't,did,didn't,do,does,doesn't,doing,don't,"
+					+ "down,during,each,few,for,from,further,had,hadn't,"
+					+ "has,hasn't,have,haven't,having,he,he'd,he'll,he's,"
+					+ "her,here,here's,hers,herself,him,himself,his,how,"
+					+ "how's,i,i'd,i'll,i'm,i've,if,in,into,is,isn't,it,"
+					+ "it's,its,itself,let's,me,more,most,mustn't,my,myself,"
+					+ "no,nor,not,of,off,on,once,only,or,other,ought,our,ours,"
+					+ "ourselves,out,over,own,same,shan't,she,she'd,she'll,"
+					+ "she's,should,shouldn't,so,some,such,than,that,that's,"
+					+ "the,their,theirs,them,themselves,then,there,there's,"
+					+ "these,they,they'd,they'll,they're,they've,this,those,"
+					+ "through,to,too,under,until,up,very,was,wasn't,we,we'd,"
+					+ "we'll,we're,we've,were,weren't,what,what's,when,when's,"
+					+ "where,where's,which,while,who,who's,whom,why,why's,with,"
+					+ "won't,would,wouldn't,you,you'd,you'll,you're,you've,your,"
+					+ "yours,yourself,yourselves,").split(",")));
 }
 

@@ -13,11 +13,11 @@ public class GetScoresCallable implements Callable<Heap>
 {
 	private int initialCapacity = 100;
 	private Heap matchedUrls ;
-	private String[] query = new String[20];
+	private ArrayList<String> query = new ArrayList<String>();
 	private DynamoIndexerDA dbAccessor;
 	private String tablename;
 	
-	public GetScoresCallable(String tablename, String[] query)
+	public GetScoresCallable(String tablename, ArrayList<String> query)
 	{
 		this.tablename = tablename;
 		this.query = query;
@@ -55,10 +55,9 @@ public class GetScoresCallable implements Callable<Heap>
 	
 	private void getUnigramScores()
 	{
-		for (int i = 0; i < query.length; i++)
+		for (String term: query)
 		{
 			ArrayList<Postings> postings = new ArrayList<Postings>();
-			String term = query[i];
 			PaginatedQueryList<InvertedIndex> resultList = dbAccessor.loadIndex(term);
 			if (!resultList.isEmpty())
 			{
@@ -70,12 +69,12 @@ public class GetScoresCallable implements Callable<Heap>
 	
 	private void getBigramScores()
 	{
-		for (int i = 0; i < query.length - 1; i++)
+		for (int i = 0; i < query.size() - 1; i++)
 		{
 			ArrayList<Postings> postings = new ArrayList<Postings>();
 			StringBuffer term = new StringBuffer();
-			term.append(query[i] + " ");
-			term.append(query[i+1]);
+			term.append(query.get(i) + " ");
+			term.append(query.get(i + 1));
 			PaginatedQueryList<InvertedIndex> resultList = dbAccessor.loadIndex(term.toString());
 			if (!resultList.isEmpty())
 			{
@@ -87,13 +86,13 @@ public class GetScoresCallable implements Callable<Heap>
 	
 	private void getTrigramScores()
 	{
-		for (int i = 0; i < query.length - 2; i++)
+		for (int i = 0; i < query.size() - 2; i++)
 		{
 			ArrayList<Postings> postings = new ArrayList<Postings>();
 			StringBuffer term = new StringBuffer();
-			term.append(query[i] + " ");
-			term.append(query[i+1] + " ");
-			term.append(query[i+2]);
+			term.append(query.get(i) + " ");
+			term.append(query.get(i + 1) + " ");
+			term.append(query.get(i + 2));
 			PaginatedQueryList<InvertedIndex> resultList = dbAccessor.loadIndex(term.toString());
 			if (!resultList.isEmpty())
 			{
