@@ -19,7 +19,6 @@ import edu.upenn.cis455.project.storage.DynamoDA;
 
 public class Map extends Mapper<NullWritable, BytesWritable, Text, Text> {
     
-	private final Text url = new Text();
 	private DynamoDA<Float> dynamo = new DynamoDA<Float>("edu.upenn.cis455.project.pagerank", Float.class);
 	
 	@Override
@@ -54,12 +53,5 @@ public class Map extends Mapper<NullWritable, BytesWritable, Text, Text> {
 			e.printStackTrace();
 		}
 		return urlList;
-	}
-
-	public void setUrl(String content){
-		this.url.set(content.trim());
-		
-	}
-	
-	
+	}	
 }

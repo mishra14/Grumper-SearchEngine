@@ -6,7 +6,7 @@ import org.apache.hadoop.mapreduce.Reducer;
 
 public class Reduce extends Reducer<Text, Text, Text, Text>
 {
-	private static final Float damper = (float) 0.5;
+	private static final Float damper = (float) 0.8;
 	@Override
 	protected void reduce(Text key, Iterable<Text> values, Context context) 
 			throws IOException, InterruptedException {
