@@ -12,27 +12,28 @@ public class PostingsMarshaller implements DynamoDBMarshaller<ArrayList<Postings
 	@Override
 	public String marshall(ArrayList<Postings> postings)
 	{	
-		System.out.println("Postings: " + postings.toString());
 		StringBuilder marshalled = new StringBuilder();
+		int i = 0;
+		int size = postings.size() - 1;
+
 		for (Postings posting : postings){
+			if (i < size)
 			marshalled.append(posting.getPosting() 
-					+ " " + posting.getTfidf() + " " + posting.getIdf() + ",");
-			
-		
+					+ " " + posting.getTfidf() + " " + posting.getIdf() + "\t");
+			else
+				marshalled.append(posting.getPosting() 
+						+ " " + posting.getTfidf() + " " + posting.getIdf());
+			i++;
 		}
-		marshalled.deleteCharAt(marshalled.length() - 1);
-		System.out.println(marshalled.toString());
 		return marshalled.toString();
 	}
 
 	@Override
 	public ArrayList<Postings> unmarshall(Class<ArrayList<Postings>> clazz, String s)
 	{
-		System.out.println("String : " + s);
 		ArrayList<Postings> list = new ArrayList<Postings>();
-		String[] allPostings = s.split(",");
+		String[] allPostings = s.split("\t");
 		for(String posting : allPostings){		
-			System.out.println(posting);
 			Postings postings = new Postings();
 			String[] pair = posting.trim().split(" ", 2);
 			postings.setPosting(pair[0]);

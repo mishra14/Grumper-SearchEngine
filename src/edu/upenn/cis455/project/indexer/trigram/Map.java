@@ -2,6 +2,7 @@ package edu.upenn.cis455.project.indexer.trigram;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.StringTokenizer;
 
 import org.apache.hadoop.io.BytesWritable;
@@ -12,50 +13,61 @@ import org.jsoup.nodes.Document;
 
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.upenn.cis455.project.bean.DocumentRecord;
 //import edu.upenn.cis455.project.indexer.Stemmer;
+import edu.upenn.cis455.project.scoring.Stemmer;
 
 public class Map extends Mapper<Text, BytesWritable, Text, Text> {
     
 	private final Text url = new Text();
-	private ArrayList<String>allWords;
+	private ArrayList<String>allWords = new ArrayList<String>();
+
 	@Override
     public void map(Text key, BytesWritable value, Context context) 
     		throws IOException, InterruptedException {
-	    Text bigram = new Text();
-	    DocumentRecord doc = getDocument(value);
-	    String line = doc.getDocumentString();
-	    url.set(doc.getDocumentId().trim());
+	    Text trigram = new Text();
+		List<DocumentRecord> docList = getDocument(value);
+		for (DocumentRecord doc : docList){
+			if (doc != null){
+				String line = doc.getDocumentString();
+			    url.set(doc.getDocumentId().trim());
+			    
+			    String rawContent = getHtmlText(line);
+			    getAllWords(rawContent);
+			    int numWords = allWords.size();
+			    
+			    for (int i = 0; i < numWords - 2; i++){
+			    	trigram.set(allWords.get(i) 
+			    			+ " " + allWords.get(i + 1)
+			    			+ " " + allWords.get(i + 2)
+			    			+ ";" + key);
+			    	context.write( new Text(trigram), url);
+			    }  
+			}
+		}
+
 	    
-	    String rawContent = getHtmlText(line);
-	    getAllWords(rawContent);
-	    int numWords = allWords.size();
-	    
-	    for (int i = 0; i < numWords - 2; i++){
-	    	bigram.set(allWords.get(i) 
-	    			+ " " + allWords.get(i + 1)
-	    			+ " " + allWords.get(i + 2)
-	    			+ ";" + key);
-	    	context.write( new Text(bigram), url);
-	    }  
 	    
     }
 	
-	public void setUrl(String content){
+	public void setUrl(String content)
+	{
 		this.url.set(content.trim());
 		
 	}
 	
-	public void getAllWords(String content){
-		allWords = new ArrayList<String>();
+	public void getAllWords(String content)
+	{
+		allWords.clear();
 		StringTokenizer tokenizer = new StringTokenizer(content, " ,.?\"!-");
 		String word;
 		while (tokenizer.hasMoreTokens()) {
 			word = tokenizer.nextToken();
 	    	word = word.trim().toLowerCase().replaceAll("[^a-z0-9 ]", "");
 	    	if (!stopwords.contains(word) && !word.equals("")){
-	    		allWords.add(word);
+	    		allWords.add(stem(word));
 	    	}
 	    }
 	}
@@ -66,29 +78,37 @@ public class Map extends Mapper<Text, BytesWritable, Text, Text> {
 		String textContent = doc.select("body").text();
 		return textContent;
 	}
-	private DocumentRecord getDocument(BytesWritable value) {
+	
+	private List<DocumentRecord> getDocument(BytesWritable value)
+	{
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.setVisibility(PropertyAccessor.ALL, Visibility.NONE);
 		mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
-		DocumentRecord doc=null;
-		try {
-			doc = mapper.readValue(new String(value.getBytes()), DocumentRecord.class);
-		} catch (IOException e) {
+		List<DocumentRecord> docList = new ArrayList<DocumentRecord>();
+		try
+		{
+			docList = mapper.readValue(new String(value.getBytes()),
+					new TypeReference<List<DocumentRecord>>()
+					{
+					});
+		}
+		catch (IOException e)
+		{
 			e.printStackTrace();
 		}
-		return doc;
+		return docList;
 	}
 	
-//	public String stem(String word)
-//	{
-//		System.out.println("received word: " + word);
-//		Stemmer stemmer = new Stemmer();
-//		char[] charArray = word.toCharArray();
-//		stemmer.add(charArray, word.length());
-//		stemmer.stem();
-//		String stemmedWord = stemmer.toString();
-//		return stemmedWord;
-//	}
+	public String stem(String word)
+	{
+		System.out.println("received word: " + word);
+		Stemmer stemmer = new Stemmer();
+		char[] charArray = word.toCharArray();
+		stemmer.add(charArray, word.length());
+		stemmer.stem();
+		String stemmedWord = stemmer.toString();
+		return stemmedWord;
+	}
 	
 	private static ArrayList<String> stopwords =
 			new ArrayList<String> (Arrays.asList(("a,about,above,"

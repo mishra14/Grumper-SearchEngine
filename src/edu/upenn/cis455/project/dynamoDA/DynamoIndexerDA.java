@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -17,6 +18,8 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperConfig;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
 import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedQueryList;
+
+import edu.upenn.cis455.project.crawler.Hash;
 import edu.upenn.cis455.project.storage.InvertedIndex;
 import edu.upenn.cis455.project.storage.Postings;
 
@@ -72,7 +75,6 @@ public class DynamoIndexerDA
 
 		InvertedIndex index = new InvertedIndex();
 		index.setWord(word);
-		//parseInput(postingsList);
 		ArrayList<Postings>allPostings = parseAllPostings(postingsString);
 		ArrayList<Postings> postingsList = new ArrayList<Postings>();
 		int count = 0;
@@ -82,55 +84,28 @@ public class DynamoIndexerDA
 			count ++;
 			
 			if ( count >= MAX_LIST || i == size - 1){
-				index.setPostings(postingsList);
-				System.out.println("Saving Index: " + index.toString());
-				mapper.save(index, config);
-				postingsList = new ArrayList<Postings>();
-				count = 0;
+				try
+				{
+					index.setRangeKey(Hash.hashKey(postingsList.toString()));
+					index.setPostings(postingsList);
+					mapper.save(index, config);
+					postingsList = new ArrayList<Postings>();
+					count = 0;
+				}
+				catch (NoSuchAlgorithmException e)
+				{
+					e.printStackTrace();
+				}
+				
 			}
 			
 		}
-		
-//		Iterator<Entry<String, Float>> it = allPostings.entrySet().iterator();
-//		ArrayList<Postings> postingList = new ArrayList<Postings>();
-//		while (it.hasNext())
-//		{
-//			Map.Entry<String, Float> pair = (Map.Entry<String, Float>) it
-//					.next();
-//			Postings posting = new Postings();
-//			posting.setPosting(pair.getKey().toString());
-//			posting.setTfidf((float) pair.getValue());
-//			postingList.add(posting);
-//			it.remove();
-//			count++;
-//			if (count >= MAX_LIST || !it.hasNext())
-//			{
-//				index.setPostings(postingList);
-//				mapper.save(index, config);
-//				postingList = new ArrayList<Postings>();
-//				count = 0;
-//
-//			}
-//
-//		}
-
 	}
 
-//	public void parseInput(String postingsList)
-//	{
-//		allPostings = new HashMap<String, Float>();
-//		String[] postings = postingsList.split(",");
-//		for (String posting : postings)
-//		{
-//			String[] pair = posting.trim().split(" ");
-//			allPostings.put(pair[0].trim(), Float.parseFloat(pair[1].trim()));
-//		}
-//
-//	}
 	
 	public ArrayList<Postings> parseAllPostings(String postingsList){
 		ArrayList<Postings> list = new ArrayList<Postings>();
-		String[] postingsContent = postingsList.split(",");
+		String[] postingsContent = postingsList.split("\t");
 		for (String posting : postingsContent)
 		{
 			Postings postings = new Postings();
@@ -153,24 +128,10 @@ public class DynamoIndexerDA
 				.withHashKeyValues(queryIndex);
 		PaginatedQueryList<InvertedIndex> resultList = mapper.query(
 				InvertedIndex.class, query, config);
-		for (InvertedIndex index : resultList)
-		{
-			System.out.println(index);
-		}
+//		for (InvertedIndex index : resultList)
+//		{
+//			System.out.println("RESULT " + index);
+//		}
 		return resultList;
 	}
-
-//	public static void main(String args[])
-//	{
-//		String tableName = "UnigramIndex";
-//		DynamoIndexerDA dynamo = new DynamoIndexerDA(tableName);
-//		
-//	
-//		dynamo.saveIndex("Dumpty", "google.com 0.8 0.4");;
-//		
-//		
-//		System.out.println("done saving");
-//		dynamo.loadIndex("Dumpty");
-//		System.out.println("done loading");
-//	}
 }

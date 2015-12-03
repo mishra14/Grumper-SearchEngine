@@ -2,6 +2,7 @@ package edu.upenn.cis455.project.storage;
 
 import java.util.ArrayList;
 
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMarshalling;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBRangeKey;
@@ -12,6 +13,7 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 public class InvertedIndex
 {
 	private String word;
+	private String range;
 	private ArrayList<Postings> postingsList;
 
 	@DynamoDBHashKey(attributeName = "Word")
@@ -25,7 +27,15 @@ public class InvertedIndex
 		this.word = word;
 	}
 
-	@DynamoDBRangeKey(attributeName = "Postings")
+	@DynamoDBRangeKey(attributeName = "Range")
+	public String getRangeKey(){
+		return this.range;
+	}
+	public void setRangeKey(String range){
+		this.range = range;
+	}
+	
+	@DynamoDBAttribute(attributeName = "Postings")
 	@DynamoDBMarshalling(marshallerClass = PostingsMarshaller.class)
 	public ArrayList<Postings> getPostings()
 	{

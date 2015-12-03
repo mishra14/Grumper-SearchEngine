@@ -13,7 +13,6 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
 import edu.upenn.cis455.project.dynamoDA.DynamoIndexerDA;
-import edu.upenn.cis455.project.scoring.TFIDF;
 import edu.upenn.cis455.project.scoring.URLTFIDF;
 
 public class Reduce extends Reducer<Text, Text, Text, Text>
@@ -30,7 +29,7 @@ public class Reduce extends Reducer<Text, Text, Text, Text>
 		setFieldsFromKey(key);
 		df = computeDF(values);
 		String postingsList = createPostingsList();  
-		context.write(keyword, new Text(postingsList));
+		//context.write(keyword, new Text(postingsList));
 		DynamoIndexerDA dynamo = new DynamoIndexerDA(tablename);
 		dynamo.saveIndex(keyword.toString(), postingsList);
     }
@@ -61,10 +60,9 @@ public class Reduce extends Reducer<Text, Text, Text, Text>
 	  private ArrayList<URLTFIDF> sortPostings(){
 		 
 		  ArrayList<URLTFIDF> postingsList = new ArrayList<URLTFIDF>();
-		  
 		  for(String docID: tf.keySet()){
-			  float idf = TFIDF.getIDF(df, bucketSize);
-			  float tfidf = TFIDF.getTFIDF(tf.get(docID), idf);
+			  float idf = (float) Math.log(3400/df);// replace later with bucketsize
+			  float tfidf = tf.get(docID) * idf ;
 			  URLTFIDF newPostings = new URLTFIDF(docID, tfidf, idf);
 			  postingsList.add(newPostings);
 		  }
@@ -79,7 +77,7 @@ public class Reduce extends Reducer<Text, Text, Text, Text>
 		  int i = 0;
 		  for(URLTFIDF pair : postingsList){
 			  if (i < size )
-				  postings.append(pair.getURL()+ " " + pair.getTFIDF() + " "+ pair.getIDF() +",");
+				  postings.append(pair.getURL()+ " " + pair.getTFIDF() + " "+ pair.getIDF() +"\t");
 			  else 
 				  postings.append(pair.getURL()+ " " + pair.getTFIDF() + " " + pair.getIDF());
 			  i++;
