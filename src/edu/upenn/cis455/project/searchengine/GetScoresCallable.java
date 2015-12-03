@@ -6,9 +6,9 @@ import java.util.concurrent.Callable;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedQueryList;
 
+import edu.upenn.cis455.project.dynamoDA.DynamoIndexerDA;
 import edu.upenn.cis455.project.storage.InvertedIndex;
 import edu.upenn.cis455.project.storage.Postings;
-import test.edu.upenn.cis455.project.DynamoIndexerDA;
 
 public class GetScoresCallable implements Callable<Heap>
 {

@@ -16,10 +16,10 @@ public class SearchEngine extends HttpServlet
 	private int maxResults = 10;
 	private int resultCount = 0;
 	private int initialCapacity = 100;
-	private Heap unigramUrls = new Heap(initialCapacity);
+	private PriorityQueue<Entry<String, Float>> unigramUrls;
 	private Heap bigramUrls = new Heap(initialCapacity);
 	private Heap trigramUrls = new Heap(initialCapacity);
-	private PriorityQueue<Entry<String, Integer>> cosineSimilarity;
+	private PriorityQueue<Entry<String, Float>> cosineSimilarity;
 	//private ArrayList<Postings> finalResultUrls = new ArrayList<Postings>();
 	private ArrayList<String> finalResultUrls = new ArrayList<String>();
 
@@ -62,25 +62,28 @@ public class SearchEngine extends HttpServlet
 			
 			if (queryTerms.size() == 0)
 			{
-				System.out.println("including stop word");
+				System.out.println("including stop words");
 				queryTerms = getQueryTerms(searchQuery, true);
 				System.out.println("query terms are now: " + queryTerms);
 				//Callable<HashMap<String, Integer>>
 				//TODO get proximity
 			}
 			
-			else if (queryTerms.size() >= 3)
+			if (queryTerms.size() >= 3)
 			{
-				Callable<Heap> callableUnigrams = new GetScoresCallable("UnigramIndex", queryTerms);
+				Callable<PriorityQueue<Entry<String, Float>>> callableCosineSim = new CosineSimilarityCallable(queryTerms);
+				//Callable<Heap> callableUnigrams = new GetScoresCallable("UnigramIndex", queryTerms);
 				Callable<Heap> callableBigrams = new GetScoresCallable("BigramIndex", queryTerms);
 				Callable<Heap> callableTrigrams = new GetScoresCallable("TrigramIndex", queryTerms);
-				Future<Heap> unigramFuture = pool.submit(callableUnigrams);
+				Future<PriorityQueue<Entry<String, Float>>> cosineSimFuture = pool.submit(callableCosineSim);
+				//Future<Heap> unigramFuture = pool.submit(callableUnigrams);
 				Future<Heap> bigramFuture = pool.submit(callableBigrams);
 				Future<Heap> trigramFuture = pool.submit(callableTrigrams);
 
 				try
 				{
-					unigramUrls = unigramFuture.get();
+					unigramUrls = cosineSimFuture.get();
+					//unigramUrls = unigramFuture.get();
 					bigramUrls = bigramFuture.get();
 					trigramUrls = trigramFuture.get();
 				}
@@ -94,14 +97,20 @@ public class SearchEngine extends HttpServlet
 			
 			else if (queryTerms.size() >= 2)
 			{
-				Callable<Heap> callableUnigrams = new GetScoresCallable("UnigramIndex", queryTerms);
+				Callable<PriorityQueue<Entry<String, Float>>> callableCosineSim = new CosineSimilarityCallable(queryTerms);
+
+				//Callable<Heap> callableUnigrams = new GetScoresCallable("UnigramIndex", queryTerms);
 				Callable<Heap> callableBigrams = new GetScoresCallable("BigramIndex", queryTerms);
-				Future<Heap> unigramFuture = pool.submit(callableUnigrams);
+				//Future<Heap> unigramFuture = pool.submit(callableUnigrams);
+				Future<PriorityQueue<Entry<String, Float>>> cosineSimFuture = pool.submit(callableCosineSim);
+
 				Future<Heap> bigramFuture = pool.submit(callableBigrams);
 
 				try
 				{
-					unigramUrls = unigramFuture.get();
+					unigramUrls = cosineSimFuture.get();
+
+					//unigramUrls = unigramFuture.get();
 					bigramUrls = bigramFuture.get();
 				}
 				catch (InterruptedException | ExecutionException e)
@@ -114,12 +123,17 @@ public class SearchEngine extends HttpServlet
 			
 			else
 			{
-				Callable<Heap> callableUnigrams = new GetScoresCallable("UnigramIndex", queryTerms);
-				Future<Heap> unigramFuture = pool.submit(callableUnigrams);
+				Callable<PriorityQueue<Entry<String, Float>>> callableCosineSim = new CosineSimilarityCallable(queryTerms);
+				Future<PriorityQueue<Entry<String, Float>>> cosineSimFuture = pool.submit(callableCosineSim);
+
+//				Callable<Heap> callableUnigrams = new GetScoresCallable("UnigramIndex", queryTerms);
+//				Future<Heap> unigramFuture = pool.submit(callableUnigrams);
 				try
 				{
 					System.out.println("waiting for results...");
-					unigramUrls = unigramFuture.get();
+					unigramUrls = cosineSimFuture.get();
+
+					//unigramUrls = unigramFuture.get();
 					System.out.println("got results...");
 				}
 				catch (InterruptedException | ExecutionException e)
@@ -165,11 +179,12 @@ public class SearchEngine extends HttpServlet
 			getRankedResults(unigramUrls);
 		}
 		
-		System.out.println("SEARCH RESULTS:");
-		for (String result: finalResultUrls)
-		{
-			System.out.println(result);
-		}
+//		System.out.println("SEARCH RESULTS:");
+//		
+//		for (String result: finalResultUrls)
+//		{
+//			System.out.println(result);
+//		}
 		
 	}
 	
@@ -179,9 +194,30 @@ public class SearchEngine extends HttpServlet
 		
 		for (int i = 0; i < numResults; i++)
 		{
-			String result = scoringFunction.remove().getUrl();
+			UrlScores score = scoringFunction.remove();
+			String result = score.getUrl();//scoringFunction.remove().getUrl();
 			if (!finalResultUrls.contains(result))
 			{
+				System.out.println("final result:");
+				System.out.println(score.getUrl() + " " + score.getCount() + " " + score.getTfidf());
+				finalResultUrls.add(result);
+				resultCount++;
+			}
+		}
+	}
+	
+	private void getRankedResults(PriorityQueue<Entry<String, Float>> cosineSimilarity)
+	{
+		int numResults = Math.min(maxResults - resultCount, cosineSimilarity.size());
+		
+		for (int i = 0; i < numResults; i++)
+		{
+			Entry<String, Float> score = cosineSimilarity.remove();
+			String result = score.getKey();//scoringFunction.remove().getUrl();
+			if (!finalResultUrls.contains(result))
+			{
+				System.out.println("final result:");
+				System.out.println(score.getKey() + " " + score.getValue());
 				finalResultUrls.add(result);
 				resultCount++;
 			}
@@ -214,10 +250,10 @@ public class SearchEngine extends HttpServlet
 //		searchEngine.search("used");
 //		searchEngine.search("side");
 //		searchEngine.search("choose");
-//		searchEngine.search("map"); 
+		searchEngine.search("map"); 
 //		searchEngine.search("log");
 //		searchEngine.search("am an and");
-		searchEngine.search("mashed potatoes");
+//		searchEngine.search("mashed potatoes");
 //		searchEngine.search("data contribute");
 		//searchEngine.search("cookies melissa");
 
