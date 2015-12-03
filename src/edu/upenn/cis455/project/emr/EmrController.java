@@ -60,20 +60,20 @@ import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
 import edu.upenn.cis455.project.bean.DocumentRecord;
 import edu.upenn.cis455.project.bean.EmrResult;
 import edu.upenn.cis455.project.crawler.Hash;
-import edu.upenn.cis455.project.storage.S3DocumentDA;
 import edu.upenn.cis455.project.storage.S3EmrDA;
 
 public class EmrController
 {
-	private static final int MAX_LIST_SIZE = 1000;
+	private static final int MAX_LIST_SIZE = 25;
 	private static final Double DELTA = 0.00001;
-	private static final int DOCUMENTS_TO_MERGE = 10;
+	private static final int DOCUMENTS_TO_MERGE = 50;
 	private String emrInputPath;
 	private String emrOutputBucketName;
 	private String emrOutputPrefix;
@@ -250,7 +250,7 @@ public class EmrController
 				objectNames.add(objectIter.next().getKey());
 			}
 		}
-		System.out.println(objectNames);
+		// System.out.println(objectNames);
 		return objectNames;
 	}
 
@@ -289,16 +289,17 @@ public class EmrController
 			results.addAll(resultsInDocument);
 			if (results.size() > MAX_LIST_SIZE)
 			{
-				System.out.println(results);
-				batchWriteEmrResults(results);
-				results.clear();
+				// System.out.println(results);
+				List<EmrResult> resultsToBeWritten = results.subList(0, 24);
+				batchWriteEmrResults(resultsToBeWritten);
+				results.removeAll(resultsToBeWritten);
 			}
 			// remove that document from s3
 			s3.deleteEmrResult(object);
 		}
 		if (results.size() > 0)
 		{
-			System.out.println(results);
+			// System.out.println(results);
 			batchWriteEmrResults(results);
 		}
 		// delete the output folder now
@@ -306,14 +307,15 @@ public class EmrController
 		return results;
 	}
 
-	public void mergeCrawledDocuments(List<String> objectNames)
-			throws NoSuchAlgorithmException, JsonProcessingException
+	public void mergeCrawledDocuments(List<String> objectNames,
+			String outputBucketName) throws NoSuchAlgorithmException,
+			JsonProcessingException
 	{
-		String outputBucketName = "edu.upenn.cis455.project.indexer.documents";
 		List<DocumentRecord> mergedDocuments = new ArrayList<DocumentRecord>();
 		for (String object : objectNames)
 		{
-			DocumentRecord doc = getDocument(outputBucketName, object);
+			DocumentRecord doc = getDocument(
+					"edu.upenn.cis455.project.documents", object);
 			mergedDocuments.add(doc);
 			if (mergedDocuments.size() > DOCUMENTS_TO_MERGE)
 			{
@@ -332,7 +334,7 @@ public class EmrController
 		}
 	}
 
-	public void writeDocuments(List<DocumentRecord> mergedDocuments,
+	public String writeDocuments(List<DocumentRecord> mergedDocuments,
 			String bucketName) throws NoSuchAlgorithmException,
 			JsonProcessingException
 	{
@@ -350,6 +352,7 @@ public class EmrController
 		PutObjectRequest request = new PutObjectRequest(bucketName, s3Key,
 				inputStream, omd);
 		s3Client.putObject(request);
+		return s3Key;
 	}
 
 	public String createCluster() throws InterruptedException
@@ -449,6 +452,7 @@ public class EmrController
 			TableWriteItems writeItems = new TableWriteItems(tableName);
 			for (EmrResult result : results)
 			{
+				//System.out.println(result);
 				Item item = new Item().withPrimaryKey(primaryKeyName,
 						result.getKey()).with(valueKeyName, result.getValue());
 				writeItems.addItemToPut(item);
@@ -509,9 +513,9 @@ public class EmrController
 					tableMap.put(item.getString(primaryKeyName),
 							Float.valueOf(item.getFloat(valueKeyName)));
 				}
-				System.out.println("comparing - ");
-				System.out.println(tableMap);
-				System.out.println(resultsMap);
+				// System.out.println("comparing - ");
+				// System.out.println(tableMap);
+				// System.out.println(resultsMap);
 				for (Map.Entry<String, Float> result : resultsMap.entrySet())
 				{
 					Float newRank = result.getValue();
@@ -635,6 +639,46 @@ public class EmrController
 			e.printStackTrace();
 		}
 		return doc;
+	}
+
+	public List<DocumentRecord> getDocuments(String bucketName, String prefix)
+	{
+		List<DocumentRecord> documentList = new ArrayList<DocumentRecord>();
+		try
+		{
+			GetObjectRequest req = new GetObjectRequest(bucketName, prefix);
+			S3Object s3Object = s3Client.getObject(req);
+			InputStream objectData = s3Object.getObjectContent();
+			BufferedReader reader = new BufferedReader(new InputStreamReader(
+					objectData));
+			StringBuilder s3Content = new StringBuilder();
+			String line;
+			while ((line = reader.readLine()) != null)
+			{
+				s3Content.append(line + "\r\n");
+			}
+			reader.close();
+			objectData.close();
+			ObjectMapper mapper = new ObjectMapper();
+			mapper.setVisibility(PropertyAccessor.ALL, Visibility.NONE);
+			mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
+			documentList = mapper.readValue(s3Content.toString(),
+					new TypeReference<List<DocumentRecord>>()
+					{
+					});
+		}
+		catch (AmazonS3Exception ase)
+		{
+			System.out.println("S3EmrDA : document does not exist");
+			ase.printStackTrace();
+		}
+		catch (IOException e)
+		{
+			System.out
+					.println("S3EmrDA : IOException while fetching document from S3");
+			e.printStackTrace();
+		}
+		return documentList;
 	}
 
 	public boolean isIterative()
