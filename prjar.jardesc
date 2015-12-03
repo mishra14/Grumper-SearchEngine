@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<jardesc>
+    <jar path="/media/sf_shared/pagerank.jar"/>
+    <options buildIfNeeded="true" compress="true" descriptionLocation="/cis455project/prjar.jardesc" exportErrors="true" exportWarnings="true" includeDirectoryEntries="false" overwrite="false" saveDescription="true" storeRefactorings="false" useSourceFolders="false"/>
+    <storedRefactorings deprecationInfo="true" structuralOnly="false"/>
+    <selectedProjects/>
+    <manifest generateManifest="true" mainClassHandleIdentifier="=cis455project/src&lt;edu.upenn.cis455.project.pagerank{PageRankTool.java[PageRankTool" manifestLocation="" manifestVersion="1.0" reuseManifest="false" saveManifest="false" usesManifest="true">
+        <sealing sealJar="false">
+            <packagesToSeal/>
+            <packagesToUnSeal/>
+        </sealing>
+    </manifest>
+    <selectedElements exportClassFiles="true" exportJavaFiles="false" exportOutputFolder="false">
+        <file path="/cis455project/lib/RepJEJConsole.jar"/>
+        <file path="/cis455project/lib/jackson-annotations-2.6.3.jar"/>
+        <javaElement handleIdentifier="=cis455project/src&lt;edu.upenn.cis455.project.storage"/>
+        <file path="/cis455project/lib/httpcore-4.4.4.jar"/>
+        <file path="/cis455project/lib/jackson-databind-2.6.3.jar"/>
+        <file path="/cis455project/lib/jackson-core-2.6.3.jar"/>
+        <javaElement handleIdentifier="=cis455project/src&lt;edu.upenn.cis455.project.pagerank"/>
+        <file path="/cis455project/lib/commons-logging.jar"/>
+        <file path="/cis455project/lib/log4j-1.2.9.jar"/>
+        <file path="/cis455project/lib/httpclient-4.5.1.jar"/>
+        <file path="/cis455project/lib/hadoop-common-2.0.2-alpha.jar"/>
+        <javaElement handleIdentifier="=cis455project/src&lt;edu.upenn.cis455.project.bean"/>
+        <file path="/cis455project/lib/joda-time-2.9.1.jar"/>
+        <file path="/cis455project/lib/hadoop-mapreduce-client-core-2.0.2-alpha.jar"/>
+        <file path="/cis455project/lib/junit.jar"/>
+    </selectedElements>
+</jardesc>

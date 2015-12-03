@@ -14,7 +14,7 @@ public class PageRankEmrController
 	public static void main(String[] args) throws InterruptedException,
 			NoSuchAlgorithmException, JsonProcessingException
 	{
-		String emrInputPath = "s3://edu.upenn.cis455.project.url.test/";
+		String emrInputPath = "s3://edu.upenn.cis455.project.urls/";
 		String emrOutputBucketName = "edu.upenn.cis455.project.pagerank";
 		String emrOutputPrefix = "output";
 		String clusterLogPath = "s3://edu.upenn.cis455.project.pagerank/log";
