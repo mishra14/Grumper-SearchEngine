@@ -1,6 +1,5 @@
 package edu.upenn.cis455.project.pagerank;
 
-
 import java.io.IOException;
 import java.util.HashSet;
 
@@ -17,41 +16,53 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.upenn.cis455.project.bean.UrlList;
 import edu.upenn.cis455.project.storage.DynamoDA;
 
-public class Map extends Mapper<NullWritable, BytesWritable, Text, Text> {
-    
-	private DynamoDA<Float> dynamo = new DynamoDA<Float>("edu.upenn.cis455.project.pagerank", Float.class);
-	
+public class Map extends Mapper<NullWritable, BytesWritable, Text, Text>
+{
+
+	private DynamoDA<Float> dynamo = new DynamoDA<Float>(
+			"edu.upenn.cis455.project.pagerank", Float.class);
+
 	@Override
-    public void map(NullWritable key, BytesWritable value, Context context) 
-    		throws IOException, InterruptedException {
-	    UrlList urlList = getUrlList(value);
-	    HashSet<String> forwardLinks = (HashSet<String>) urlList.getUrls();
-	    String url = urlList.getParentUrl();
-	    Item item = dynamo.getItem("hostName", url);
-	    Float urlRank = new Float(1);
-	    if(item!=null)
-	    {
-	    	urlRank = item.getFloat("rank");
-	    }
-	    Float edgeWeight = urlRank/forwardLinks.size();
-	    for(String forwardLink : forwardLinks)
-	    {
-		    Float rankVar = edgeWeight ;
-	    	String rankString=rankVar.toString();
-	    	context.write(new Text(forwardLink), new Text(rankString));
-	    }
-    }
-	
-	private UrlList getUrlList(BytesWritable value) {
+	public void map(NullWritable key, BytesWritable value, Context context)
+			throws IOException, InterruptedException
+	{
+		UrlList urlList = getUrlList(value);
+		if (urlList != null)
+		{
+			HashSet<String> forwardLinks = (HashSet<String>) urlList.getUrls();
+			String url = urlList.getParentUrl();
+			Item item = dynamo.getItem("hostName", url);
+			Float urlRank = new Float(1);
+			if (item != null)
+			{
+				urlRank = item.getFloat("rank");
+			}
+			Float edgeWeight = urlRank / forwardLinks.size();
+			for (String forwardLink : forwardLinks)
+			{
+				Float rankVar = edgeWeight;
+				String rankString = rankVar.toString();
+				context.write(new Text(forwardLink), new Text(rankString));
+			}
+		}
+
+	}
+
+	private UrlList getUrlList(BytesWritable value)
+	{
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.setVisibility(PropertyAccessor.ALL, Visibility.NONE);
 		mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
-		UrlList urlList=null;
-		try {
-			urlList = mapper.readValue(new String(value.getBytes()), UrlList.class);
-		} catch (IOException e) {
+		UrlList urlList = null;
+		try
+		{
+			urlList = mapper.readValue(new String(value.getBytes()),
+					UrlList.class);
+		}
+		catch (IOException e)
+		{
 			e.printStackTrace();
 		}
 		return urlList;
-	}	
+	}
 }
