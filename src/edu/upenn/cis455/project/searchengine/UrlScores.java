@@ -11,7 +11,7 @@ public class UrlScores
 		this.url = url;
 		this.tfidf = tfidf;
 		this.count = count;
-	}
+	}	
 	
 	public String getUrl()
 	{
