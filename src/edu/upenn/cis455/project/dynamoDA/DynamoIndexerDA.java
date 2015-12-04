@@ -36,7 +36,8 @@ public class DynamoIndexerDA
 	
 	public DynamoIndexerDA(String tableName){
 		this.tableName = tableName;
-		this.config = new DynamoDBMapperConfig(new DynamoDBMapperConfig.TableNameOverride(this.tableName));
+		this.config = new DynamoDBMapperConfig(
+				new DynamoDBMapperConfig.TableNameOverride(this.tableName));
 		db = new AmazonDynamoDBClient();
 		//setupDB();
 		mapper = new DynamoDBMapper(db);
@@ -70,12 +71,12 @@ public class DynamoIndexerDA
 		
 		
 	}
-	public void saveIndex(String word, String postingsString)
+	public void saveIndex(String word, ArrayList<Postings> allPostings)
 	{
 
 		InvertedIndex index = new InvertedIndex();
 		index.setWord(word);
-		ArrayList<Postings>allPostings = parseAllPostings(postingsString);
+		//ArrayList<Postings>allPostings = parseAllPostings(postingsString);
 		ArrayList<Postings> postingsList = new ArrayList<Postings>();
 		int count = 0;
 		int size = allPostings.size();
@@ -103,22 +104,22 @@ public class DynamoIndexerDA
 	}
 
 	
-	public ArrayList<Postings> parseAllPostings(String postingsList){
-		ArrayList<Postings> list = new ArrayList<Postings>();
-		String[] postingsContent = postingsList.split("\t");
-		for (String posting : postingsContent)
-		{
-			Postings postings = new Postings();
-			String[] pair = posting.trim().split(" ", 2);
-			postings.setPosting(pair[0]);
-			pair = pair[1].split(" ");
-			postings.setTfidf(Float.parseFloat(pair[0].trim()));
-			postings.setIdf(Float.parseFloat(pair[1].trim()));
-			list.add(postings);
-			
-		}
-		return list;
-	}
+//	public ArrayList<Postings> parseAllPostings(String postingsList){
+//		ArrayList<Postings> list = new ArrayList<Postings>();
+//		String[] postingsContent = postingsList.split("\t");
+//		for (String posting : postingsContent)
+//		{
+//			Postings postings = new Postings();
+//			String[] pair = posting.trim().split(" ", 2);
+//			postings.setPosting(pair[0]);
+//			pair = pair[1].split(" ");
+//			postings.setTfidf(Float.parseFloat(pair[0].trim()));
+//			postings.setIdf(Float.parseFloat(pair[1].trim()));
+//			list.add(postings);
+//			
+//		}
+//		return list;
+//	}
 
 	public PaginatedQueryList<InvertedIndex> loadIndex(String word)
 	{	

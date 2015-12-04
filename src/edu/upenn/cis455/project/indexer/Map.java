@@ -39,12 +39,12 @@ public class Map extends Mapper<Text, BytesWritable, Text, Text>
 				url.set(doc.getDocumentId().trim());
 
 				String rawContent = getHtmlText(line);
-				StringTokenizer tokenizer = new StringTokenizer(rawContent, " ,.?\"!-");
+				StringTokenizer tokenizer = new StringTokenizer(rawContent, " ,.?\"!-\t");
 				while (tokenizer.hasMoreTokens())
 				{
 					String currWord = tokenizer.nextToken();
 					currWord = currWord.toLowerCase()
-							.replaceAll("[^a-z0-9 ]", "").trim();
+							.replaceAll("[^a-z]", "").trim();
 					// String stemmedWord = stem(currWord);
 					if (!currWord.isEmpty())
 					{
