@@ -23,6 +23,7 @@ public class Map extends Mapper<Text, BytesWritable, Text, Text> {
     
 	private final Text url = new Text();
 	private ArrayList<String>allWords = new ArrayList<String>();
+	private final String splitOn = " ,.?\"!-[({\r\t\"\'\\_";
 
 	@Override
     public void map(Text key, BytesWritable value, Context context) 
@@ -61,12 +62,12 @@ public class Map extends Mapper<Text, BytesWritable, Text, Text> {
 	public void getAllWords(String content)
 	{
 		allWords.clear();
-		StringTokenizer tokenizer = new StringTokenizer(content, " ,.?\"!-");
+		StringTokenizer tokenizer = new StringTokenizer(content, splitOn);
 		String word;
 		while (tokenizer.hasMoreTokens()) {
 			word = tokenizer.nextToken();
-	    	word = word.trim().toLowerCase().replaceAll("[^a-z0-9 ]", "");
-	    	if (!stopwords.contains(word) && !word.equals("")){
+	    	word = word.trim().toLowerCase().replaceAll("[^a-z]", "");
+	    	if (!stopwords.contains(word) && !word.isEmpty()){
 	    		allWords.add(stem(word));
 	    	}
 	    }
