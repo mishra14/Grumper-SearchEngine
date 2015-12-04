@@ -14,6 +14,7 @@ import org.apache.hadoop.mapreduce.Reducer;
 
 import edu.upenn.cis455.project.dynamoDA.DynamoIndexerDA;
 import edu.upenn.cis455.project.scoring.URLTFIDF;
+import edu.upenn.cis455.project.storage.Postings;
 
 public class Reduce extends Reducer<Text, Text, Text, Text>
 {
@@ -28,7 +29,8 @@ public class Reduce extends Reducer<Text, Text, Text, Text>
 			throws IOException, InterruptedException {
 		setFieldsFromKey(key);
 		df = computeDF(values);
-		String postingsList = createPostingsList();  
+		//String postingsList = createPostingsList();  
+		ArrayList<Postings> postingsList = createPostings();
 		//context.write(keyword, new Text(postingsList));
 		DynamoIndexerDA dynamo = new DynamoIndexerDA(tablename);
 		dynamo.saveIndex(keyword.toString(), postingsList);
@@ -57,34 +59,34 @@ public class Reduce extends Reducer<Text, Text, Text, Text>
 		  return docIDset.size();
 	  }
 	  
-	  private ArrayList<URLTFIDF> sortPostings(){
+	  private ArrayList<Postings> createPostings(){
 		 
-		  ArrayList<URLTFIDF> postingsList = new ArrayList<URLTFIDF>();
+		  ArrayList<Postings> postingsList = new ArrayList<Postings>();
 		  for(String docID: tf.keySet()){
-			  float idf = (float) Math.log(3400/df);// replace later with bucketsize
+			  float idf = (float) Math.log(14987/df);// replace later with bucketsize
 			  float tfidf = tf.get(docID) * idf ;
-			  URLTFIDF newPostings = new URLTFIDF(docID, tfidf, idf);
+			  Postings newPostings = new Postings(docID, tfidf, idf);
 			  postingsList.add(newPostings);
 		  }
 		  Collections.sort(postingsList);
 		  return postingsList; 
 	  }
 	  
-	  private String createPostingsList(){
-		  StringBuilder postings = new StringBuilder();
-		  ArrayList<URLTFIDF> postingsList = sortPostings();
-		  int size = postingsList.size() - 1;
-		  int i = 0;
-		  for(URLTFIDF pair : postingsList){
-			  if (i < size )
-				  postings.append(pair.getURL()+ " " + pair.getTFIDF() + " "+ pair.getIDF() +"\t");
-			  else 
-				  postings.append(pair.getURL()+ " " + pair.getTFIDF() + " " + pair.getIDF());
-			  i++;
-		  }
-		  return postings.toString();
-	  }
-	  
+//	  private String createPostingsList(){
+//		  StringBuilder postings = new StringBuilder();
+//		  ArrayList<URLTFIDF> postingsList = sortPostings();
+//		  int size = postingsList.size() - 1;
+//		  int i = 0;
+//		  for(URLTFIDF pair : postingsList){
+//			  if (i < size )
+//				  postings.append(pair.getURL()+ " " + pair.getTFIDF() + " "+ pair.getIDF() +"\t");
+//			  else 
+//				  postings.append(pair.getURL()+ " " + pair.getTFIDF() + " " + pair.getIDF());
+//			  i++;
+//		  }
+//		  return postings.toString();
+//	  }
+//	  
 	  private void setFieldsFromKey(Text key)
 	  {
 		  String[] keys = key.toString().split(" ");

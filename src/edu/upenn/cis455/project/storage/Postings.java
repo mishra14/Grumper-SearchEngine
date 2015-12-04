@@ -1,11 +1,18 @@
 package edu.upenn.cis455.project.storage;
 
-public class Postings
+import edu.upenn.cis455.project.scoring.URLTFIDF;
+
+public class Postings implements Comparable<Postings>
 {
 	String posting;
 	float tfidf;
 	float idf;
-	
+	public Postings(String posting, float tfidf, float idf){
+		this.posting = posting;
+		this.tfidf = tfidf;
+		this.idf = idf;
+	}
+	public Postings(){}
 	public void setPosting(String posting){
 		this.posting = posting;
 	}
@@ -30,6 +37,11 @@ public class Postings
 		return this.idf;
 	}
 
+	@Override
+	public int compareTo(Postings compareTFIDF){
+		int other = (int) ((Postings)compareTFIDF).getTfidf();
+		return other - (int)this.tfidf ;
+	}
 	@Override
 	public String toString()
 	{
