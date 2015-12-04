@@ -40,7 +40,7 @@ public class DBWrapper
 		envConfig.setAllowCreate(true);
 		storeConfig.setAllowCreate(true);
 		envConfig.setTransactional(true);
-		envConfig.setLockTimeout(2, TimeUnit.SECONDS);
+		envConfig.setLockTimeout(4, TimeUnit.SECONDS);
 		storeConfig.setTransactional(true);
 		env = new Environment(dbFile, envConfig);
 		store = new EntityStore(env, "Crawler Store", storeConfig);

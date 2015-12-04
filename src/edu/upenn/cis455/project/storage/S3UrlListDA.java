@@ -132,7 +132,7 @@ public class S3UrlListDA
 		catch (AmazonS3Exception ase)
 		{
 			System.out.println("S3UrlListDA : document does not exist");
-			ase.printStackTrace();
+//			ase.printStackTrace();
 		}
 		catch (IOException e)
 		{

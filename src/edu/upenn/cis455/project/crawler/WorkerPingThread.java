@@ -57,8 +57,8 @@ public class WorkerPingThread extends Thread
 		{
 			try
 			{
-				System.out
-						.println("crawl worker ping thread : pinging crawl master");
+//				System.out
+//						.println("crawl worker ping thread : pinging crawl master");
 				String host = masterUrl.getHost();
 				int port = masterUrl.getPort() == -1 ? masterUrl
 						.getDefaultPort() : masterUrl.getPort();

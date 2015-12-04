@@ -10,6 +10,7 @@ import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.URL;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -38,14 +39,14 @@ public class PushToDB extends TimerTask
 	@Override
 	public void run()
 	{
-		System.out.println("!!!!!!!!!!!!!!!!!! SENDING PUSHDATA !!!!!!!!!!!!!!!!!!!!!!!!!!!");
+//		System.out.println("!!!!!!!!!!!!!!!!!! SENDING PUSHDATA !!!!!!!!!!!!!!!!!!!!!!!!!!!");
 		int numWorkers;
 		
 		synchronized(workers){
 			numWorkers = workers.size();
 		}
 		
-		System.out.println("[PUSHDB] Numworkers: "+numWorkers);
+//		System.out.println("[PUSHDB] Numworkers: "+numWorkers);
 		for(int i=0;i<numWorkers;i++){
 			File file = new File("./"+i+".txt");
 			
@@ -123,7 +124,7 @@ public class PushToDB extends TimerTask
 			{
 				for(String post_body: post){
 					
-					System.out.println("[PUSHDATA] Opening new socket for port: "+port);
+//					System.out.println("[PUSHDATA] Opening new socket for port: "+port);
 					socket = new Socket(host, port);
 					clientSocketOut = new PrintWriter(new OutputStreamWriter(
 							socket.getOutputStream()));
@@ -137,7 +138,7 @@ public class PushToDB extends TimerTask
 					clientSocketOut.print("\r\n");
 					clientSocketOut.print("\r\n");
 					clientSocketOut.flush();
-					System.out.println("Sent Post");
+//					System.out.println("Sent Post");
 					
 					response = null;
 					if(socket!=null){
@@ -188,8 +189,25 @@ public class PushToDB extends TimerTask
 		S3DocumentDA s3 = new S3DocumentDA();
 		synchronized(crawledDocs){
 			for(DocumentRecord doc : crawledDocs){
-				System.out.println("Adding: "+doc.getDocumentId());
+//				System.out.println("Adding: "+doc.getDocumentId());
+				String hashcode = s3.getHashCodeFromDynamo(doc.getDocumentId());
+				
 				s3.putDocument(doc);
+				System.out.println("Added to s3: "+doc.getDocumentId());
+				
+				try
+				{
+					if(hashcode!=null && !hashcode.equals(Hash.hashKey(doc.getDocumentString())))
+					{
+						s3.deleteDocumentWithHashCode(hashcode);
+						System.out.println("Deleted from s3: "+doc.getDocumentId()+" hashcode: "+hashcode);
+					}
+				}
+				catch (NoSuchAlgorithmException e)
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 			
 			crawledDocs.clear();
@@ -211,9 +229,11 @@ public class PushToDB extends TimerTask
 					urlDA.putUrlList(urllist);
 				}
 			}
+			
+			urlMappings.clear();
 		}
 		
-		System.out.println("!!!!!!!!!!!!!!!!!!!!!!!! FINISHED PUSHING TO DB !!!!!!!!!!!!!!!!!!!!!!!!!!!1");
+//		System.out.println("!!!!!!!!!!!!!!!!!!!!!!!! FINISHED PUSHING TO DB !!!!!!!!!!!!!!!!!!!!!!!!!!!1");
 		
 	}
 	

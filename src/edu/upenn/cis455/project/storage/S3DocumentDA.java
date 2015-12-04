@@ -133,7 +133,7 @@ public class S3DocumentDA
 			catch (AmazonS3Exception ase)
 			{
 				System.out.println("S3DocumentDA : document does not exist");
-				ase.printStackTrace();
+//				ase.printStackTrace();
 			}
 			catch (IOException e)
 			{

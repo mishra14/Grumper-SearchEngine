@@ -57,8 +57,8 @@ public class MasterPingThread extends Thread
 				synchronized (workerList)
 				{
 
-					System.out
-							.println("crawl master ping thread : updating active worker list");
+//					System.out
+//							.println("crawl master ping thread : updating active worker list");
 					updateWorkers();
 					StringBuilder workerString = buildWorkerString();
 					for (String worker : workerList)
@@ -115,7 +115,7 @@ public class MasterPingThread extends Thread
 			throws UnknownHostException, IOException
 	{
 		String workerUrl = "http://" + worker + "/worker/updateworkers";
-		System.out.println("master : updating worker list to - " + workerUrl);
+//		System.out.println("master : updating worker list to - " + workerUrl);
 		URL url = new URL(workerUrl);
 		String host = url.getHost();
 		int port = url.getPort() == -1 ? url.getDefaultPort() : url.getPort();
@@ -149,7 +149,7 @@ public class MasterPingThread extends Thread
 
 	private void updateWorkers()
 	{
-		System.out.println("crawl master ping thread : updating");
+//		System.out.println("crawl master ping thread : updating");
 		ArrayList<String> inActiveWorkers = new ArrayList<String>();
 		for (Map.Entry<String, WorkerStatus> entry : workers.entrySet())
 		{
@@ -164,12 +164,12 @@ public class MasterPingThread extends Thread
 		{
 			workers.keySet().removeAll(inActiveWorkers);
 		}
-		System.out.println("crawl master ping thread : removing workers - "
-				+ inActiveWorkers);
-		System.out.println("crawl master ping thread : updated worker List - "
-				+ workerList);
-		System.out.println("crawl master ping thread : updated worker map - "
-				+ workers);
+//		System.out.println("crawl master ping thread : removing workers - "
+//				+ inActiveWorkers);
+//		System.out.println("crawl master ping thread : updated worker List - "
+//				+ workerList);
+//		System.out.println("crawl master ping thread : updated worker map - "
+//				+ workers);
 
 	}
 }

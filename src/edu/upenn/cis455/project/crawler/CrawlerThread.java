@@ -40,9 +40,9 @@ public class CrawlerThread implements Runnable{
 			String url = null;
 			if(urlQueue.getSize() == 0){
 				
-				System.out.println("QUEUE EMPTY: Enqueing urls from db");
+//				System.out.println("QUEUE EMPTY: Enqueing urls from db");
 				ArrayList<String> urls = UrlDA.getURLS();
-				System.out.println("SIZE of urlqueue from db: "+urls.size());
+//				System.out.println("SIZE of urlqueue from db: "+urls.size());
 				urlQueue.enqueueAll(urls);
 				try
 				{	
@@ -89,7 +89,7 @@ public class CrawlerThread implements Runnable{
 			}
 			
 			if(idx!=self_id){
-				System.out.println("Writing url ["+url+"] to worker "+idx);
+//				System.out.println("Writing url ["+url+"] to worker "+idx);
 				FileIO.writeURL(url, idx);
 				continue;
 			}
@@ -229,8 +229,8 @@ public class CrawlerThread implements Runnable{
 				}
 				catch (Exception e)
 				{
-					System.out.println("Error fetching Robots.txt new: ");
-					e.printStackTrace();
+//					System.out.println("Error fetching Robots.txt new: ");
+//					e.printStackTrace();
 					
 				}
 				//DBWrapper.closeDBWrapper();
@@ -255,7 +255,7 @@ public class CrawlerThread implements Runnable{
 					//DBWrapper.closeDBWrapper();
 
 				}else{
-					System.out.println("Document cannot be fetched for url"+url+". Head returned false");
+//					System.out.println("Document cannot be fetched for url"+url+". Head returned false");
 					//System.out.println("Moving on");
 					continue;
 				}

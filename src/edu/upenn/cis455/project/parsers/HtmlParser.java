@@ -21,7 +21,7 @@ public class HtmlParser
 {
 	
 	public static void parse(String content, String url, Queue<String> urlQueue, ArrayList<UrlList> urlMappings){
-		System.out.println("PARSING: "+url);
+//		System.out.println("PARSING: "+url);
 		Document doc = Jsoup.parse(content, url, Parser.htmlParser());
 		extractLinks(url, doc, urlQueue, urlMappings);
 	}
@@ -79,7 +79,7 @@ public class HtmlParser
 //		URL url = null;
 //		try
 //		{
-//			url = new URL("http://www.usnews.com/education");
+//			url = new URL("http://www.blog.coursera.org/");
 //		}
 //		catch (MalformedURLException e)
 //		{

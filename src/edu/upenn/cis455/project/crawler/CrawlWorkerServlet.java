@@ -94,7 +94,7 @@ public class CrawlWorkerServlet extends HttpServlet
 		timerTask = new PushToDB(this.workers, this.crawledDocs, this.urlMappings);
 		
 		timer = new Timer(true);
-		timer.scheduleAtFixedRate(timerTask, 60000, 60000);
+		timer.scheduleAtFixedRate(timerTask, 0, 40000);
 	}
 	
 	public void destroy(){

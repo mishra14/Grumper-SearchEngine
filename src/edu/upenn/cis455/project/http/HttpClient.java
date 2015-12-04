@@ -58,21 +58,21 @@ public class HttpClient
 			
 			if(lastAccessed!=null){
 				SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
-//				sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+				sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
 				String d = sdf.format(lastAccessed);
 				connection.setRequestProperty("If-Modified-Since", d);
 			}
 			
 			this.response_code = connection.getResponseCode();
 			
-			if(connection.getResponseCode() == 301){
+			if(connection.getResponseCode() == 301 || connection.getResponseCode()== 303){
 				String location = connection.getHeaderField("Location");
 	//			System.out.println("Redirected to: "+location);
 				urlQueue.enqueue(location);
 			}
 			
 			if(connection.getResponseCode()!=200){
-				System.out.println("Response code for "+url+" is: "+connection.getResponseCode());
+//				System.out.println("Response code for "+url+" is: "+connection.getResponseCode());
 				return false;
 			}
 			
@@ -97,7 +97,7 @@ public class HttpClient
 			
 			if(lastAccessed!=null){
 				SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
-//				sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+				sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
 				String d = sdf.format(lastAccessed);
 //				System.out.println(d);
 				connection.setRequestProperty("If-Modified-Since", d);
@@ -106,9 +106,9 @@ public class HttpClient
 			this.response_code = connection.getResponseCode();
 			
 //			System.out.println(connection.getResponseCode());
-			if(connection.getResponseCode() == 301){
+			if(connection.getResponseCode() == 301 || connection.getResponseCode()== 303){
 				String location = connection.getHeaderField("Location");
-				System.out.println("Redirected to: "+location);
+//				System.out.println("Redirected to: "+location);
 				urlQueue.enqueue(location);
 			}
 			
