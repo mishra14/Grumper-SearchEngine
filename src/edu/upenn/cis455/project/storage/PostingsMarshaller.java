@@ -31,18 +31,24 @@ public class PostingsMarshaller implements DynamoDBMarshaller<ArrayList<Postings
 	@Override
 	public ArrayList<Postings> unmarshall(Class<ArrayList<Postings>> clazz, String s)
 	{
-		ArrayList<Postings> list = new ArrayList<Postings>();
-		String[] allPostings = s.split("\t");
-		for(String posting : allPostings){		
-			Postings postings = new Postings();
-			String[] pair = posting.trim().split(" ", 2);
-			postings.setPosting(pair[0]);
-			pair = pair[1].split(" ");
-			postings.setTfidf(Float.parseFloat(pair[0].trim()));
-			postings.setIdf(Float.parseFloat(pair[1].trim()));
-			list.add(postings);
+		try {
+			ArrayList<Postings> list = new ArrayList<Postings>();
+			String[] allPostings = s.split("\t");
+			for(String posting : allPostings){		
+				Postings postings = new Postings();
+				String[] pair = posting.trim().split(" ", 2);
+				postings.setPosting(pair[0]);
+				pair = pair[1].split(" ");
+				postings.setTfidf(Float.parseFloat(pair[0].trim()));
+				postings.setIdf(Float.parseFloat(pair[1].trim()));
+				list.add(postings);
+			}
+			return list;
+		} catch (Exception e){
+			
 		}
-		return list;
+		return null;
+		
 	}
 	
 

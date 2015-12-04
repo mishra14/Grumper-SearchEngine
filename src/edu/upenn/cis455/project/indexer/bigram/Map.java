@@ -22,6 +22,8 @@ public class Map extends Mapper<Text, BytesWritable, Text, Text> {
     
 	private final Text url = new Text();
 	private ArrayList<String>allWords;
+	private final String splitOn = " ,.?\"!-[({\r\t\"\'\\_";
+
 	@Override
     public void map(Text key, BytesWritable value, Context context) 
     		throws IOException, InterruptedException {
@@ -38,7 +40,7 @@ public class Map extends Mapper<Text, BytesWritable, Text, Text> {
 				    
 				    for (int i = 0; i < numWords - 1; i++){
 				    	bigram.set(allWords.get(i) + " " + allWords.get(i + 1) + ";" + key);
-				    	context.write( bigram , url);
+				    	context.write(bigram , url);
 				    }  
 			}
 		}
@@ -51,12 +53,12 @@ public class Map extends Mapper<Text, BytesWritable, Text, Text> {
 	public void getAllWords(String content)
 	{
 		allWords.clear();
-		StringTokenizer tokenizer = new StringTokenizer(content, " ,.?\"!-");
+		StringTokenizer tokenizer = new StringTokenizer(content, splitOn);
 		String word;
 		while (tokenizer.hasMoreTokens()) {
 			word = tokenizer.nextToken();
-	    	word = word.trim().toLowerCase().replaceAll("[^a-z0-9 ]", "");
-	    	if (!stopwords.contains(word) && !word.equals("")){
+	    	word = word.trim().toLowerCase().replaceAll("[^a-z]", "");
+	    	if (!stopwords.contains(word) && !word.isEmpty()){
 	    		allWords.add(stem(word));
 	    	}
 	    }
