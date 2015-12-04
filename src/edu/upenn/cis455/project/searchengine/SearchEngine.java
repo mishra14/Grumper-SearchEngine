@@ -69,99 +69,39 @@ public class SearchEngine extends HttpServlet
 				//TODO get proximity
 			}
 			
-			if (queryTerms.size() >= 3)
-			{
-				Callable<PriorityQueue<Entry<String, Float>>> callableCosineSim = new CosineSimilarityCallable(queryTerms);
-				//Callable<Heap> callableUnigrams = new GetScoresCallable("UnigramIndex", queryTerms);
-				Callable<Heap> callableBigrams = new GetScoresCallable("BigramIndex", queryTerms);
-				Callable<Heap> callableTrigrams = new GetScoresCallable("TrigramIndex", queryTerms);
-				Future<PriorityQueue<Entry<String, Float>>> cosineSimFuture = pool.submit(callableCosineSim);
-				//Future<Heap> unigramFuture = pool.submit(callableUnigrams);
-				Future<Heap> bigramFuture = pool.submit(callableBigrams);
-				Future<Heap> trigramFuture = pool.submit(callableTrigrams);
+			Callable<PriorityQueue<Entry<String, Float>>> callableCosineSim = new CosineSimilarityCallable(queryTerms);
+			Callable<Heap> callableBigrams = new GetScoresCallable("BigramIndex", queryTerms);
+			Callable<Heap> callableTrigrams = new GetScoresCallable("TrigramIndex", queryTerms);
+			
+			Future<PriorityQueue<Entry<String, Float>>> cosineSimFuture = pool.submit(callableCosineSim);
+			Future<Heap> bigramFuture = pool.submit(callableBigrams);
+			Future<Heap> trigramFuture = pool.submit(callableTrigrams);
 
-				try
-				{
-					unigramUrls = cosineSimFuture.get();
-					//unigramUrls = unigramFuture.get();
-					bigramUrls = bigramFuture.get();
-					trigramUrls = trigramFuture.get();
-				}
-				catch (InterruptedException | ExecutionException e)
-				{
-					e.printStackTrace();
-				}
-				
-				getRankedResults();
+			try
+			{
+				cosineSimilarity = cosineSimFuture.get();
+				bigramUrls = bigramFuture.get();
+				trigramUrls = trigramFuture.get();
+			}
+			catch (InterruptedException | ExecutionException e)
+			{
+				e.printStackTrace();
 			}
 			
-			else if (queryTerms.size() >= 2)
-			{
-				Callable<PriorityQueue<Entry<String, Float>>> callableCosineSim = new CosineSimilarityCallable(queryTerms);
-
-				//Callable<Heap> callableUnigrams = new GetScoresCallable("UnigramIndex", queryTerms);
-				Callable<Heap> callableBigrams = new GetScoresCallable("BigramIndex", queryTerms);
-				//Future<Heap> unigramFuture = pool.submit(callableUnigrams);
-				Future<PriorityQueue<Entry<String, Float>>> cosineSimFuture = pool.submit(callableCosineSim);
-
-				Future<Heap> bigramFuture = pool.submit(callableBigrams);
-
-				try
-				{
-					unigramUrls = cosineSimFuture.get();
-
-					//unigramUrls = unigramFuture.get();
-					bigramUrls = bigramFuture.get();
-				}
-				catch (InterruptedException | ExecutionException e)
-				{
-					e.printStackTrace();
-				}
-				
-				getRankedResults();
-			}
-			
-			else
-			{
-				Callable<PriorityQueue<Entry<String, Float>>> callableCosineSim = new CosineSimilarityCallable(queryTerms);
-				Future<PriorityQueue<Entry<String, Float>>> cosineSimFuture = pool.submit(callableCosineSim);
-
-//				Callable<Heap> callableUnigrams = new GetScoresCallable("UnigramIndex", queryTerms);
-//				Future<Heap> unigramFuture = pool.submit(callableUnigrams);
-				try
-				{
-					System.out.println("waiting for results...");
-					unigramUrls = cosineSimFuture.get();
-
-					//unigramUrls = unigramFuture.get();
-					System.out.println("got results...");
-				}
-				catch (InterruptedException | ExecutionException e)
-				{
-					e.printStackTrace();
-				}
-				
-				getRankedResults();
-			}
-			
-//			Callable<PriorityQueue<Entry<String, Integer>>> callableCosSim = new CosineSimilarityCallable(queryTerms, unigramUrls, initialCapacity);
-//			Future<PriorityQueue<Entry<String, Integer>>> cosSimFuture = pool.submit(callableCosSim);
-//			
-//			try
-//			{
-//				cosineSimilarity = cosSimFuture.get();
-//			}
-//			
-//			catch (InterruptedException | ExecutionException e)
-//			{
-//				e.printStackTrace();
-//			}
+			getRankedResults();
 		}
 	}
 	
 	private void getRankedResults()
 	{
-		System.out.println("In ranked results: size of unigrams: " + unigramUrls.size());
+		System.out.println("SEARCH RESULTS:");
+		
+		if (resultCount < maxResults && !cosineSimilarity.isEmpty())
+		{
+			System.out.println("unigrams");
+			getRankedResults(cosineSimilarity);
+		}
+		
 		if (resultCount < maxResults && !trigramUrls.isEmpty())
 		{
 			getRankedResults(trigramUrls);
@@ -173,11 +113,7 @@ public class SearchEngine extends HttpServlet
 			getRankedResults(bigramUrls);
 		}
 		
-		if (resultCount < maxResults && !unigramUrls.isEmpty())
-		{
-			System.out.println("unigrams");
-			getRankedResults(unigramUrls);
-		}
+		
 		
 //		System.out.println("SEARCH RESULTS:");
 //		
@@ -199,7 +135,7 @@ public class SearchEngine extends HttpServlet
 			if (!finalResultUrls.contains(result))
 			{
 				System.out.println("final result:");
-				System.out.println(score.getUrl() + " " + score.getCount() + " " + score.getTfidf());
+				System.out.println(score.getUrl() + " - count: " + score.getCount() + " - tfidf: " + score.getTfidf());
 				finalResultUrls.add(result);
 				resultCount++;
 			}
@@ -217,7 +153,7 @@ public class SearchEngine extends HttpServlet
 			if (!finalResultUrls.contains(result))
 			{
 				System.out.println("final result:");
-				System.out.println(score.getKey() + " " + score.getValue());
+				System.out.println(score.getKey() + " - cosine sim: " + score.getValue());
 				finalResultUrls.add(result);
 				resultCount++;
 			}

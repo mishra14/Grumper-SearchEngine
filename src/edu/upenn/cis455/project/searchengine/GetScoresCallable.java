@@ -37,18 +37,16 @@ public class GetScoresCallable implements Callable<Heap>
 		
 		else if (tablename.equals("BigramIndex"))
 		{
-			getBigramScores();
+			if (query.size() >= 2)
+				getBigramScores();
 		}
 		
 		else if (tablename.equals("TrigramIndex"))
 		{
-			getTrigramScores();
+			if (query.size() >= 3)
+				getTrigramScores();
 		}
 		
-		else
-		{
-			//getProximity();
-		}
 		//System.out.println("size of matched urls: " + matchedUrls.size());
 		return matchedUrls;
 	}
