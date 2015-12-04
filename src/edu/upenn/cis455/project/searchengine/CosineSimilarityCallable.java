@@ -57,13 +57,18 @@ public class CosineSimilarityCallable implements Callable<PriorityQueue<Entry<St
 		
 		for(String term : query)
 		{
+			System.out.println("finding matches for " + term + "...");
 			PaginatedQueryList<InvertedIndex> resultList = dbAccessor.loadIndex(term);
 			System.out.println("accessed dynamo");
 			if (!resultList.isEmpty())
 			{
-				System.out.println("found matching urls for unigrams");
-				postings = resultList.get(0).getPostings();
-				computeCosineSimilarity(term, postings);
+				System.out.println("found matching urls for unigram: " + term);
+				for (InvertedIndex result: resultList)
+				{
+					postings = result.getPostings();
+					System.out.println("postings: " + postings);
+					computeCosineSimilarity(term, postings);
+				}
 			}
 			
 		}
@@ -74,8 +79,6 @@ public class CosineSimilarityCallable implements Callable<PriorityQueue<Entry<St
 		{
 			float tfidf = seenUrlsTfidf.get(url);
 			float denominator = seenUrlsDenominator.get(url);
-			System.out.println("denominator for url: " + denominator);
-			System.out.println("query denominator: " + queryDenominator);
 			float cosineSim = (float) (tfidf/(Math.sqrt(denominator + queryDenominator)));
 			seenUrlsTfidf.put(url, cosineSim);
 		}

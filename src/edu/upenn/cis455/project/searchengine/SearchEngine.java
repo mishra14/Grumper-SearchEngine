@@ -13,7 +13,7 @@ public class SearchEngine extends HttpServlet
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private int maxResults = 10;
+	private int maxResults = 50;
 	private int resultCount = 0;
 	private int initialCapacity = 100;
 	private PriorityQueue<Entry<String, Float>> unigramUrls;
@@ -48,6 +48,7 @@ public class SearchEngine extends HttpServlet
 	public void search(String searchQuery)
 	{
 		ArrayList<String> queryTerms = new ArrayList<String>();
+		cosineSimilarity = new PriorityQueue<Entry<String, Float>>();
 		ExecutorService pool = Executors.newFixedThreadPool(5);
 		
 		if (searchQuery.isEmpty())
@@ -58,7 +59,7 @@ public class SearchEngine extends HttpServlet
 		else
 		{
 			queryTerms = getQueryTerms(searchQuery, false);
-			System.out.println("query terms: " + queryTerms.size());
+			System.out.println("query terms are: " + queryTerms);
 			
 			if (queryTerms.size() == 0)
 			{
@@ -70,18 +71,18 @@ public class SearchEngine extends HttpServlet
 			}
 			
 			Callable<PriorityQueue<Entry<String, Float>>> callableCosineSim = new CosineSimilarityCallable(queryTerms);
-			Callable<Heap> callableBigrams = new GetScoresCallable("BigramIndex", queryTerms);
-			Callable<Heap> callableTrigrams = new GetScoresCallable("TrigramIndex", queryTerms);
+//			Callable<Heap> callableBigrams = new GetScoresCallable("BigramIndex", queryTerms);
+//			Callable<Heap> callableTrigrams = new GetScoresCallable("TrigramIndex", queryTerms);
 			
 			Future<PriorityQueue<Entry<String, Float>>> cosineSimFuture = pool.submit(callableCosineSim);
-			Future<Heap> bigramFuture = pool.submit(callableBigrams);
-			Future<Heap> trigramFuture = pool.submit(callableTrigrams);
+//			Future<Heap> bigramFuture = pool.submit(callableBigrams);
+//			Future<Heap> trigramFuture = pool.submit(callableTrigrams);
 
 			try
 			{
 				cosineSimilarity = cosineSimFuture.get();
-				bigramUrls = bigramFuture.get();
-				trigramUrls = trigramFuture.get();
+//				bigramUrls = bigramFuture.get();
+//				trigramUrls = trigramFuture.get();
 			}
 			catch (InterruptedException | ExecutionException e)
 			{
@@ -102,16 +103,16 @@ public class SearchEngine extends HttpServlet
 			getRankedResults(cosineSimilarity);
 		}
 		
-		if (resultCount < maxResults && !trigramUrls.isEmpty())
-		{
-			getRankedResults(trigramUrls);
-		}
-		
-		if (resultCount < maxResults && !bigramUrls.isEmpty())
-		{
-			System.out.println("bigrams:");
-			getRankedResults(bigramUrls);
-		}
+//		if (resultCount < maxResults && !trigramUrls.isEmpty())
+//		{
+//			getRankedResults(trigramUrls);
+//		}
+//		
+//		if (resultCount < maxResults && !bigramUrls.isEmpty())
+//		{
+//			System.out.println("bigrams:");
+//			getRankedResults(bigramUrls);
+//		}
 		
 		
 		
@@ -186,9 +187,17 @@ public class SearchEngine extends HttpServlet
 //		searchEngine.search("used");
 //		searchEngine.search("side");
 //		searchEngine.search("choose");
-		searchEngine.search("map"); 
+//		searchEngine.search("pakistan");
+//		searchEngine.search("Adamson university"); 
+//		searchEngine.search("new york");
+		searchEngine.search("banana");
+//		searchEngine.search("university of pennsylvania");
+//		searchEngine.search("penn");
+		//searchEngine.search("temple university");
+		//searchEngine.search("taylor swift");
 //		searchEngine.search("log");
 //		searchEngine.search("am an and");
+//		searchEngine.search("happy birthday");
 //		searchEngine.search("mashed potatoes");
 //		searchEngine.search("data contribute");
 		//searchEngine.search("cookies melissa");
