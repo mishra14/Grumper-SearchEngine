@@ -24,11 +24,8 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-
-import edu.upenn.cis455.project.bean.DocumentRecord;
 import edu.upenn.cis455.project.bean.UrlList;
 import edu.upenn.cis455.project.crawler.Hash;
-import edu.upenn.cis455.project.storage.S3UrlListDA;
 
 public class PageRankEmrController
 {
@@ -38,13 +35,13 @@ public class PageRankEmrController
 	public static void main(String[] args) throws InterruptedException,
 			NoSuchAlgorithmException, JsonProcessingException
 	{
-		String emrInputPath = "s3://edu.upenn.cis455.project.urls/";
+		String emrInputPath = "s3://edu.upenn.cis455.project.pagerank.urls/";
 		String emrOutputBucketName = "edu.upenn.cis455.project.pagerank";
 		String emrOutputPrefix = "output";
 		String clusterLogPath = "s3://edu.upenn.cis455.project.pagerank/log";
 		String emrJarPath = "s3://edu.upenn.cis455.project.pagerank/jar/pagerank.jar";
 		String emrStepName = "pagerank";
-		String clusterId = "j-342H5ZYIAPABW";
+		String clusterId = "j-115AWJCL45F9H";
 		String clusterName = "page rank cluster";
 		String ec2AccessKeyName = "test";
 		String tableName = "edu.upenn.cis455.project.pagerank";
@@ -53,28 +50,19 @@ public class PageRankEmrController
 		EmrController controller = new EmrController(emrInputPath,
 				emrOutputBucketName, emrOutputPrefix, emrJarPath, emrStepName,
 				clusterId, tableName, primaryKeyName, valueKeyName);
-		// controller.runJob();
-		/*EmrController controller = new EmrController(emrInputPath,
+
+		/*mergeUrlLists("edu.upenn.cis455.project.urls",
+				"edu.upenn.cis455.project.pagerank.urls");
+		EmrController controller = new EmrController(emrInputPath,
 				emrOutputBucketName, emrOutputPrefix, clusterLogPath,
 				emrJarPath, emrStepName, clusterName, ec2AccessKeyName,
 				tableName, primaryKeyName, valueKeyName);
 		controller.createCluster();*/
-		/*controller.setIterative(true);
-		int i = 0;
-		do
-		{
-			controller.setDone(true);
-			controller.runJob();
-			controller.s3ToDynamo(controller.getObjectNamesForBucket());
-			System.out.println("Status after iterations " + (++i) + " - "
-					+ controller.isDone());
-		}
-		while (!controller.isDone());*/
+		controller.runJob();
+
 		// controller.terminateCluster();
-		mergeUrlLists("edu.upenn.cis455.project.urls",
-				"edu.upenn.cis455.project.pagerank.urls");
 		List<String> docs = controller
-				.getObjectNamesForBucket("edu.upenn.cis455.project.urls");
+				.getObjectNamesForBucket("edu.upenn.cis455.project.url");
 		System.out.println(docs.size());
 		System.out.println("Page rank terminated");
 	}
