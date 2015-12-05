@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -74,6 +75,7 @@ public class EmrController
 	private static final int MAX_LIST_SIZE = 25;
 	private static final Double DELTA = 0.00001;
 	private static final int DOCUMENTS_TO_MERGE = 50;
+	private static final int MAX_POSTINGS_SIZE = 80;
 	private String emrInputPath;
 	private String emrOutputBucketName;
 	private String emrOutputPrefix;
@@ -87,6 +89,7 @@ public class EmrController
 	private String tableName;
 	private String primaryKeyName;
 	private String valueKeyName;
+	private String rangeKeyName;
 	private DynamoDB dynamo;
 	private boolean iterative;
 	private boolean done;
@@ -135,6 +138,53 @@ public class EmrController
 		this.dynamo = new DynamoDB(new AmazonDynamoDBClient());
 		this.iterative = false;
 		this.done = true;
+	}
+
+	public EmrController(String emrInputPath, String emrOutputBucketName,
+			String emrOutputPrefix, String clusterLogPath, String emrJarPath,
+			String emrStepName, String clusterName, String ec2AccessKeyName,
+			String tableName, String primaryKeyName, String valueKeyName,
+			String rangeKeyName)
+	{
+		super();
+		this.emrInputPath = emrInputPath;
+		this.emrOutputBucketName = emrOutputBucketName;
+		this.emrOutputPrefix = emrOutputPrefix;
+		this.clusterLogPath = clusterLogPath;
+		this.emrJarPath = emrJarPath;
+		this.emrStepName = emrStepName;
+		this.clusterName = clusterName;
+		this.ec2AccessKeyName = ec2AccessKeyName;
+		this.tableName = tableName;
+		this.s3Client = new AmazonS3Client();
+		this.primaryKeyName = primaryKeyName;
+		this.valueKeyName = valueKeyName;
+		this.dynamo = new DynamoDB(new AmazonDynamoDBClient());
+		this.iterative = false;
+		this.done = true;
+		this.rangeKeyName = rangeKeyName;
+	}
+
+	public EmrController(String emrInputPath, String emrOutputBucketName,
+			String emrOutputPrefix, String emrJarPath, String emrStepName,
+			String clusterId, String tableName, String primaryKeyName,
+			String valueKeyName, String rangeKeyName)
+	{
+		super();
+		this.emrInputPath = emrInputPath;
+		this.emrOutputBucketName = emrOutputBucketName;
+		this.emrOutputPrefix = emrOutputPrefix;
+		this.emrJarPath = emrJarPath;
+		this.emrStepName = emrStepName;
+		this.clusterId = clusterId;
+		this.tableName = tableName;
+		this.s3Client = new AmazonS3Client();
+		this.primaryKeyName = primaryKeyName;
+		this.valueKeyName = valueKeyName;
+		this.dynamo = new DynamoDB(new AmazonDynamoDBClient());
+		this.iterative = false;
+		this.done = true;
+		this.rangeKeyName = rangeKeyName;
 	}
 
 	public boolean runJob() throws InterruptedException
@@ -307,6 +357,96 @@ public class EmrController
 		return results;
 	}
 
+	public List<EmrResult> s3ToDynamoPostings(List<String> objectNames)
+	{
+		List<EmrResult> results = new ArrayList<EmrResult>();
+		S3EmrDA s3 = new S3EmrDA(emrOutputBucketName);
+		for (String object : objectNames)
+		{
+			List<EmrResult> resultsInDocument = s3.getEmrResult(object);
+			HashSet<EmrResult> resultSet = new HashSet<>(resultsInDocument);
+			List<EmrResult> newResults = new ArrayList<EmrResult>();
+			for (EmrResult result : resultSet)
+			{
+				if(result.getKey().equals("category"))
+				{
+					System.out.println("result - "+result);
+					
+				}
+				String[] postings = result.getValue().split("\t");
+				int size = postings.length;
+				StringBuilder newValue = new StringBuilder();
+				int count=0;
+				for(int i=0;i<size;i++)
+				{
+					newValue.append(postings[i]);
+					count++;
+					if(count >=MAX_POSTINGS_SIZE || i == size-1)
+					{
+						count=0;
+						EmrResult newResult = new EmrResult(result.getKey(), newValue.toString()); 
+						if(result.getKey().equals("category"))
+						{
+							System.out.println("new result - "+newResult);
+							
+						}
+						newResults.add(newResult);
+					}
+					else
+					{
+						newValue.append("\t");
+					}
+				}
+			}
+			
+			/*for (EmrResult result : resultsInDocument)
+			{
+				int count = 0;
+				int prev = 0;
+				for (int i = 0; i < result.getValue().length(); i++)
+				{
+					if (result.getValue().charAt(i) == '\t')
+					{
+						count++;
+						if (count % MAX_POSTINGS_SIZE == 0 && count > 1)
+						{
+							String bunchOfPostings = result.getValue()
+									.substring(prev, i);
+							EmrResult newResult = new EmrResult(
+									result.getKey(), bunchOfPostings);
+							newResults.add(newResult);
+							prev = i+1;
+						}
+					}
+				}
+				String bunchOfPostings = result.getValue().substring(prev,
+						result.getValue().length() - 1);
+				EmrResult newResult = new EmrResult(result.getKey(),
+						bunchOfPostings);
+				newResults.add(newResult);
+
+			}*/
+			results.addAll(newResults);
+			while(results.size() > MAX_LIST_SIZE)
+			{
+				// System.out.println(results);
+				List<EmrResult> resultsToBeWritten = results.subList(0, 24);
+				batchWriteEmrResults(resultsToBeWritten);
+				results.removeAll(resultsToBeWritten);
+			}
+			// remove that document from s3
+			s3.deleteEmrResult(object);
+		}
+		if (results.size() > 0)
+		{
+			// System.out.println(results);
+			batchWriteEmrResults(results);
+		}
+		// delete the output folder now
+		s3.deleteEmrResult(emrOutputPrefix);
+		return results;
+	}
+
 	public void mergeCrawledDocuments(List<String> objectNames,
 			String outputBucketName) throws NoSuchAlgorithmException,
 			JsonProcessingException
@@ -452,27 +592,48 @@ public class EmrController
 			TableWriteItems writeItems = new TableWriteItems(tableName);
 			for (EmrResult result : results)
 			{
-				//System.out.println(result);
-				Item item = new Item().withPrimaryKey(primaryKeyName,
-						result.getKey()).with(valueKeyName, result.getValue());
+				// System.out.println(result);
+
+				PrimaryKey primaryKey;
+				if (!isIterative())
+				{
+					primaryKey = new PrimaryKey(primaryKeyName,
+							result.getKey(), rangeKeyName, Hash.hashKey(result
+									.getValue()));
+				}
+				else
+				{
+					primaryKey = new PrimaryKey(primaryKeyName, result.getKey());
+				}
+				Item item = new Item().withPrimaryKey(primaryKey).with(
+						valueKeyName, result.getValue());
+				//System.out.println(item);
 				writeItems.addItemToPut(item);
 			}
-			BatchWriteItemOutcome outcome = dynamo.batchWriteItem(writeItems);
-			do
-			{
-
-				// Check for unprocessed keys
-				Map<String, List<WriteRequest>> unprocessedItems = outcome
-						.getUnprocessedItems();
-
-				if (outcome.getUnprocessedItems().size() > 0)
+			try{
+				BatchWriteItemOutcome outcome = dynamo.batchWriteItem(writeItems);
+				do
 				{
-					outcome = dynamo
-							.batchWriteItemUnprocessed(unprocessedItems);
-				}
 
+					// Check for unprocessed keys
+					Map<String, List<WriteRequest>> unprocessedItems = outcome
+							.getUnprocessedItems();
+
+					if (outcome.getUnprocessedItems().size() > 0)
+					{
+						outcome = dynamo
+								.batchWriteItemUnprocessed(unprocessedItems);
+					}
+
+				}
+				while (outcome.getUnprocessedItems().size() > 0);
 			}
-			while (outcome.getUnprocessedItems().size() > 0);
+			catch(Exception e)
+			{
+				System.out.println(writeItems.getItemsToPut());
+				e.printStackTrace();
+			}
+			
 
 		}
 		catch (Exception e)

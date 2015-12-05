@@ -34,7 +34,7 @@ public class PageRankEmrController
 				emrJarPath, emrStepName, clusterName, ec2AccessKeyName,
 				tableName, primaryKeyName, valueKeyName);
 		controller.createCluster();*/
-		controller.setIterative(true);
+		/*controller.setIterative(true);
 		int i = 0;
 		do
 		{
@@ -44,7 +44,7 @@ public class PageRankEmrController
 			System.out.println("Status after iterations " + (++i) + " - "
 					+ controller.isDone());
 		}
-		while (!controller.isDone());
+		while (!controller.isDone());*/
 		//controller.terminateCluster();
 		List<String> docs = controller
 				.getObjectNamesForBucket("edu.upenn.cis455.project.documents");

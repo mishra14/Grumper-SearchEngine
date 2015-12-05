@@ -16,7 +16,7 @@ public class EmrResult
 
 	public EmrResult(String pairLine)
 	{
-		String[] splits = pairLine.split("\t");
+		String[] splits = pairLine.split("\t", 2);
 		if (splits.length == 2)
 		{
 			key = splits[0];
