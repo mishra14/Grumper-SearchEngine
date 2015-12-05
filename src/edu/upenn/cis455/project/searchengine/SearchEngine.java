@@ -3,6 +3,7 @@ package edu.upenn.cis455.project.searchengine;
 import java.io.*;
 import java.util.concurrent.*;
 import java.util.*;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.Map.*;
 
 import javax.servlet.http.*;
@@ -13,13 +14,12 @@ public class SearchEngine extends HttpServlet
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private int maxResults = 10;
+	private int maxResults = 50;
 	private int resultCount = 0;
-	private int initialCapacity = 100;
-	private PriorityQueue<Entry<String, Float>> unigramUrls;
-	private Heap bigramUrls = new Heap(initialCapacity);
-	private Heap trigramUrls = new Heap(initialCapacity);
-	private PriorityQueue<Entry<String, Float>> cosineSimilarity;
+	private HashMap<String, Float> cosineSimilarityUnigrams;
+	private HashMap<String, Float> cosineSimilarityBigrams;
+	private HashMap<String, Float> cosineSimilarityTrigrams;
+	private Heap urlFinalScores;
 	//private ArrayList<Postings> finalResultUrls = new ArrayList<Postings>();
 	private ArrayList<String> finalResultUrls = new ArrayList<String>();
 
@@ -48,6 +48,11 @@ public class SearchEngine extends HttpServlet
 	public void search(String searchQuery)
 	{
 		ArrayList<String> queryTerms = new ArrayList<String>();
+		cosineSimilarityUnigrams = new HashMap<String, Float>();
+		cosineSimilarityBigrams = new HashMap<String, Float>();
+		cosineSimilarityTrigrams = new HashMap<String, Float>();
+		urlFinalScores = new Heap(100);
+		
 		ExecutorService pool = Executors.newFixedThreadPool(5);
 		
 		if (searchQuery.isEmpty())
@@ -58,7 +63,7 @@ public class SearchEngine extends HttpServlet
 		else
 		{
 			queryTerms = getQueryTerms(searchQuery, false);
-			System.out.println("query terms: " + queryTerms.size());
+			System.out.println("query terms are: " + queryTerms);
 			
 			if (queryTerms.size() == 0)
 			{
@@ -69,158 +74,58 @@ public class SearchEngine extends HttpServlet
 				//TODO get proximity
 			}
 			
-			if (queryTerms.size() >= 3)
-			{
-				Callable<PriorityQueue<Entry<String, Float>>> callableCosineSim = new CosineSimilarityCallable(queryTerms);
-				//Callable<Heap> callableUnigrams = new GetScoresCallable("UnigramIndex", queryTerms);
-				Callable<Heap> callableBigrams = new GetScoresCallable("BigramIndex", queryTerms);
-				Callable<Heap> callableTrigrams = new GetScoresCallable("TrigramIndex", queryTerms);
-				Future<PriorityQueue<Entry<String, Float>>> cosineSimFuture = pool.submit(callableCosineSim);
-				//Future<Heap> unigramFuture = pool.submit(callableUnigrams);
-				Future<Heap> bigramFuture = pool.submit(callableBigrams);
-				Future<Heap> trigramFuture = pool.submit(callableTrigrams);
+			Callable<HashMap<String, Float>> callableCosineSimUnigrams = new CosineSimilarityCallable(queryTerms, "UnigramIndex");
+			//Callable<HashMap<String, Float>> callableCosineSimBigrams = new CosineSimilarityCallable(queryTerms, "BigramIndex");
+			//Callable<HashMap<String, Float>> callableCosineSimTrigrams = new CosineSimilarityCallable(queryTerms, "TrigramIndex");
+			
+			Future<HashMap<String, Float>> cosSimUnigramsFuture = pool.submit(callableCosineSimUnigrams);
+			//Future<HashMap<String, Float>> bigramFuture = pool.submit(callableCosineSimBigrams);
+			//Future<HashMap<String, Float>> trigramFuture = pool.submit(callableCosineSimTrigrams);
 
-				try
-				{
-					unigramUrls = cosineSimFuture.get();
-					//unigramUrls = unigramFuture.get();
-					bigramUrls = bigramFuture.get();
-					trigramUrls = trigramFuture.get();
-				}
-				catch (InterruptedException | ExecutionException e)
-				{
-					e.printStackTrace();
-				}
-				
-				getRankedResults();
+			try
+			{
+				cosineSimilarityUnigrams = cosSimUnigramsFuture.get();
+				//cosineSimilarityBigrams = bigramFuture.get();
+				//cosineSimilarityTrigrams = trigramFuture.get();
+			}
+			catch (InterruptedException | ExecutionException e)
+			{
+				e.printStackTrace();
 			}
 			
-			else if (queryTerms.size() >= 2)
+			computeScores();
+			getRankedResults();
+		}
+	}
+	
+	private void computeScores()
+	{
+		for (String url : cosineSimilarityUnigrams.keySet())
+		{
+			float score = cosineSimilarityUnigrams.get(url);
+			
+			if (cosineSimilarityBigrams.containsKey(url))
 			{
-				Callable<PriorityQueue<Entry<String, Float>>> callableCosineSim = new CosineSimilarityCallable(queryTerms);
-
-				//Callable<Heap> callableUnigrams = new GetScoresCallable("UnigramIndex", queryTerms);
-				Callable<Heap> callableBigrams = new GetScoresCallable("BigramIndex", queryTerms);
-				//Future<Heap> unigramFuture = pool.submit(callableUnigrams);
-				Future<PriorityQueue<Entry<String, Float>>> cosineSimFuture = pool.submit(callableCosineSim);
-
-				Future<Heap> bigramFuture = pool.submit(callableBigrams);
-
-				try
-				{
-					unigramUrls = cosineSimFuture.get();
-
-					//unigramUrls = unigramFuture.get();
-					bigramUrls = bigramFuture.get();
-				}
-				catch (InterruptedException | ExecutionException e)
-				{
-					e.printStackTrace();
-				}
-				
-				getRankedResults();
+				score += cosineSimilarityBigrams.get(url);
 			}
 			
-			else
+			if (cosineSimilarityTrigrams.containsKey(url))
 			{
-				Callable<PriorityQueue<Entry<String, Float>>> callableCosineSim = new CosineSimilarityCallable(queryTerms);
-				Future<PriorityQueue<Entry<String, Float>>> cosineSimFuture = pool.submit(callableCosineSim);
-
-//				Callable<Heap> callableUnigrams = new GetScoresCallable("UnigramIndex", queryTerms);
-//				Future<Heap> unigramFuture = pool.submit(callableUnigrams);
-				try
-				{
-					System.out.println("waiting for results...");
-					unigramUrls = cosineSimFuture.get();
-
-					//unigramUrls = unigramFuture.get();
-					System.out.println("got results...");
-				}
-				catch (InterruptedException | ExecutionException e)
-				{
-					e.printStackTrace();
-				}
-				
-				getRankedResults();
+				score += cosineSimilarityTrigrams.get(url);
 			}
 			
-//			Callable<PriorityQueue<Entry<String, Integer>>> callableCosSim = new CosineSimilarityCallable(queryTerms, unigramUrls, initialCapacity);
-//			Future<PriorityQueue<Entry<String, Integer>>> cosSimFuture = pool.submit(callableCosSim);
-//			
-//			try
-//			{
-//				cosineSimilarity = cosSimFuture.get();
-//			}
-//			
-//			catch (InterruptedException | ExecutionException e)
-//			{
-//				e.printStackTrace();
-//			}
+			urlFinalScores.add(url, score);
 		}
 	}
 	
 	private void getRankedResults()
 	{
-		System.out.println("In ranked results: size of unigrams: " + unigramUrls.size());
-		if (resultCount < maxResults && !trigramUrls.isEmpty())
+		System.out.println("SEARCH RESULTS:");
+		
+		while (resultCount < maxResults && !urlFinalScores.isEmpty())
 		{
-			getRankedResults(trigramUrls);
-		}
-		
-		if (resultCount < maxResults && !bigramUrls.isEmpty())
-		{
-			System.out.println("bigrams:");
-			getRankedResults(bigramUrls);
-		}
-		
-		if (resultCount < maxResults && !unigramUrls.isEmpty())
-		{
-			System.out.println("unigrams");
-			getRankedResults(unigramUrls);
-		}
-		
-//		System.out.println("SEARCH RESULTS:");
-//		
-//		for (String result: finalResultUrls)
-//		{
-//			System.out.println(result);
-//		}
-		
-	}
-	
-	private void getRankedResults(Heap scoringFunction)
-	{
-		int numResults = Math.min(maxResults - resultCount, scoringFunction.size());
-		
-		for (int i = 0; i < numResults; i++)
-		{
-			UrlScores score = scoringFunction.remove();
-			String result = score.getUrl();//scoringFunction.remove().getUrl();
-			if (!finalResultUrls.contains(result))
-			{
-				System.out.println("final result:");
-				System.out.println(score.getUrl() + " " + score.getCount() + " " + score.getTfidf());
-				finalResultUrls.add(result);
-				resultCount++;
-			}
-		}
-	}
-	
-	private void getRankedResults(PriorityQueue<Entry<String, Float>> cosineSimilarity)
-	{
-		int numResults = Math.min(maxResults - resultCount, cosineSimilarity.size());
-		
-		for (int i = 0; i < numResults; i++)
-		{
-			Entry<String, Float> score = cosineSimilarity.remove();
-			String result = score.getKey();//scoringFunction.remove().getUrl();
-			if (!finalResultUrls.contains(result))
-			{
-				System.out.println("final result:");
-				System.out.println(score.getKey() + " " + score.getValue());
-				finalResultUrls.add(result);
-				resultCount++;
-			}
+			System.out.println(urlFinalScores.remove().getKey());
+			resultCount++;
 		}
 	}
 	
@@ -250,11 +155,20 @@ public class SearchEngine extends HttpServlet
 //		searchEngine.search("used");
 //		searchEngine.search("side");
 //		searchEngine.search("choose");
-		searchEngine.search("map"); 
+//		searchEngine.search("pakistan");
+//		searchEngine.search("Adamson university"); 
+//		searchEngine.search("new york");
+//		searchEngine.search("banana");
+//		searchEngine.search("university of pennsylvania");
+//		searchEngine.search("penn");
+		//searchEngine.search("temple university");
+		//searchEngine.search("taylor swift");
 //		searchEngine.search("log");
 //		searchEngine.search("am an and");
-//		searchEngine.search("mashed potatoes");
-//		searchEngine.search("data contribute");
+//		searchEngine.search("happy birthday");
+		//searchEngine.search("chestnut pie");
+		searchEngine.search("adele");
+		//searchEngine.search("cooked beet greens");
 		//searchEngine.search("cookies melissa");
 
 	}
