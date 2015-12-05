@@ -1,37 +1,29 @@
 package edu.upenn.cis455.project.searchengine;
 
 import java.util.*;
+import java.util.AbstractMap.SimpleEntry;
 
 public class Heap
 {
-	private PriorityQueue<UrlScores> myHeap;
+	private PriorityQueue<SimpleEntry<String, Float>> myHeap;
 	
 	public Heap(int initialCapacity)
 	{
 		
-		myHeap = new PriorityQueue<UrlScores>(initialCapacity, 
-				new Comparator<UrlScores>()
+		myHeap = new PriorityQueue<SimpleEntry<String, Float>>(initialCapacity, 
+				new Comparator<SimpleEntry<String, Float>>()
 				{
-			public int compare(UrlScores url1, UrlScores url2)
+			public int compare(SimpleEntry<String, Float> entry1, SimpleEntry<String, Float> entry2)
 			{
 				
-				if (url1.getCount() > url2.getCount())
+				if (entry1.getValue() > entry2.getValue())
 					return -1;
-				else if (url1.getCount() == url2.getCount())
+				
+				else if (entry1.getValue() == entry2.getValue())
 				{
-					if (url1.getTfidf() > url2.getTfidf())
-					{
-						return -1;
-					}
-					
-					else if (url1.getTfidf() == url2.getTfidf())
-					{
-						return 0;
-					}
-					
-					else
-						return 1;
+					return 0;
 				}
+				
 				else
 					return 1;
 			}
@@ -39,12 +31,18 @@ public class Heap
 		
 	}
 	
-	public void addAll(Collection<UrlScores> scores)
+	public void add(String key, Float value)
+	{
+		SimpleEntry<String, Float> entry = new SimpleEntry<String, Float>(key, value);
+		myHeap.add(entry);
+	}
+	
+	public void addAll(Collection<SimpleEntry<String, Float>> scores)
 	{
 		myHeap.addAll(scores);
 	}
 	
-	public UrlScores remove()
+	public SimpleEntry<String, Float> remove()
 	{
 		return myHeap.remove();
 	}

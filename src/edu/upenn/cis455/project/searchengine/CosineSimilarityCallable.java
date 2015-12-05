@@ -10,81 +10,64 @@ import edu.upenn.cis455.project.dynamoDA.DynamoIndexerDA;
 import edu.upenn.cis455.project.storage.InvertedIndex;
 import edu.upenn.cis455.project.storage.Postings;
 
-public class CosineSimilarityCallable implements Callable<PriorityQueue<Entry<String, Float>>>
+public class CosineSimilarityCallable implements Callable<HashMap<String, Float>>
 {
-	private int initialCapacity = 100;
 	private ArrayList<String> query;
-	private PriorityQueue<Entry<String, Float>> cosineSimilarity;
-	private HashMap<String, Float> queryTf;
+	private HashMap<String, Float> cosineSimilarity, queryTf, seenUrlsDenominator;
 	private DynamoIndexerDA dbAccessor;
-	private HashMap<String, Float> seenUrlsTfidf, seenUrlsDenominator;
 	private float queryDenominator = 0;
 	
-	public CosineSimilarityCallable(ArrayList<String> query)
+	public CosineSimilarityCallable(ArrayList<String> query, String tablename)
 	{
-		this.query = query;
-		this.dbAccessor = new DynamoIndexerDA("UnigramIndex");
+		this.query = new ArrayList<String>();
+		setQueryNgrams(query, tablename);
+		this.dbAccessor = new DynamoIndexerDA(tablename);
 
-		setQueue();
-	}
-	
-	private void setQueue()
-	{
-		cosineSimilarity = new PriorityQueue<Entry<String, Float>>(initialCapacity, 
-				new Comparator<Entry<String, Float>>()
-				{
-					public int compare(Entry<String, Float> e1, Entry<String, Float> e2)
-					{
-						if (e1.getValue() > e2.getValue())
-							return -1;
-						else if (e1.getValue() == e2.getValue())
-							return 0;
-						else
-							return 1;
-					}
-				});
-	}
+	}	
 	
 	@Override
-	public PriorityQueue<Entry<String, Float>> call() throws Exception
+	public HashMap<String, Float> call() throws Exception
 	{
 		System.out.println("in cosine sim callable");
 		ArrayList<Postings> postings;
-		seenUrlsTfidf = new HashMap<String, Float>();
+		ArrayList<String> ngrams;
+		cosineSimilarity = new HashMap<String, Float>();
 		seenUrlsDenominator = new HashMap<String, Float>();
 		
-		computeQueryTf();
-		
-		for(String term : query)
+		if (!query.isEmpty())
 		{
-			System.out.println("finding matches for " + term + "...");
-			PaginatedQueryList<InvertedIndex> resultList = dbAccessor.loadIndex(term);
-			System.out.println("accessed dynamo");
-			if (!resultList.isEmpty())
+			computeQueryTf();
+			
+			for(String term : query)
 			{
-				System.out.println("found matching urls for unigram: " + term);
-				for (InvertedIndex result: resultList)
+				System.out.println("finding matches for " + term + "...");
+				PaginatedQueryList<InvertedIndex> resultList = dbAccessor.loadIndex(term);
+				System.out.println("accessed dynamo");
+				if (!resultList.isEmpty())
 				{
-					postings = result.getPostings();
-					System.out.println("postings: " + postings);
-					computeCosineSimilarity(term, postings);
+					System.out.println("found matching urls for ngram: " + term);
+					for (InvertedIndex result: resultList)
+					{
+						postings = result.getPostings();
+						System.out.println("postings: " + postings);
+						
+						computeCosineSimilarity(term, postings);
+					}
 				}
+				
 			}
 			
+			//queryDenominator = (float) Math.sqrt(queryDenominator);
+			
+			for (String url: cosineSimilarity.keySet())
+			{
+				float tfidf = cosineSimilarity.get(url);
+				float denominator = seenUrlsDenominator.get(url);
+				float cosineSim = (float) (tfidf/(Math.sqrt(denominator + queryDenominator)));
+				cosineSimilarity.put(url, cosineSim);
+			}
 		}
-		
-		//queryDenominator = (float) Math.sqrt(queryDenominator);
-		
-		for (String url: seenUrlsTfidf.keySet())
-		{
-			float tfidf = seenUrlsTfidf.get(url);
-			float denominator = seenUrlsDenominator.get(url);
-			float cosineSim = (float) (tfidf/(Math.sqrt(denominator + queryDenominator)));
-			seenUrlsTfidf.put(url, cosineSim);
-		}
-		
-		cosineSimilarity.addAll(seenUrlsTfidf.entrySet());
-		
+			
 		System.out.println("cosine sim size: " + cosineSimilarity.size());
 		return cosineSimilarity;
 	}
@@ -125,11 +108,11 @@ public class CosineSimilarityCallable implements Callable<PriorityQueue<Entry<St
 		for (Postings posting: postings)
 		{
 			url = posting.getPosting();
-			if (seenUrlsTfidf.containsKey(url))
+			if (cosineSimilarity.containsKey(url))
 			{
-				float currTfidf = seenUrlsTfidf.get(url);
+				float currTfidf = cosineSimilarity.get(url);
 				postingTfidf = posting.getTfidf();
-				seenUrlsTfidf.put(url, currTfidf + postingTfidf*queryTermTfidf);
+				cosineSimilarity.put(url, currTfidf + postingTfidf*queryTermTfidf);
 				float currDenominator = seenUrlsDenominator.get(url);
 				seenUrlsDenominator.put(url, currDenominator + postingTfidf*postingTfidf);
 			}
@@ -137,9 +120,44 @@ public class CosineSimilarityCallable implements Callable<PriorityQueue<Entry<St
 			else
 			{
 				postingTfidf = posting.getTfidf();
-				seenUrlsTfidf.put(url, postingTfidf*queryTermTfidf);
+				cosineSimilarity.put(url, postingTfidf*queryTermTfidf);
 				seenUrlsDenominator.put(url, postingTfidf*postingTfidf);
 			}
+		}
+	}
+	
+	private void setQueryNgrams(ArrayList<String> queryTerms, String tablename)
+	{	
+		if (tablename.equals("BigramIndex") && queryTerms.size() >= 2)
+		{
+			System.out.println("Finding bigrams");
+			for (int i = 0; i < queryTerms.size() - 1; i++)
+			{
+				StringBuffer term = new StringBuffer();
+				term.append(queryTerms.get(i) + " ");
+				term.append(queryTerms.get(i + 1));
+				System.out.println("bigram: " + term);
+				query.add(term.toString());
+			}
+		}
+		
+		else if (tablename.equals("TrigramIndex") && queryTerms.size() >= 3)
+		{
+			System.out.println("Finding trigrams");
+			for (int i = 0; i < queryTerms.size() - 2; i++)
+			{
+				StringBuffer term = new StringBuffer();
+				term.append(queryTerms.get(i) + " ");
+				term.append(queryTerms.get(i + 1) + " ");
+				term.append(queryTerms.get(i + 2));
+				query.add(term.toString());
+			}
+		}
+		
+		else if (tablename.equals("UnigramIndex"))
+		{
+			System.out.println("Finding unigrams");
+			this.query = queryTerms;
 		}
 	}
 }

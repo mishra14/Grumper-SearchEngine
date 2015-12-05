@@ -3,6 +3,7 @@ package edu.upenn.cis455.project.searchengine;
 import java.io.*;
 import java.util.concurrent.*;
 import java.util.*;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.Map.*;
 
 import javax.servlet.http.*;
@@ -15,11 +16,10 @@ public class SearchEngine extends HttpServlet
 	private static final long serialVersionUID = 1L;
 	private int maxResults = 50;
 	private int resultCount = 0;
-	private int initialCapacity = 100;
-	private PriorityQueue<Entry<String, Float>> unigramUrls;
-	private Heap bigramUrls = new Heap(initialCapacity);
-	private Heap trigramUrls = new Heap(initialCapacity);
-	private PriorityQueue<Entry<String, Float>> cosineSimilarity;
+	private HashMap<String, Float> cosineSimilarityUnigrams;
+	private HashMap<String, Float> cosineSimilarityBigrams;
+	private HashMap<String, Float> cosineSimilarityTrigrams;
+	private Heap urlFinalScores;
 	//private ArrayList<Postings> finalResultUrls = new ArrayList<Postings>();
 	private ArrayList<String> finalResultUrls = new ArrayList<String>();
 
@@ -48,7 +48,11 @@ public class SearchEngine extends HttpServlet
 	public void search(String searchQuery)
 	{
 		ArrayList<String> queryTerms = new ArrayList<String>();
-		cosineSimilarity = new PriorityQueue<Entry<String, Float>>();
+		cosineSimilarityUnigrams = new HashMap<String, Float>();
+		cosineSimilarityBigrams = new HashMap<String, Float>();
+		cosineSimilarityTrigrams = new HashMap<String, Float>();
+		urlFinalScores = new Heap(100);
+		
 		ExecutorService pool = Executors.newFixedThreadPool(5);
 		
 		if (searchQuery.isEmpty())
@@ -70,26 +74,47 @@ public class SearchEngine extends HttpServlet
 				//TODO get proximity
 			}
 			
-			Callable<PriorityQueue<Entry<String, Float>>> callableCosineSim = new CosineSimilarityCallable(queryTerms);
-//			Callable<Heap> callableBigrams = new GetScoresCallable("BigramIndex", queryTerms);
-//			Callable<Heap> callableTrigrams = new GetScoresCallable("TrigramIndex", queryTerms);
+			Callable<HashMap<String, Float>> callableCosineSimUnigrams = new CosineSimilarityCallable(queryTerms, "UnigramIndex");
+			//Callable<HashMap<String, Float>> callableCosineSimBigrams = new CosineSimilarityCallable(queryTerms, "BigramIndex");
+			//Callable<HashMap<String, Float>> callableCosineSimTrigrams = new CosineSimilarityCallable(queryTerms, "TrigramIndex");
 			
-			Future<PriorityQueue<Entry<String, Float>>> cosineSimFuture = pool.submit(callableCosineSim);
-//			Future<Heap> bigramFuture = pool.submit(callableBigrams);
-//			Future<Heap> trigramFuture = pool.submit(callableTrigrams);
+			Future<HashMap<String, Float>> cosSimUnigramsFuture = pool.submit(callableCosineSimUnigrams);
+			//Future<HashMap<String, Float>> bigramFuture = pool.submit(callableCosineSimBigrams);
+			//Future<HashMap<String, Float>> trigramFuture = pool.submit(callableCosineSimTrigrams);
 
 			try
 			{
-				cosineSimilarity = cosineSimFuture.get();
-//				bigramUrls = bigramFuture.get();
-//				trigramUrls = trigramFuture.get();
+				cosineSimilarityUnigrams = cosSimUnigramsFuture.get();
+				//cosineSimilarityBigrams = bigramFuture.get();
+				//cosineSimilarityTrigrams = trigramFuture.get();
 			}
 			catch (InterruptedException | ExecutionException e)
 			{
 				e.printStackTrace();
 			}
 			
+			computeScores();
 			getRankedResults();
+		}
+	}
+	
+	private void computeScores()
+	{
+		for (String url : cosineSimilarityUnigrams.keySet())
+		{
+			float score = cosineSimilarityUnigrams.get(url);
+			
+			if (cosineSimilarityBigrams.containsKey(url))
+			{
+				score += cosineSimilarityBigrams.get(url);
+			}
+			
+			if (cosineSimilarityTrigrams.containsKey(url))
+			{
+				score += cosineSimilarityTrigrams.get(url);
+			}
+			
+			urlFinalScores.add(url, score);
 		}
 	}
 	
@@ -97,67 +122,10 @@ public class SearchEngine extends HttpServlet
 	{
 		System.out.println("SEARCH RESULTS:");
 		
-		if (resultCount < maxResults && !cosineSimilarity.isEmpty())
+		while (resultCount < maxResults && !urlFinalScores.isEmpty())
 		{
-			System.out.println("unigrams");
-			getRankedResults(cosineSimilarity);
-		}
-		
-//		if (resultCount < maxResults && !trigramUrls.isEmpty())
-//		{
-//			getRankedResults(trigramUrls);
-//		}
-//		
-//		if (resultCount < maxResults && !bigramUrls.isEmpty())
-//		{
-//			System.out.println("bigrams:");
-//			getRankedResults(bigramUrls);
-//		}
-		
-		
-		
-//		System.out.println("SEARCH RESULTS:");
-//		
-//		for (String result: finalResultUrls)
-//		{
-//			System.out.println(result);
-//		}
-		
-	}
-	
-	private void getRankedResults(Heap scoringFunction)
-	{
-		int numResults = Math.min(maxResults - resultCount, scoringFunction.size());
-		
-		for (int i = 0; i < numResults; i++)
-		{
-			UrlScores score = scoringFunction.remove();
-			String result = score.getUrl();//scoringFunction.remove().getUrl();
-			if (!finalResultUrls.contains(result))
-			{
-				System.out.println("final result:");
-				System.out.println(score.getUrl() + " - count: " + score.getCount() + " - tfidf: " + score.getTfidf());
-				finalResultUrls.add(result);
-				resultCount++;
-			}
-		}
-	}
-	
-	private void getRankedResults(PriorityQueue<Entry<String, Float>> cosineSimilarity)
-	{
-		int numResults = Math.min(maxResults - resultCount, cosineSimilarity.size());
-		
-		for (int i = 0; i < numResults; i++)
-		{
-			Entry<String, Float> score = cosineSimilarity.remove();
-			String result = score.getKey();//scoringFunction.remove().getUrl();
-			if (!finalResultUrls.contains(result))
-			{
-				System.out.println("final result:");
-				System.out.println(score.getKey() + " - cosine sim: " + score.getValue());
-				finalResultUrls.add(result);
-				resultCount++;
-			}
+			System.out.println(urlFinalScores.remove().getKey());
+			resultCount++;
 		}
 	}
 	
@@ -190,7 +158,7 @@ public class SearchEngine extends HttpServlet
 //		searchEngine.search("pakistan");
 //		searchEngine.search("Adamson university"); 
 //		searchEngine.search("new york");
-		searchEngine.search("banana");
+//		searchEngine.search("banana");
 //		searchEngine.search("university of pennsylvania");
 //		searchEngine.search("penn");
 		//searchEngine.search("temple university");
@@ -198,8 +166,9 @@ public class SearchEngine extends HttpServlet
 //		searchEngine.search("log");
 //		searchEngine.search("am an and");
 //		searchEngine.search("happy birthday");
-//		searchEngine.search("mashed potatoes");
-//		searchEngine.search("data contribute");
+		//searchEngine.search("chestnut pie");
+		searchEngine.search("adele");
+		//searchEngine.search("cooked beet greens");
 		//searchEngine.search("cookies melissa");
 
 	}
