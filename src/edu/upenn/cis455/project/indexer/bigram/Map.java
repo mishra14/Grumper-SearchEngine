@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
 import org.apache.hadoop.io.BytesWritable;
+import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.jsoup.Jsoup;
@@ -18,14 +19,14 @@ import edu.upenn.cis455.project.bean.DocumentRecord;
 //import edu.upenn.cis455.project.indexer.Stemmer;
 import edu.upenn.cis455.project.scoring.Stemmer;
 
-public class Map extends Mapper<Text, BytesWritable, Text, Text> {
+public class Map extends Mapper<NullWritable, BytesWritable, Text, Text> {
     
 	private final Text url = new Text();
 	private ArrayList<String>allWords;
 	private final String splitOn = " ,.?\"!-[({\r\t\"\'\\_";
 
 	@Override
-    public void map(Text key, BytesWritable value, Context context) 
+    public void map(NullWritable key, BytesWritable value, Context context) 
     		throws IOException, InterruptedException {
 		Text bigram = new Text();
 		List<DocumentRecord> docList = getDocument(value);
@@ -39,16 +40,12 @@ public class Map extends Mapper<Text, BytesWritable, Text, Text> {
 				    int numWords = allWords.size();
 				    
 				    for (int i = 0; i < numWords - 1; i++){
-				    	bigram.set(allWords.get(i) + " " + allWords.get(i + 1) + ";" + key);
+				    	bigram.set(allWords.get(i) + " " + allWords.get(i + 1));
 				    	context.write(bigram , url);
 				    }  
 			}
 		}
     }
-	
-	public void setUrl(String content){
-		this.url.set(content.trim());	
-	}
 	
 	public void getAllWords(String content)
 	{

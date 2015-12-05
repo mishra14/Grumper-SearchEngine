@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import org.apache.hadoop.io.BytesWritable;
+import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.jsoup.Jsoup;
@@ -19,14 +20,14 @@ import edu.upenn.cis455.project.bean.DocumentRecord;
 //import edu.upenn.cis455.project.indexer.Stemmer;
 import edu.upenn.cis455.project.scoring.Stemmer;
 
-public class Map extends Mapper<Text, BytesWritable, Text, Text> {
+public class Map extends Mapper<NullWritable, BytesWritable, Text, Text> {
     
 	private final Text url = new Text();
 	private ArrayList<String>allWords = new ArrayList<String>();
 	private final String splitOn = " ,.?\"!-[({\r\t\"\'\\_";
 
 	@Override
-    public void map(Text key, BytesWritable value, Context context) 
+    public void map(NullWritable key, BytesWritable value, Context context) 
     		throws IOException, InterruptedException {
 	    Text trigram = new Text();
 		List<DocumentRecord> docList = getDocument(value);
@@ -42,8 +43,7 @@ public class Map extends Mapper<Text, BytesWritable, Text, Text> {
 			    for (int i = 0; i < numWords - 2; i++){
 			    	trigram.set(allWords.get(i) 
 			    			+ " " + allWords.get(i + 1)
-			    			+ " " + allWords.get(i + 2)
-			    			+ ";" + key);
+			    			+ " " + allWords.get(i + 2));
 			    	context.write( new Text(trigram), url);
 			    }  
 			}

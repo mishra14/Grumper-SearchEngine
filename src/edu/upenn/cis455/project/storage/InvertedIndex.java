@@ -13,7 +13,7 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 public class InvertedIndex
 {
 	private String word;
-	private String range;
+	private long range;
 	private ArrayList<Postings> postingsList;
 
 	@DynamoDBHashKey(attributeName = "Word")
@@ -28,10 +28,10 @@ public class InvertedIndex
 	}
 
 	@DynamoDBRangeKey(attributeName = "Range")
-	public String getRangeKey(){
+	public long getRangeKey(){
 		return this.range;
 	}
-	public void setRangeKey(String range){
+	public void setRangeKey(long range){
 		this.range = range;
 	}
 	

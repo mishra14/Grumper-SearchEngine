@@ -9,6 +9,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.IOUtils;
+import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
@@ -20,18 +21,19 @@ import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 
-public class WholeFileRecordReader  extends RecordReader<Text, BytesWritable> {
+public class WholeFileRecordReader  extends RecordReader<NullWritable, BytesWritable> {
 	private FileSplit split;
 	private Configuration conf;
 	private boolean fileread = false;
 	private BytesWritable value = new BytesWritable();
 	private int bucketSize;
-	private static final String crawlerBucket = "edu.upenn.cis455.project.indexer.documents";
+	private static final String crawlerBucket = "test-indexer";//"edu.upenn.cis455.project.indexer.documents";
 	
 	@Override
-	public Text getCurrentKey() throws IOException, InterruptedException {
-		return new Text(String.valueOf(bucketSize));
+	public NullWritable getCurrentKey() throws IOException, InterruptedException {
+		return NullWritable.get();
 	}
+	  
 	  
 	@Override
 	public float getProgress() throws IOException, InterruptedException {
@@ -48,7 +50,7 @@ public class WholeFileRecordReader  extends RecordReader<Text, BytesWritable> {
              this.split = (FileSplit)split;
              this.conf = context.getConfiguration();
              //this.crawlerBucket = "emr-job-aayushi/input"; //TODO Use crawler bucket
-             setBucketSize();
+             //setBucketSize();
              
      }
 	
@@ -80,17 +82,17 @@ public class WholeFileRecordReader  extends RecordReader<Text, BytesWritable> {
 		return value;
 	}
 	
-	public void setBucketSize()
-	{
-		AmazonS3 s3client = new AmazonS3Client(); //TODO Need to add aws credentials here
-	    ObjectListing listing = s3client.listObjects(crawlerBucket);
-	    List<S3ObjectSummary> summaries = listing.getObjectSummaries();
-	
-	    while (listing.isTruncated()) {
-	       listing = s3client.listNextBatchOfObjects (listing);
-	       summaries.addAll (listing.getObjectSummaries());
-	    }
-	    
-	    bucketSize = summaries.size();
-	}
+//	public void setBucketSize()
+//	{
+//		AmazonS3 s3client = new AmazonS3Client(); //TODO Need to add aws credentials here
+//	    ObjectListing listing = s3client.listObjects(crawlerBucket);
+//	    List<S3ObjectSummary> summaries = listing.getObjectSummaries();
+//	
+//	    while (listing.isTruncated()) {
+//	       listing = s3client.listNextBatchOfObjects (listing);
+//	       summaries.addAll (listing.getObjectSummaries());
+//	    }
+//	    
+//	    bucketSize = summaries.size();
+//	}
 }

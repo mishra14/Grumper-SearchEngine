@@ -19,20 +19,18 @@ public class Reduce extends Reducer<Text, Text, Text, Text>
 {
 	private Log log = LogFactory.getLog(Reduce.class);
 	private HashMap<String, Integer> tf = null;
-	private Text keyword;
-	private int bucketSize, df;
+	private final static int bucketSize = 14987;
+	private int df;
 	private static final String tablename = "BigramIndex";
 	
 	@Override
 	protected void reduce(Text key, Iterable<Text> values, Context context) 
 			throws IOException, InterruptedException {
-		
-		setFieldsFromKey(key);
-		df = computeDF(values);
+				df = computeDF(values);
 		ArrayList<Postings> postingsList = createPostings();
 		//context.write(keyword, new Text(postingsList));
 		DynamoIndexerDA dynamo = new DynamoIndexerDA(tablename);
-		dynamo.saveIndex(keyword.toString(), postingsList);
+		dynamo.saveIndexWithBackOff	(key.toString(), postingsList);
     }
 	
 	private int computeDF( Iterable<Text> docIDs){
@@ -61,7 +59,7 @@ public class Reduce extends Reducer<Text, Text, Text, Text>
 		 
 		  ArrayList<Postings> postingsList = new ArrayList<Postings>();
 		  for(String docID: tf.keySet()){
-			  float idf = (float) Math.log(14987/df);// replace later with bucketsize
+			  float idf = (float) Math.log(bucketSize/df);// replace later with bucketsize
 			  float tfidf = tf.get(docID) * idf ;
 			  Postings newPostings = new Postings(docID, tfidf, idf);
 			  postingsList.add(newPostings);
@@ -70,11 +68,4 @@ public class Reduce extends Reducer<Text, Text, Text, Text>
 		  return postingsList; 
 	  }
 	
-	  
-	  private void setFieldsFromKey(Text key)
-	  {
-		  String[] keys = key.toString().split(";");
-		  bucketSize = Integer.parseInt(keys[1]);
-		  keyword = new Text(keys[0]);
-	  }
 }

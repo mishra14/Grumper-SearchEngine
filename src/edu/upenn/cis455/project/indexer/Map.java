@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import org.apache.hadoop.io.BytesWritable;
+import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.jsoup.Jsoup;
@@ -20,14 +21,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.upenn.cis455.project.bean.DocumentRecord;
 import edu.upenn.cis455.project.scoring.Stemmer;
 
-public class Map extends Mapper<Text, BytesWritable, Text, Text>
+public class Map extends Mapper<NullWritable, BytesWritable, Text, Text>
 {
 
 	private final Text url = new Text();
-	private final String splitOn = " ,.?\"!-[({\r\t\"\'\\_";
+	private final String splitOn = " ,.?\"!-[({\t\"\'\\_";
 
 	@Override
-	public void map(Text key, BytesWritable value, Context context)
+	public void map(NullWritable key, BytesWritable value, Context context)
 			throws IOException, InterruptedException
 	{
 		Text word = new Text();
@@ -49,11 +50,11 @@ public class Map extends Mapper<Text, BytesWritable, Text, Text>
 				{
 					String currWord = tokenizer.nextToken();
 					currWord = currWord.toLowerCase()
-							.replaceAll("[^a-z]", " ").trim();
+							.replaceAll("[^a-z]", "").trim();
 					// String stemmedWord = stem(currWord);
 					if (!currWord.isEmpty())
 					{
-						word.set(stem(currWord) + " " + key);
+						word.set(stem(currWord));
 						context.write(word, url);
 					}
 
