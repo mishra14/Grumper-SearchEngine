@@ -9,10 +9,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.security.NoSuchAlgorithmException;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
-
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
@@ -27,7 +23,6 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-
 import edu.upenn.cis455.project.bean.UrlList;
 import edu.upenn.cis455.project.crawler.Hash;
 
@@ -99,7 +94,6 @@ public class S3UrlListDA
 		}
 		catch (NoSuchAlgorithmException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return result;
@@ -142,7 +136,6 @@ public class S3UrlListDA
 		}
 		catch (NoSuchAlgorithmException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return urlList;
@@ -169,23 +162,6 @@ public class S3UrlListDA
 					inputStream, omd);
 			s3client.putObject(request);
 
-			// No need to put into dynamo as it should already be there
-
-			/*
-			ObjectMapper mapper = new ObjectMapper();
-			mapper.setVisibility(PropertyAccessor.ALL, Visibility.NONE);
-			mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
-			ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
-			String json = ow.writeValueAsString(doc);
-			ObjectMetadata omd = new ObjectMetadata();
-			omd.setContentType("text/html");
-			omd.setContentLength(json.length());
-			ByteArrayInputStream inputStream = new ByteArrayInputStream(
-					json.getBytes());
-			PutObjectRequest request = new PutObjectRequest(bucketName, s3Key,
-					inputStream, omd);
-			s3client.putObject(request);
-			dynamo.putItem("documentUrl", doc.getDocumentId(), "s3Key", s3Key);*/
 		}
 		catch (JsonProcessingException e)
 		{
@@ -195,7 +171,6 @@ public class S3UrlListDA
 		}
 		catch (NoSuchAlgorithmException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -218,22 +193,7 @@ public class S3UrlListDA
 		}
 		catch (NoSuchAlgorithmException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}
-
-	public static void main(String[] args) throws IOException,
-			NoSuchAlgorithmException
-	{
-		S3UrlListDA s3 = new S3UrlListDA();
-		String parentUrl = "www.yahoo.com";
-		Set<String> urls = new HashSet<String>();
-		urls.add("www.google.com");
-		urls.add("www.amazon.com");
-		UrlList urlList = new UrlList(parentUrl, urls, true,
-				new Date().getTime());
-		s3.putUrlList(urlList);
-		System.out.println(s3.getUrlList(parentUrl));
 	}
 }
