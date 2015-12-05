@@ -30,6 +30,7 @@ public class PageRankTool extends Configured implements Tool
 			{
 				break;
 			}
+			System.out.println("Done with job " + (i + 1) + " successfully");
 		}
 		System.exit(res);
 	}
