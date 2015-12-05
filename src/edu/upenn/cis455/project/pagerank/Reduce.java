@@ -6,7 +6,7 @@ import org.apache.hadoop.mapreduce.Reducer;
 
 public class Reduce extends Reducer<Text, Text, Text, Text>
 {
-	
+	private static final Float damper = (float) 0.8;
 	@Override
 	protected void reduce(Text key, Iterable<Text> values, Context context) 
 			throws IOException, InterruptedException {
@@ -16,8 +16,9 @@ public class Reduce extends Reducer<Text, Text, Text, Text>
 			Float rankVariable = Float.parseFloat(rankVariableString.toString());
 			rankSum+=rankVariable;
 		}
-		String rank = rankSum.toString();
-		context.write(key, new Text(rank));
+		Float rank = (1-damper)+damper*rankSum;
+		String rankString = rank.toString();
+		context.write(key, new Text(rankString));
     }
 	
 }
