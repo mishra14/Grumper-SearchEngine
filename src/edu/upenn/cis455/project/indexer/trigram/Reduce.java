@@ -17,6 +17,7 @@ import edu.upenn.cis455.project.storage.Postings;
 
 public class Reduce extends Reducer<Text, Text, Text, Text>
 {
+	
 	private Log log = LogFactory.getLog(Reduce.class);
 	private HashMap<String, Integer> tf = null;
 	private final static int bucketSize = 14987;
