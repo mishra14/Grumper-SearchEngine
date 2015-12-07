@@ -1,12 +1,17 @@
 package edu.upenn.cis455.project.searchengine;
 
 import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.concurrent.*;
 import java.util.*;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Map.*;
 
 import javax.servlet.http.*;
+
+import edu.upenn.cis455.project.scoring.Stemmer;
+import edu.upenn.cis455.project.storage.DynamoDA;
 
 public class SearchEngine extends HttpServlet
 {
@@ -19,6 +24,7 @@ public class SearchEngine extends HttpServlet
 	private HashMap<String, Float> cosineSimilarityUnigrams;
 	private HashMap<String, Float> cosineSimilarityBigrams;
 	private HashMap<String, Float> cosineSimilarityTrigrams;
+	private HashMap<String, Float> pageRankMap;
 	private Heap urlFinalScores;
 	//private ArrayList<Postings> finalResultUrls = new ArrayList<Postings>();
 	private ArrayList<String> finalResultUrls = new ArrayList<String>();
@@ -40,7 +46,7 @@ public class SearchEngine extends HttpServlet
 	public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException
 	{
 		PrintWriter out = response.getWriter();
-		String searchQuery = request.getParameter("query");
+		//String searchQuery = request.getParameter("query");
 		out.write("No servlet yet. Using search method!");
 		response.flushBuffer();
 	}
@@ -52,6 +58,7 @@ public class SearchEngine extends HttpServlet
 		cosineSimilarityBigrams = new HashMap<String, Float>();
 		cosineSimilarityTrigrams = new HashMap<String, Float>();
 		urlFinalScores = new Heap(100);
+		pageRankMap = new HashMap<>();
 		
 		ExecutorService pool = Executors.newFixedThreadPool(5);
 		
@@ -100,21 +107,42 @@ public class SearchEngine extends HttpServlet
 	
 	private void computeScores()
 	{
+		float pageRank;
+		String hostname;
+		DynamoDA<Float> pageRankDA = new DynamoDA<Float>("edu.upenn.cis455.project.pagerank", Float.class);
 		for (String url : cosineSimilarityUnigrams.keySet())
 		{
-			float score = cosineSimilarityUnigrams.get(url);
-			
+			try
+			{
+				hostname = new URL(url).getHost(); //TODO ask anwesha!
+				if (pageRankMap.containsKey(hostname))
+				{
+					pageRank = pageRankMap.get(hostname);
+				}
+				
+				else
+				{
+					
+				}
+			}
+			catch (MalformedURLException e)
+			{
+				System.out.println("Exception: Malformed Url " + url);
+				continue;
+			}
+			//String hostname = new Url(url)
+			float score = (float) (cosineSimilarityUnigrams.get(url));
 			if (cosineSimilarityBigrams.containsKey(url))
 			{
-				score += cosineSimilarityBigrams.get(url);
+				score += 2*cosineSimilarityBigrams.get(url);
 			}
 			
 			if (cosineSimilarityTrigrams.containsKey(url))
 			{
-				score += cosineSimilarityTrigrams.get(url);
+				score += 3*cosineSimilarityTrigrams.get(url);
 			}
 			
-			urlFinalScores.add(url, score);
+			urlFinalScores.add(url, score*pageRank);
 		}
 	}
 	
@@ -124,7 +152,8 @@ public class SearchEngine extends HttpServlet
 		
 		while (resultCount < maxResults && !urlFinalScores.isEmpty())
 		{
-			System.out.println(urlFinalScores.remove().getKey());
+			SimpleEntry<String, Float> finalScore = urlFinalScores.remove();
+			System.out.println(finalScore.getKey() + ": " + String.valueOf(finalScore.getValue()));
 			resultCount++;
 		}
 	}
@@ -137,11 +166,21 @@ public class SearchEngine extends HttpServlet
 			word = tokenizer.nextToken();
 	    	word = word.trim().toLowerCase().replaceAll("[^a-z0-9 ]", "");
 	    	if (includeStopWords || (!stopwords.contains(word) && !word.equals(""))){
-	    		allTerms.add(word);
+	    		allTerms.add(stem(word));
 	    	}
 	    }
 		
 		return allTerms;
+	}
+	
+	public String stem(String word)
+	{
+		Stemmer stemmer = new Stemmer();
+		char[] charArray = word.toCharArray();
+		stemmer.add(charArray, word.length());
+		stemmer.stem();
+		String stemmedWord = stemmer.toString();
+		return stemmedWord;
 	}
 	
 	public static void main(String args[]) throws IOException
@@ -157,17 +196,17 @@ public class SearchEngine extends HttpServlet
 //		searchEngine.search("choose");
 //		searchEngine.search("pakistan");
 //		searchEngine.search("Adamson university"); 
-//		searchEngine.search("new york");
-//		searchEngine.search("banana");
-//		searchEngine.search("university of pennsylvania");
-//		searchEngine.search("penn");
-		//searchEngine.search("temple university");
+		//searchEngine.search("sex and the city");
+		//searchEngine.search("barrack obama");
+		//searchEngine.search("university of pennsylvania");
+		searchEngine.search("india");
+		//searchEngine.search("adamson university");
 		//searchEngine.search("taylor swift");
 //		searchEngine.search("log");
 //		searchEngine.search("am an and");
-//		searchEngine.search("happy birthday");
+		//searchEngine.search("happy birthday");
 		//searchEngine.search("chestnut pie");
-		searchEngine.search("adele");
+		//searchEngine.search("adele");
 		//searchEngine.search("cooked beet greens");
 		//searchEngine.search("cookies melissa");
 
