@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="WINDOWS-1252" standalone="no"?>
+<jardesc>
+    <jar path="C:/Users/Ankit/OneDrive/Documents/My Folder/CIS 555/project/emrindexer.jar"/>
+    <options buildIfNeeded="true" compress="true" descriptionLocation="/cis455project/emrindexer.jardesc" exportErrors="true" exportWarnings="true" includeDirectoryEntries="false" overwrite="true" saveDescription="true" storeRefactorings="false" useSourceFolders="false"/>
+    <storedRefactorings deprecationInfo="true" structuralOnly="false"/>
+    <selectedProjects/>
+    <manifest generateManifest="true" mainClassHandleIdentifier="=cis455project/src&lt;edu.upenn.cis455.project.emr{IndexerEmrController.java[IndexerEmrController" manifestLocation="" manifestVersion="1.0" reuseManifest="false" saveManifest="false" usesManifest="true">
+        <sealing sealJar="false">
+            <packagesToSeal/>
+            <packagesToUnSeal/>
+        </sealing>
+    </manifest>
+    <selectedElements exportClassFiles="true" exportJavaFiles="true" exportOutputFolder="false">
+        <file path="/cis455project/lib/jackson-databind-2.6.3.jar"/>
+        <javaElement handleIdentifier="=cis455project/src&lt;edu.upenn.cis455.project.bean"/>
+        <javaElement handleIdentifier="=cis455project/src&lt;edu.upenn.cis455.project.storage"/>
+        <file path="/cis455project/lib/jackson-annotations-2.6.3.jar"/>
+        <javaElement handleIdentifier="=cis455project/src&lt;edu.upenn.cis455.project.emr"/>
+        <file path="/cis455project/lib/jackson-core-2.6.3.jar"/>
+    </selectedElements>
+</jardesc>
