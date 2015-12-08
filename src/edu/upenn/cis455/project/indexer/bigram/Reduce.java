@@ -30,24 +30,21 @@ public class Reduce extends Reducer<Text, Text, Text, Text>
 		ArrayList<Postings> postingsList = createPostings();
 		//context.write(keyword, new Text(postingsList));
 		DynamoIndexerDA dynamo = new DynamoIndexerDA(tablename);
-		dynamo.saveIndexWithBackOff	(key.toString(), postingsList);
+		dynamo.saveIndexWithBackOff	(key.toString(), postingsList, context);
     }
 	
 	private int computeDF( Iterable<Text> docIDs){
 		 Set<String> docIDset = new HashSet<>();
 		 tf = new HashMap<>();
-		 log.info("DOC IDS: " + docIDs.toString());
 		 for (Text id : docIDs){
 			 String docID = id.toString();
 			 docIDset.add(docID);
 			 //add to tf dictionary
 			 if (tf.containsKey(docID)){
-				  System.err.println("Compute Postings : Doc ID in tf" + docID.toString());
 				  int count = tf.get(docID);
 				  tf.put(docID, count + 1);
 			  }
 			  else {
-				  System.err.println("Compute Postings : Doc ID new" + docID.toString());
 				  tf.put(docID, 1);
 			  }			 
 		  }

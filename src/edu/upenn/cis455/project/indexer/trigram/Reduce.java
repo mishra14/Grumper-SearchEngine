@@ -31,7 +31,7 @@ public class Reduce extends Reducer<Text, Text, Text, Text>
 		ArrayList<Postings> postingsList = createPostings();
 		//context.write(keyword, new Text(postingsList));
 		DynamoIndexerDA dynamo = new DynamoIndexerDA(tablename);
-		dynamo.saveIndexWithBackOff	(key.toString(), postingsList);
+		dynamo.saveMultipleIndex(key.toString(), postingsList, context);
 		}
 	
 	private int computeDF( Iterable<Text> docIDs){

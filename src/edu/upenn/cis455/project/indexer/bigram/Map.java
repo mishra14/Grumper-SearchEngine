@@ -22,7 +22,7 @@ import edu.upenn.cis455.project.scoring.Stemmer;
 public class Map extends Mapper<NullWritable, BytesWritable, Text, Text> {
     
 	private final Text url = new Text();
-	private ArrayList<String>allWords;
+	private ArrayList<String>allWords = new ArrayList<String>();
 	private final String splitOn = " ,.?\"!-[({\r\t\"\'\\_";
 
 	@Override
