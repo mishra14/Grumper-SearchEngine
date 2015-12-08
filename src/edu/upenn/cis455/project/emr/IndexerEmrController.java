@@ -1,11 +1,18 @@
 package edu.upenn.cis455.project.emr;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.ListObjectsRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
@@ -14,7 +21,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 public class IndexerEmrController
 {
-	private static AmazonS3Client s3Client = new AmazonS3Client();
+	private static AmazonS3Client s3Client = new AmazonS3Client(getCredentials());
 	private static String projectDocumentBucket = "edu.upenn.cis455.project.documents";
 	private static String indexerDocumentBucket = "edu.upenn.cis455.project.indexer.documents.large";
 	private static String emrInputPath = "s3://test-indexer/";
@@ -44,6 +51,8 @@ public class IndexerEmrController
 				emrJarPath, emrStepName, clusterName, ec2AccessKeyName,
 				tableName, primaryKeyName, valueKeyName, rangeKeyName);
 		controller.createCluster();*/
+		List<String> docs = getObjectNamesForBucket(projectDocumentBucket);
+		System.out.println(docs.size());
 		System.out.println(new Date());
 		List<String> documentsToMerge = getObjectNamesForBucket(projectDocumentBucket);
 		List<DocumentMergerThread> mergerThreads = new ArrayList<DocumentMergerThread>();
@@ -72,8 +81,7 @@ public class IndexerEmrController
 		}
 		// controller.runJob();
 		// controller.s3ToDynamoPostings(controller.getObjectNamesForBucket());
-		List<String> docs = controller
-				.getObjectNamesForBucket(projectDocumentBucket);
+		//List<String> docs = getObjectNamesForBucket(projectDocumentBucket);
 		System.out.println(docs.size());
 		System.out.println("Indexer Terminated");
 		System.out.println(new Date());
@@ -106,6 +114,48 @@ public class IndexerEmrController
 		}
 		System.out.println("count - " + count);
 		return objectNames;
+	}
+	
+	
+	public static AWSCredentials getCredentials()
+	{
+		File file = new File("/usr/share/jetty/webapps/credentials");
+		String accessKey = null;
+		String secretKey = null;
+		try
+		{
+			String line;
+			FileReader reader = new FileReader(file);
+			BufferedReader in = new BufferedReader(reader);
+			while ((line = in.readLine()) != null)
+			{
+				if (line.contains("AWSAccessKeyId"))
+				{
+					accessKey = line.split("=")[1].trim();
+				}
+				else if (line.contains("AWSSecretKey"))
+				{
+					secretKey = line.split("=")[1].trim();
+				}
+			}
+			in.close();
+			reader.close();
+		}
+		catch (FileNotFoundException e)
+		{
+			System.out
+					.println("S3DocumentDA : reading from local credential file failed");
+			e.printStackTrace();
+		}
+		catch (IOException e)
+		{
+			System.out
+					.println("S3DocumentDA : reading from local credential file failed");
+			e.printStackTrace();
+		}
+		BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKey,
+				secretKey);
+		return awsCredentials;
 	}
 
 }

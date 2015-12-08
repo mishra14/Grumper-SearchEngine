@@ -8,7 +8,6 @@ import java.io.InputStreamReader;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
-
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.GetObjectRequest;
@@ -28,6 +27,7 @@ public class DocumentMergerThread extends Thread
 {
 
 	private static final int DOCUMENTS_TO_MERGE = 150;
+	private static final long MAX_DOCUMENT_SIZE = 60000000;
 	private int id;
 	private String projectDocumentBucket;
 	private String mergedDocumentBucket;
@@ -41,7 +41,8 @@ public class DocumentMergerThread extends Thread
 		this.projectDocumentBucket = projectDocumentBucket;
 		this.mergedDocumentBucket = mergedDocumentBucket;
 		this.objectNames = objectNames;
-		this.s3Client = new AmazonS3Client();
+		this.s3Client = new AmazonS3Client(
+				IndexerEmrController.getCredentials());
 		this.id = id;
 	}
 
@@ -73,9 +74,9 @@ public class DocumentMergerThread extends Thread
 		for (String object : objectNames)
 		{
 			DocumentRecord doc = getDocument(projectDocumentBucket, object);
-			size += doc.toString().length() * 2;
+			size += doc.toString().length();
 			mergedDocuments.add(doc);
-			if (mergedDocuments.size() > DOCUMENTS_TO_MERGE)
+			if (size > MAX_DOCUMENT_SIZE)
 			{
 				System.out.println("Merger Thread " + id + " : Merged "
 						+ mergedDocuments.size() + " documents with size - "
@@ -145,6 +146,7 @@ public class DocumentMergerThread extends Thread
 		mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
 		ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
 		String json = ow.writeValueAsString(mergedDocuments);
+		System.out.println("json size - " + json.length());
 		String s3Key = Hash.hashKey(json);
 		ByteArrayInputStream inputStream = new ByteArrayInputStream(
 				json.getBytes());
