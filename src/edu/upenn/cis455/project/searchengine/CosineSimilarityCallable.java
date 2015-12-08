@@ -42,19 +42,31 @@ public class CosineSimilarityCallable implements Callable<HashMap<String, Float>
 			{
 				System.out.println("finding matches for " + term + "...");
 				PaginatedQueryList<InvertedIndex> resultList = dbAccessor.loadIndex(term);
-				System.out.println("accessed dynamo");
+				System.out.println("accessed dynamo, result list size: " + resultList.size());
+				
 				if (!resultList.isEmpty())
 				{
+					postings = new ArrayList<Postings>();
 					System.out.println("found matching urls for ngram: " + term);
 					for (InvertedIndex result: resultList)
 					{
-						postings = result.getPostings();
-						System.out.println("postings: " + postings);
-						
-						computeCosineSimilarity(term, postings);
+						ArrayList<Postings> currPosting = result.getPostings();
+						//System.out.println("Postings: " + currPosting);
+						if (currPosting != null)
+							postings.add(currPosting.get(0));
+						if (postings.size() == 100)
+						{
+							computeCosineSimilarity(term, postings);
+							postings = new ArrayList<Postings>();
+						}
 					}
-				}
-				
+					
+					if (!postings.isEmpty())
+					{
+						computeCosineSimilarity(term, postings);
+						postings = new ArrayList<Postings>();
+					}
+				}	
 			}
 			
 			//queryDenominator = (float) Math.sqrt(queryDenominator);
@@ -62,8 +74,10 @@ public class CosineSimilarityCallable implements Callable<HashMap<String, Float>
 			for (String url: cosineSimilarity.keySet())
 			{
 				float tfidf = cosineSimilarity.get(url);
+				//System.out.println("tfidf: " + tfidf);
 				float denominator = seenUrlsDenominator.get(url);
 				float cosineSim = (float) (tfidf/(Math.sqrt(denominator + queryDenominator)));
+				//System.out.println("cosine sim: " + cosineSim);
 				cosineSimilarity.put(url, cosineSim);
 			}
 		}
@@ -101,8 +115,7 @@ public class CosineSimilarityCallable implements Callable<HashMap<String, Float>
 		String url;
 		float postingTfidf;
 		float idf = postings.get(0).getIdf();
-		float queryTermTfidf = (float) (queryTf.get(term) * Math.log(idf));
-		System.out.println("query tfidf: " + queryTermTfidf);
+		float queryTermTfidf = (float) (queryTf.get(term) * idf);
 		queryDenominator += Math.pow(queryTermTfidf, 2);
 		
 		for (Postings posting: postings)
