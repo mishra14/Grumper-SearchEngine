@@ -13,6 +13,8 @@ import com.amazonaws.services.dynamodbv2.document.Item;
 
 import edu.upenn.cis455.project.scoring.Stemmer;
 import edu.upenn.cis455.project.storage.DynamoDA;
+import edu.upenn.cis455.project.storage.DBWrapper;
+import edu.upenn.cis455.project.storage.SearchEngineCacheDA;
 
 public class SearchEngine extends HttpServlet
 {
@@ -27,6 +29,8 @@ public class SearchEngine extends HttpServlet
 	private HashMap<String, Float> cosineSimilarityTrigrams;
 	private HashMap<String, Float> pageRankMap;
 	private Heap urlTfidfScores, urlFinalScores;
+	private StringBuffer resultsForCache;
+	private SearchEngineCacheDA cacheDA = new SearchEngineCacheDA();
 
 	public void init()
 	{
@@ -35,72 +39,94 @@ public class SearchEngine extends HttpServlet
 	
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException
 	{
-		PrintWriter out = response.getWriter();
-		
-		out.write(searchPage);
-		response.flushBuffer();
-		
+				
 	}
 	
 	public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException
 	{
 		PrintWriter out = response.getWriter();
-		//String searchQuery = request.getParameter("query");
-		out.write("No servlet yet. Using search method!");
+		String searchQuery = request.getParameter("query");
+		System.out.println("search query received: "+searchQuery);
+		out.write("searchQuery Result1 Result2 Result3 Result4");
 		response.flushBuffer();
 	}
 	
 	public void search(String searchQuery)
 	{
-		ArrayList<String> queryTerms = new ArrayList<String>();
-		cosineSimilarityUnigrams = new HashMap<String, Float>();
-		cosineSimilarityBigrams = new HashMap<String, Float>();
-		cosineSimilarityTrigrams = new HashMap<String, Float>();
-		urlTfidfScores = new Heap(100);
-		pageRankMap = new HashMap<>();
-		
-		ExecutorService pool = Executors.newFixedThreadPool(2);
-		
-		if (searchQuery.isEmpty())
-		{
-			System.out.println("Please enter a search query!");
-		}
-		
-		else
-		{
-			queryTerms = getQueryTerms(searchQuery, false);
-			System.out.println("query terms are: " + queryTerms);
+		try {
+			String BDBStore = "/home/cis455/SeacheEngineCache";
+			DBWrapper.openDBWrapper(BDBStore);
 			
-			if (queryTerms.size() == 0)
+			if (cacheDA.getCachedResultsInfo(searchQuery) != null)
 			{
-				System.out.println("including stop words");
-				queryTerms = getQueryTerms(searchQuery, true);
-				System.out.println("query terms are now: " + queryTerms);
-				//Callable<HashMap<String, Integer>>
-				//TODO get proximity
+				System.out.println("Query was cached");
+				getCachedResults(searchQuery);
+				
 			}
 			
-			Callable<HashMap<String, Float>> callableCosineSimUnigrams = new CosineSimilarityCallable(queryTerms, "UnigramIndex");
-			Callable<HashMap<String, Float>> callableCosineSimBigrams = new CosineSimilarityCallable(queryTerms, "BigramIndex");
-			//Callable<HashMap<String, Float>> callableCosineSimTrigrams = new CosineSimilarityCallable(queryTerms, "TrigramIndex");
-			
-			Future<HashMap<String, Float>> cosSimUnigramsFuture = pool.submit(callableCosineSimUnigrams);
-			Future<HashMap<String, Float>> bigramFuture = pool.submit(callableCosineSimBigrams);
-			//Future<HashMap<String, Float>> trigramFuture = pool.submit(callableCosineSimTrigrams);
+			else
+			{
+				System.out.println("Query not cached");
+				ArrayList<String> queryTerms = new ArrayList<String>();
+				cosineSimilarityUnigrams = new HashMap<String, Float>();
+				cosineSimilarityBigrams = new HashMap<String, Float>();
+				cosineSimilarityTrigrams = new HashMap<String, Float>();
+				urlTfidfScores = new Heap(100);
+				pageRankMap = new HashMap<>();
+				
+				ExecutorService pool = Executors.newFixedThreadPool(2);
+				
+				if (searchQuery.isEmpty())
+				{
+					System.out.println("Please enter a search query!");
+				}
+				
+				else
+				{
+					queryTerms = getQueryTerms(searchQuery, false);
+					System.out.println("query terms are: " + queryTerms);
+					
+					if (queryTerms.size() == 0)
+					{
+						System.out.println("including stop words");
+						queryTerms = getQueryTerms(searchQuery, true);
+						System.out.println("query terms are now: " + queryTerms);
+						//Callable<HashMap<String, Integer>>
+					}
+					
+					Callable<HashMap<String, Float>> callableCosineSimUnigrams = new CosineSimilarityCallable(queryTerms, "UnigramIndex");
+					Callable<HashMap<String, Float>> callableCosineSimBigrams = new CosineSimilarityCallable(queryTerms, "BigramIndex");
+					//Callable<HashMap<String, Float>> callableCosineSimTrigrams = new CosineSimilarityCallable(queryTerms, "TrigramIndex");
+					
+					Future<HashMap<String, Float>> cosSimUnigramsFuture = pool.submit(callableCosineSimUnigrams);
+					Future<HashMap<String, Float>> bigramFuture = pool.submit(callableCosineSimBigrams);
+					//Future<HashMap<String, Float>> trigramFuture = pool.submit(callableCosineSimTrigrams);
 
-			try
-			{
-				cosineSimilarityUnigrams = cosSimUnigramsFuture.get();
-				cosineSimilarityBigrams = bigramFuture.get();
-				//cosineSimilarityTrigrams = trigramFuture.get();
+					try
+					{
+						cosineSimilarityUnigrams = cosSimUnigramsFuture.get();
+						cosineSimilarityBigrams = bigramFuture.get();
+						//cosineSimilarityTrigrams = trigramFuture.get();
+					}
+					catch (InterruptedException | ExecutionException e)
+					{
+						e.printStackTrace();
+					}
+					
+					computeScores();
+					getRankedResults();
+				}
+				
+				System.out.println("Adding query to cache");
+				//CachedResultsInfo cacheInfo = new CachedResultsInfo(searchQuery, resultsForCache.toString(), new Date());
+				//dbw.putCachedResultsInfo(cacheInfo);
+				System.out.println("Closing dbwrapper");
+				DBWrapper.closeDBWrapper();
 			}
-			catch (InterruptedException | ExecutionException e)
-			{
-				e.printStackTrace();
-			}
-			
-			computeScores();
-			getRankedResults();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
 		}
 	}
 	
@@ -112,15 +138,15 @@ public class SearchEngine extends HttpServlet
 		DynamoDA<Float> pageRankDA = new DynamoDA<Float>("edu.upenn.cis455.project.pagerank", Float.class);
 		for (String url : cosineSimilarityUnigrams.keySet())
 		{
-			float score = (float) (cosineSimilarityUnigrams.get(url));
+			float score = (float) (0.17*cosineSimilarityUnigrams.get(url));
 			if (cosineSimilarityBigrams.containsKey(url))
 			{
-				score += 2*cosineSimilarityBigrams.get(url);
+				score += 0.33*cosineSimilarityBigrams.get(url);
 			}
 			
 			if (cosineSimilarityTrigrams.containsKey(url))
 			{
-				score += 3*cosineSimilarityTrigrams.get(url);
+				score += 0.49*cosineSimilarityTrigrams.get(url);
 			}
 			
 			urlTfidfScores.add(url, score);
@@ -133,7 +159,7 @@ public class SearchEngine extends HttpServlet
 			Float cosineSim = urlCosineSim.getValue();
 			try
 			{
-				hostname = new URL(url).getHost(); //TODO ask anwesha!
+				hostname = new URL(url).getHost();
 				if (pageRankMap.containsKey(hostname))
 				{
 					//System.out.println("getting pagerank from map: " + hostname);
@@ -152,7 +178,7 @@ public class SearchEngine extends HttpServlet
 					}
 				}
 				
-				urlFinalScores.add(url, cosineSim*pageRank);
+				urlFinalScores.add(url, (float) (0.8*cosineSim + 0.2*pageRank));
 			}
 			catch (MalformedURLException e)
 			{
@@ -164,11 +190,13 @@ public class SearchEngine extends HttpServlet
 	
 	private void getRankedResults()
 	{
+		resultsForCache = new StringBuffer();
 		System.out.println("SEARCH RESULTS:");
 		
 		while (resultCount < maxResults && !urlFinalScores.isEmpty())
 		{
 			SimpleEntry<String, Float> finalScore = urlFinalScores.remove();
+			resultsForCache.append(finalScore.getKey() + " ");
 			System.out.println(finalScore.getKey() + ": " + String.valueOf(finalScore.getValue()));
 			resultCount++;
 		}
@@ -187,6 +215,16 @@ public class SearchEngine extends HttpServlet
 	    }
 		
 		return allTerms;
+	}
+	
+	public void getCachedResults(String query)
+	{
+		String cachedResults = cacheDA.getCachedResultsInfo(query).getResults();
+		System.out.println("SEARCH RESULTS:");
+		for (String result: cachedResults.split(" "))
+		{
+			System.out.println(result);
+		}
 	}
 	
 	public String stem(String word)
@@ -212,8 +250,8 @@ public class SearchEngine extends HttpServlet
 //		searchEngine.search("choose");
 //		searchEngine.search("pakistan");
 //		searchEngine.search("Adamson university"); 
-		searchEngine.search("david beckham");
-		//searchEngine.search("barrack obama");
+		//searchEngine.search("mark zuckerberg");
+		searchEngine.search("bill clinton");
 		//searchEngine.search("university of pennsylvania");
 		//searchEngine.search("india");
 		//searchEngine.search("adamson university");
@@ -227,11 +265,6 @@ public class SearchEngine extends HttpServlet
 		//searchEngine.search("cookies melissa");
 
 	}
-	private String searchPage = "<form action=\"/search\" method=\"post\"> "
-			+ "<center>Name of Search Engine</center> <br> " //TODO name of engine
-			+ "<center><input type=\"text\" name=\"query\"> </center>" + "<br><br>"
-			+ "<center><input type = \"submit\" value = \"submit\"></center>"  + "<br><br>"
-			+ "</form>";
 	
 	private static ArrayList<String> stopwords =
 			new ArrayList<String> (Arrays.asList(("a,about,above,"
