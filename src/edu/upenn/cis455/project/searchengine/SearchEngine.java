@@ -45,8 +45,9 @@ public class SearchEngine extends HttpServlet
 	public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException
 	{
 		PrintWriter out = response.getWriter();
-		//String searchQuery = request.getParameter("query");
-		out.write("No servlet yet. Using search method!");
+		String searchQuery = request.getParameter("query");
+		System.out.println("search query received: "+searchQuery);
+		out.write("searchQuery Result1 Result2 Result3 Result4");
 		response.flushBuffer();
 	}
 	
