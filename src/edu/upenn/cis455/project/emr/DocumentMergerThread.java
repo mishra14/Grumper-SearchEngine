@@ -147,7 +147,14 @@ public class DocumentMergerThread extends Thread
 		mapper.setVisibility(PropertyAccessor.ALL, Visibility.NONE);
 		mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
 		ObjectWriter ow = mapper.writer();
-		String json = ow.writeValueAsString(mergedDocuments);
+		StringBuilder jsonBuilder = new StringBuilder();
+		for(DocumentRecord doc : mergedDocuments)
+		{
+			jsonBuilder.append(ow.writeValueAsString(doc));
+			jsonBuilder.append("\n");
+		}
+		String json = jsonBuilder.toString();
+		//String json = ow.writeValueAsString(mergedDocuments);
 		System.out.println("json size - " + json.length());
 		String s3Key = Hash.hashKey(json);
 		ByteArrayInputStream inputStream = new ByteArrayInputStream(
