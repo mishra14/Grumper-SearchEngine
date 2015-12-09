@@ -23,7 +23,7 @@ public class IndexerEmrController
 {
 	private static AmazonS3Client s3Client = new AmazonS3Client(getCredentials());
 	private static String projectDocumentBucket = "edu.upenn.cis455.project.documents";
-	private static String indexerDocumentBucket = "edu.upenn.cis455.project.indexer.documents.large";
+	private static String indexerDocumentBucket = "edu.upenn.cis455.project.indexer.documents.large2";
 	private static String emrInputPath = "s3://test-indexer/";
 	private static String emrOutputBucketName = "edu.upenn.cis455.project.indexer";
 	private static String emrOutputPrefix = "output";

@@ -74,6 +74,8 @@ public class DocumentMergerThread extends Thread
 		for (String object : objectNames)
 		{
 			DocumentRecord doc = getDocument(projectDocumentBucket, object);
+			doc.setDocument(doc.getDocumentString().replaceAll("\n", ""));
+			doc.setDocument(doc.getDocumentString().replaceAll("\r", ""));
 			size += doc.toString().length();
 			mergedDocuments.add(doc);
 			if (size > MAX_DOCUMENT_SIZE)
@@ -144,7 +146,7 @@ public class DocumentMergerThread extends Thread
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.setVisibility(PropertyAccessor.ALL, Visibility.NONE);
 		mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
-		ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
+		ObjectWriter ow = mapper.writer();
 		String json = ow.writeValueAsString(mergedDocuments);
 		System.out.println("json size - " + json.length());
 		String s3Key = Hash.hashKey(json);
