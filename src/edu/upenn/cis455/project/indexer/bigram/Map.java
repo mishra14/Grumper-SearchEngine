@@ -111,7 +111,6 @@ public class Map extends Mapper<LongWritable, Text, Text, Text>
 		String stemmedWord = stemmer.toString();
 		return stemmedWord;
 	}
-
 	private static ArrayList<String> stopwords = new ArrayList<String>(
 			Arrays.asList(("a,about,above,"
 					+ "after,again,against,all,am,an,and,any,are,"

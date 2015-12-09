@@ -49,7 +49,7 @@ public class Reduce extends Reducer<Text, Text, Text, Text>
 				tf.put(docID, 1);
 			}
 		}
-
+		
 		return docIDset.size();
 	}
 
