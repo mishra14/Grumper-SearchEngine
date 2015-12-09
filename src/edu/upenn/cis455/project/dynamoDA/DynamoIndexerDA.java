@@ -8,10 +8,13 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import org.apache.hadoop.mapreduce.Reducer.Context;
 
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
@@ -77,46 +80,51 @@ public class DynamoIndexerDA
 		}
 
 	}
-//
-//	public void saveIndex(String word, ArrayList<Postings> allPostings)
-//	{
-//
-//		InvertedIndex index = new InvertedIndex();
-//		index.setWord(word);
-//		// ArrayList<Postings>allPostings = parseAllPostings(postingsString);
-//		ArrayList<Postings> postingsList = new ArrayList<Postings>();
-//		int count = 0;
-//		int size = allPostings.size();
-//		for (int i = 0; i < size; i++)
-//		{
-//			postingsList.add(allPostings.get(i));
-//			count++;
-//
-//			if (count >= MAX_LIST || i == size - 1)
-//			{
-//
-//				try
-//				{
-//					index.setRangeKey(Hash.hashKey(postingsList.toString()));
-//					index.setPostings(postingsList);
-//					mapper.save(index, config);
-//					postingsList = new ArrayList<Postings>();
-//					count = 0;
-//				}
-//				catch (NoSuchAlgorithmException e)
-//				{
-//					e.printStackTrace();
-//				}
-//
-//			}
-//
-//		}
-//	}
 
-	public void saveIndexWithBackOff(String word,
-			ArrayList<Postings> allPostings) throws InterruptedException
+	//
+	public void saveIndex(String word, ArrayList<Postings> allPostings,
+			Context context)
 	{
 
+		InvertedIndex index = new InvertedIndex();
+		index.setWord(word);
+		ArrayList<Postings> postingsList = new ArrayList<Postings>();
+		int count = 0;
+		int size = allPostings.size();
+		long range = 0;
+		for (int i = 0; i < size; i++)
+		{
+			postingsList.add(allPostings.get(i));
+			count++;
+
+			if (count >= MAX_LIST || i == size - 1)
+			{
+				try
+				{
+					index.setRangeKey(range);
+					range++;
+					index.setPostings(postingsList);
+					mapper.save(index, config);
+					postingsList = new ArrayList<Postings>();
+					count = 0;
+					if ((range % 100) == 0)
+						context.progress();
+
+				}
+				catch (ProvisionedThroughputExceededException e)
+				{
+					e.printStackTrace();
+				}
+
+			}
+
+		}
+	}
+
+	public void saveIndexWithBackOff(String word,
+			ArrayList<Postings> allPostings, Context context)
+					throws InterruptedException
+	{
 		InvertedIndex index = new InvertedIndex();
 		index.setWord(word);
 		// ArrayList<Postings>allPostings = parseAllPostings(postingsString);
@@ -128,104 +136,125 @@ public class DynamoIndexerDA
 			int backOffCount = 0;
 			int backOffDuration = 50;
 			boolean done = false;
-			while (!done && backOffCount < 100)
+			// while (!done && backOffCount < 50)
+			// {
+			postingsList.add(allPostings.get(i));
+			try
 			{
-				postingsList.add(allPostings.get(i));
-				try
-				{
-					index.setRangeKey(range);
-					index.setPostings(postingsList);
-					mapper.save(index, config);
-					range++;
-					postingsList.clear();
-					done = true;
-				}
-				catch (ProvisionedThroughputExceededException e)
-				{
-					e.printStackTrace();
-					backOffCount++;
-					Thread.sleep(backOffCount * backOffDuration);
-				}
+				index.setRangeKey(range);
+				index.setPostings(postingsList);
+				mapper.save(index, config);
+				range++;
+				postingsList.clear();
+				done = true;
+				if ((range % 100) == 0)
+					context.progress();
+			}
+			catch (ProvisionedThroughputExceededException e)
+			{
+				e.printStackTrace();
+				if ((range % 100) == 0)
+					context.progress();
+			}
+			// backOffCount++;
+			// Thread.sleep(backOffCount * backOffDuration);
+		}
+		// }
+		// }
+
+	}
+
+	public void saveMultipleIndex(String word, ArrayList<Postings> allPostings,
+			Context context)
+	{
+		int numPostings = allPostings.size();
+		if (numPostings < MAX_LIST)
+		{
+			// write to db
+			InvertedIndex index = new InvertedIndex();
+			try
+			{
+				index.setWord(word);
+				index.setPostings(allPostings);
+				index.setRangeKey(0);
+				mapper.save(index, config);
+			}
+			catch (ProvisionedThroughputExceededException e)
+			{
+				e.printStackTrace();
 			}
 
 		}
-	}
+		else
+		{
+			// breakdown the list into multiple and do batch write
+			ArrayList<Postings> postingsList = new ArrayList<Postings>();
+			ArrayList<InvertedIndex> rowEntry = new ArrayList<InvertedIndex>();
+			int totalLen = 0;
+			Postings postings;
+			long range = 0;
+			for (int i = 0; i < numPostings; i++)
+			{
+				if ( i > 2000)
+					break;
+				if ((range % 100) == 0)
+					context.progress();
+				postings = allPostings.get(i);
+				int len = getSize(postings.getPosting());
+				int temp = totalLen + len;
+				if (temp <= MAX_SIZE && (i < numPostings - 1))
+				{
+					totalLen = temp;
+					postingsList.add(postings);
+				}
+				else if (temp > MAX_SIZE
+						|| (temp <= MAX_SIZE && (i == numPostings - 1)))
+				{
+					if (i == numPostings - 1)
+					{
+						postingsList.add(postings);
+					}
+					if (rowEntry.size() < BATCH_LIMIT)
+					{
 
-//	private void createSingleRow(String word, ArrayList<Postings> allPostings)
-//	{
-//		int numPostings = allPostings.size();
-//
-//		if (numPostings < MAX_LIST)
-//		{
-//			// write to db
-//			InvertedIndex index = new InvertedIndex();
-//			try
-//			{
-//				index.setWord(word);
-//				index.setPostings(allPostings);
-//				index.setRangeKey(Hash.hashKey(allPostings.toString()));
-//				mapper.batchSave(Arrays.asList(index), config);
-//			}
-//			catch (NoSuchAlgorithmException e)
-//			{
-//				e.printStackTrace();
-//			}
-//
-//		}
-//		else
-//		{
-//			// breakdown the list into multiple and do batch write
-//			ArrayList<Postings> postingsList = new ArrayList<Postings>();
-//			ArrayList<InvertedIndex> rowEntry = new ArrayList<InvertedIndex>();
-//			int totalLen = 0;
-//			Postings postings;
-//			for (int i = 0; i < numPostings; i++)
-//			{
-//				postings = allPostings.get(i);
-//				int len = getSize(postings.getPosting());
-//				int temp = totalLen + len;
-//				if (temp <= MAX_SIZE)
-//				{
-//					totalLen = temp;
-//					postingsList.add(postings);
-//				}
-//				else if (temp > MAX_SIZE
-//						|| (temp <= MAX_SIZE && (i == numPostings - 1)))
-//				{
-//					if (rowEntry.size() < BATCH_LIMIT)
-//					{
-//						try
-//						{
-//							InvertedIndex index = new InvertedIndex();
-//							index.setWord(word);
-//							index.setPostings(postingsList);
-//							index.setRangeKey(
-//									Hash.hashKey(postingsList.toString()));
-//							rowEntry.add(index);
-//							postingsList = new ArrayList<Postings>();
-//							totalLen = 0;
-//						}
-//						catch (NoSuchAlgorithmException e)
-//						{
-//							e.printStackTrace();
-//						}
-//					}
-//					else
-//					{
-//						mapper.batchSave(rowEntry, config);
-//						rowEntry = new ArrayList<InvertedIndex>();
-//					}
-//					postingsList = new ArrayList<Postings>();
-//					totalLen = 0;
-//
-//				}
-//			}
-//
-//			if (!rowEntry.isEmpty())
-//				mapper.batchSave(rowEntry, config);
-//
-//		}
-//	}
+						InvertedIndex index = new InvertedIndex();
+						index.setWord(word);
+						index.setPostings(postingsList);
+						index.setRangeKey(range);
+						range++;
+						rowEntry.add(index);
+						postingsList.clear();
+						totalLen = 0;
+
+					}
+					else
+					{
+						try
+						{
+							mapper.batchWrite(rowEntry, Collections.emptyList(),
+									config);
+							rowEntry.clear();
+							postingsList.clear();
+							totalLen = 0;
+						}
+						catch (ProvisionedThroughputExceededException e)
+						{
+							e.printStackTrace();
+						}
+					}
+
+				}
+
+			}
+
+			if (!rowEntry.isEmpty())
+				mapper.batchWrite(rowEntry, Collections.emptyList(), config);
+			// mapper.batchSave(rowEntry.toArray(new
+			// InvertedIndex[rowEntry.size()]), config);
+
+		}
+
+	}
 
 	private int getSize(String posting)
 	{

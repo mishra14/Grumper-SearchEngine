@@ -1,4 +1,5 @@
 package edu.upenn.cis455.project.indexer.trigram;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -6,6 +7,7 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import org.apache.hadoop.io.BytesWritable;
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -21,89 +23,90 @@ import edu.upenn.cis455.project.bean.DocumentRecord;
 //import edu.upenn.cis455.project.indexer.Stemmer;
 import edu.upenn.cis455.project.scoring.Stemmer;
 
-public class Map extends Mapper<NullWritable, BytesWritable, Text, Text> {
-    
+public class Map extends Mapper<LongWritable, Text, Text, Text>
+{
+
 	private final Text url = new Text();
-	private ArrayList<String>allWords = new ArrayList<String>();
+	private ArrayList<String> allWords = new ArrayList<String>();
 	private final String splitOn = " ,.?\"!-[({\r\t\"\'\\_";
 
 	@Override
-    public void map(NullWritable key, BytesWritable value, Context context) 
-    		throws IOException, InterruptedException {
-	    Text trigram = new Text();
-		List<DocumentRecord> docList = getDocument(value);
-		for (DocumentRecord doc : docList){
-			if (doc != null){
-				String line = doc.getDocumentString();
-			    url.set(doc.getDocumentId().trim());
-			    
-			    String rawContent = getHtmlText(line);
-			    getAllWords(rawContent);
-			    int numWords = allWords.size();
-			    
-			    for (int i = 0; i < numWords - 2; i++){
-			    	trigram.set(allWords.get(i) 
-			    			+ " " + allWords.get(i + 1)
-			    			+ " " + allWords.get(i + 2));
-			    	context.write( new Text(trigram), url);
-			    }  
+	public void map(LongWritable key, Text value, Context context)
+			throws IOException, InterruptedException
+	{
+		Text trigram = new Text();
+		DocumentRecord doc = getDocument(value);
+
+		if (doc != null)
+		{
+			String line = doc.getDocumentString();
+			url.set(doc.getDocumentId().trim());
+
+			String rawContent = getHtmlText(line);
+			getAllWords(rawContent);
+			int numWords = allWords.size();
+
+			for (int i = 0; i < numWords - 2; i++)
+			{
+				trigram.set(allWords.get(i) + " " + allWords.get(i + 1) + " "
+						+ allWords.get(i + 2));
+				context.write(new Text(trigram), url);
 			}
 		}
 
-	    
-	    
-    }
-	
+	}
+
 	public void setUrl(String content)
 	{
 		this.url.set(content.trim());
-		
+
 	}
-	
+
 	public void getAllWords(String content)
 	{
 		allWords.clear();
 		StringTokenizer tokenizer = new StringTokenizer(content, splitOn);
 		String word;
-		while (tokenizer.hasMoreTokens()) {
+		while (tokenizer.hasMoreTokens())
+		{
 			word = tokenizer.nextToken();
-	    	word = word.trim().toLowerCase().replaceAll("[^a-z]", "");
-	    	if (!stopwords.contains(word) && !word.isEmpty()){
-	    		allWords.add(stem(word));
-	    	}
-	    }
+			word = word.trim().toLowerCase().replaceAll("[^a-z0-9]", "");
+			if (!word.matches("[0-9]+") && !stopwords.contains(word)
+					&& !word.isEmpty())
+			{
+				allWords.add(stem(word));
+			}
+		}
 	}
-	
+
 	public String getHtmlText(String html)
 	{
-		Document doc = Jsoup.parse(html.replaceAll("(?i)<br[^>]*>", "<pre>\n</pre>"));
+		Document doc = Jsoup
+				.parse(html.replaceAll("(?i)<br[^>]*>", "<pre>\n</pre>"));
 		String textContent = doc.select("body").text();
 		return textContent;
 	}
-	
-	private List<DocumentRecord> getDocument(BytesWritable value)
+
+	private DocumentRecord getDocument(Text value)
 	{
 		ObjectMapper mapper = new ObjectMapper();
+		DocumentRecord doc = null;
 		mapper.setVisibility(PropertyAccessor.ALL, Visibility.NONE);
 		mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
-		List<DocumentRecord> docList = new ArrayList<DocumentRecord>();
 		try
 		{
-			docList = mapper.readValue(new String(value.getBytes()),
-					new TypeReference<List<DocumentRecord>>()
-					{
-					});
+			doc = mapper.readValue(value.toString(), DocumentRecord.class);
 		}
 		catch (IOException e)
 		{
 			e.printStackTrace();
 		}
-		return docList;
+
+		return doc;
 	}
-	
+
 	public String stem(String word)
 	{
-		System.out.println("received word: " + word);
 		Stemmer stemmer = new Stemmer();
 		char[] charArray = word.toCharArray();
 		stemmer.add(charArray, word.length());
@@ -111,9 +114,9 @@ public class Map extends Mapper<NullWritable, BytesWritable, Text, Text> {
 		String stemmedWord = stemmer.toString();
 		return stemmedWord;
 	}
-	
-	private static ArrayList<String> stopwords =
-			new ArrayList<String> (Arrays.asList(("a,about,above,"
+
+	private static ArrayList<String> stopwords = new ArrayList<String>(
+			Arrays.asList(("a,about,above,"
 					+ "after,again,against,all,am,an,and,any,are,"
 					+ "aren't,as,at,be,because,been,before,being,"
 					+ "below,between,both,but,by,could,"
