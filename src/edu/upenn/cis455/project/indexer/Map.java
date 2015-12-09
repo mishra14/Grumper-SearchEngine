@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.StringTokenizer;
 
 import org.apache.hadoop.io.BytesWritable;
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -17,14 +18,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.upenn.cis455.project.bean.DocumentRecord;
 import edu.upenn.cis455.project.scoring.Stemmer;
 
-public class Map extends Mapper<NullWritable, BytesWritable, Text, Text>
+public class Map extends Mapper<LongWritable, Text, Text, Text>
 {
 
 	private final Text url = new Text();
 	private final String splitOn = " ,.?\"!-[({\t\"\'\\_";
 
 	@Override
-	public void map(NullWritable key, BytesWritable value, Context context)
+	public void map(LongWritable key, Text value, Context context)
 			throws IOException, InterruptedException
 	{
 		Text word = new Text();
@@ -33,7 +34,7 @@ public class Map extends Mapper<NullWritable, BytesWritable, Text, Text>
 		{
 			String line = doc.getDocumentString();
 			String sanitizedUrl = doc.getDocumentId().trim();
-			
+
 			if (sanitizedUrl.contains(" "))
 			{
 				sanitizedUrl.replaceAll(" ", "%20");
@@ -48,9 +49,8 @@ public class Map extends Mapper<NullWritable, BytesWritable, Text, Text>
 				String currWord = tokenizer.nextToken();
 				currWord = currWord.toLowerCase().replaceAll("[^a-z0-9]", "")
 						.trim();
-				if (currWord.matches("[0-9]+"))
-					return;
-				if (!currWord.isEmpty() && !stopwords.contains(currWord))
+				if (!currWord.matches("[0-9]+") && !currWord.isEmpty()
+						&& !stopwords.contains(currWord))
 				{
 					word.set(stem(currWord));
 					context.write(word, url);
@@ -80,7 +80,7 @@ public class Map extends Mapper<NullWritable, BytesWritable, Text, Text>
 		return textContent;
 	}
 
-	private DocumentRecord getDocument(BytesWritable value)
+	private DocumentRecord getDocument(Text value)
 	{
 		ObjectMapper mapper = new ObjectMapper();
 		DocumentRecord doc = null;
@@ -88,8 +88,7 @@ public class Map extends Mapper<NullWritable, BytesWritable, Text, Text>
 		mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
 		try
 		{
-			doc = mapper.readValue(new String(value.getBytes()),
-					DocumentRecord.class);
+			doc = mapper.readValue(value.toString(), DocumentRecord.class);
 		}
 		catch (IOException e)
 		{

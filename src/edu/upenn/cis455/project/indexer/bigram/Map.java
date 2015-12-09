@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import org.apache.hadoop.io.BytesWritable;
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -22,7 +23,7 @@ import edu.upenn.cis455.project.bean.DocumentRecord;
 //import edu.upenn.cis455.project.indexer.Stemmer;
 import edu.upenn.cis455.project.scoring.Stemmer;
 
-public class Map extends Mapper<NullWritable, BytesWritable, Text, Text>
+public class Map extends Mapper<LongWritable, Text, Text, Text>
 {
 
 	private final Text url = new Text();
@@ -30,33 +31,30 @@ public class Map extends Mapper<NullWritable, BytesWritable, Text, Text>
 	private final String splitOn = " ,.?\"!-[({\r\t\"\'\\_";
 
 	@Override
-	public void map(NullWritable key, BytesWritable value, Context context)
+	public void map(LongWritable key, Text value, Context context)
 			throws IOException, InterruptedException
 	{
 		Text bigram = new Text();
-		List<DocumentRecord> docList = getDocument(value);
-		for (DocumentRecord doc : docList)
+		DocumentRecord doc = getDocument(value);
+		if (doc != null)
 		{
-			if (doc != null)
+			String line = doc.getDocumentString();
+			// sanitize the url
+			String sanitizedUrl = doc.getDocumentId().trim();
+			if (sanitizedUrl.contains(" "))
 			{
-				String line = doc.getDocumentString();
-				//sanitize the url
-				String sanitizedUrl = doc.getDocumentId().trim();
-				if (sanitizedUrl.contains(" "))
-				{
-					sanitizedUrl.replaceAll(" ", "%20");
-				}
-				url.set(sanitizedUrl);
+				sanitizedUrl.replaceAll(" ", "%20");
+			}
+			url.set(sanitizedUrl);
 
-				String rawContent = getHtmlText(line);
-				getAllWords(rawContent);
-				
-				int numWords = allWords.size();
-				for (int i = 0; i < numWords - 1; i++)
-				{
-					bigram.set(allWords.get(i) + " " + allWords.get(i + 1));
-					context.write(bigram, url);
-				}
+			String rawContent = getHtmlText(line);
+			getAllWords(rawContent);
+
+			int numWords = allWords.size();
+			for (int i = 0; i < numWords - 1; i++)
+			{
+				bigram.set(allWords.get(i) + " " + allWords.get(i + 1));
+				context.write(bigram, url);
 			}
 		}
 	}
@@ -86,24 +84,22 @@ public class Map extends Mapper<NullWritable, BytesWritable, Text, Text>
 		return textContent;
 	}
 
-	private List<DocumentRecord> getDocument(BytesWritable value)
+	private DocumentRecord getDocument(Text value)
 	{
 		ObjectMapper mapper = new ObjectMapper();
+		DocumentRecord doc = null;
 		mapper.setVisibility(PropertyAccessor.ALL, Visibility.NONE);
 		mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
-		List<DocumentRecord> docList = new ArrayList<DocumentRecord>();
 		try
 		{
-			docList = mapper.readValue(new String(value.getBytes()),
-					new TypeReference<List<DocumentRecord>>()
-					{
-					});
+			doc = mapper.readValue(value.toString(), DocumentRecord.class);
 		}
 		catch (IOException e)
 		{
 			e.printStackTrace();
 		}
-		return docList;
+
+		return doc;
 	}
 
 	public String stem(String word)

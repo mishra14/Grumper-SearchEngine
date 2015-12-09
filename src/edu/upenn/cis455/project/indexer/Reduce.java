@@ -17,7 +17,7 @@ public class Reduce extends Reducer<Text, Text, Text, Text>
 {
 	private Log log = LogFactory.getLog(Reduce.class);
 	private static HashMap<String, Integer> tf = null;
-	private final static int bucketSize = 109834;
+	private final static int bucketSize = 119866;
 	private final static int MAX_LIST = 2000;
 	private int df;
 	//private static final String tablename = "UnigramIndex";

@@ -1,4 +1,4 @@
-package edu.upenn.cis455.project.indexer;
+package edu.upenn.cis455.project.indexer.bigram;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
