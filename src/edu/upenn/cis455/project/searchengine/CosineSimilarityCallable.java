@@ -1,7 +1,6 @@
 package edu.upenn.cis455.project.searchengine;
 
 import java.util.*;
-import java.util.Map.*;
 import java.util.concurrent.*;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedQueryList;
@@ -30,7 +29,6 @@ public class CosineSimilarityCallable implements Callable<HashMap<String, Float>
 	{
 		System.out.println("in cosine sim callable");
 		ArrayList<Postings> postings;
-		ArrayList<String> ngrams;
 		cosineSimilarity = new HashMap<String, Float>();
 		seenUrlsDenominator = new HashMap<String, Float>();
 		
