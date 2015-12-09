@@ -25,8 +25,6 @@ import edu.upenn.cis455.project.crawler.Hash;
 
 public class DocumentMergerThread extends Thread
 {
-
-	private static final int DOCUMENTS_TO_MERGE = 150;
 	private static final long MAX_DOCUMENT_SIZE = 60000000;
 	private int id;
 	private String projectDocumentBucket;
@@ -154,8 +152,9 @@ public class DocumentMergerThread extends Thread
 			jsonBuilder.append("\n");
 		}
 		String json = jsonBuilder.toString();
+		jsonBuilder.setLength(0);
 		//String json = ow.writeValueAsString(mergedDocuments);
-		System.out.println("json size - " + json.length());
+		//System.out.println("json size - " + json.length());
 		String s3Key = Hash.hashKey(json);
 		ByteArrayInputStream inputStream = new ByteArrayInputStream(
 				json.getBytes());
