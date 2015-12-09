@@ -31,7 +31,7 @@ public class ToolMapReduce extends Configured implements Tool {
  
         // Setup MapReduce job
         // Do not specify the number of Reducer
-        job.setMapperClass(Map.class);
+        job.setMapperClass(Map_old.class);
         job.setReducerClass(Reduce.class);
  
         // Specify key / value

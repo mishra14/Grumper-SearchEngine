@@ -11,18 +11,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
-
-import edu.upenn.cis455.project.dynamoDA.DynamoIndexerDA;
-import edu.upenn.cis455.project.scoring.URLTFIDF;
 import edu.upenn.cis455.project.storage.Postings;
 
 public class Reduce extends Reducer<Text, Text, Text, Text>
 {
 	private Log log = LogFactory.getLog(Reduce.class);
 	private static HashMap<String, Integer> tf = null;
-	private final static int bucketSize = 14987;
+	private final static int bucketSize = 109834;
+	private final static int MAX_LIST = 2000;
 	private int df;
-	private static final String tablename = "UnigramIndex";
+	//private static final String tablename = "UnigramIndex";
 	
 	@Override
 	protected void reduce(Text key, Iterable<Text> values, Context context) 
@@ -30,13 +28,13 @@ public class Reduce extends Reducer<Text, Text, Text, Text>
 		//setFieldsFromKey(key);
 		df = computeDF(values);
 		
-		//String postingsList = createPostingsList();  
-		//context.write(key, new Text(postingsList));
+		String postingsList = createPostingsList();  
+		context.write(key, new Text(postingsList));
 		
-		ArrayList<Postings> postingsList = createPostings();
-		DynamoIndexerDA dynamo = new DynamoIndexerDA(tablename);
+//		ArrayList<Postings> postingsList = createPostings();
+//		DynamoIndexerDA dynamo = new DynamoIndexerDA(tablename);
 		//dynamo.saveIndexWithBackOff	(key.toString(), postingsList, context);
-		dynamo.saveMultipleIndex(key.toString(), postingsList, context);
+//		dynamo.saveMultipleIndex(key.toString(), postingsList, context);
     }
 	
 	private int computeDF( Iterable<Text> docIDs){
@@ -62,24 +60,11 @@ public class Reduce extends Reducer<Text, Text, Text, Text>
 		  return docIDset.size();
 	  }
 	  
-	  private ArrayList<Postings> createPostings(){
-		 
-		  ArrayList<Postings> postingsList = new ArrayList<Postings>();
-		  for(String docID: tf.keySet()){
-			  float idf = (float) Math.log(14987/df);// replace later with bucketsize
-			  float tfidf = tf.get(docID) * idf ;
-			  Postings newPostings = new Postings(docID, tfidf, idf);
-			  postingsList.add(newPostings);
-		  }
-		  Collections.sort(postingsList);
-		  return postingsList; 
-	  }
-	  
-//	  private ArrayList<Postings> sortPostings(){
-//			 
+//	  private ArrayList<Postings> createPostings(){
+//		 
 //		  ArrayList<Postings> postingsList = new ArrayList<Postings>();
 //		  for(String docID: tf.keySet()){
-//			  float idf = (float) Math.log(bucketSize /df);// replace later with bucketsize
+//			  float idf = (float) Math.log(14987/df);// replace later with bucketsize
 //			  float tfidf = tf.get(docID) * idf ;
 //			  Postings newPostings = new Postings(docID, tfidf, idf);
 //			  postingsList.add(newPostings);
@@ -87,23 +72,37 @@ public class Reduce extends Reducer<Text, Text, Text, Text>
 //		  Collections.sort(postingsList);
 //		  return postingsList; 
 //	  }
-//	  private String createPostingsList(){
-//		  StringBuilder postings = new StringBuilder();
-//		  ArrayList<Postings> postingsList = sortPostings();
-//		  int size = postingsList.size() - 1;
-//		  int i = 0;
-//		  for(Postings posting : postingsList){
-//			  if (i < size )
-//				  postings.append(posting.getPosting()+ " " +
-//					  posting.getIdf()+ " "+ posting.getIdf() +"\t");
-//			  else 
-//				  postings.append(posting.getPosting()+ " " +
-//						  posting.getIdf()+ " "+ posting.getIdf());
-//			  i++;
-//		  }
-//		  return postings.toString();
-//	  }
-//	  
+	  
+	  private ArrayList<Postings> sortPostings(){
+			 
+		  ArrayList<Postings> postingsList = new ArrayList<Postings>();
+		  for(String docID: tf.keySet()){
+			  float idf = (float) Math.log(bucketSize /df);// replace later with bucketsize
+			  float tfidf = tf.get(docID) * idf ;
+			  Postings newPostings = new Postings(docID, tfidf, idf);
+			  postingsList.add(newPostings);
+		  }
+		  Collections.sort(postingsList);
+		  return postingsList; 
+	  }
+	  private String createPostingsList(){
+		  StringBuilder postings = new StringBuilder();
+		  ArrayList<Postings> postingsList = sortPostings();
+		  int size = postingsList.size() - 1;
+		  int i = 0;
+		  for(Postings posting : postingsList){
+			  if (i < size )
+				  postings.append(posting.getPosting()+ " " +
+					  posting.getIdf()+ " "+ posting.getIdf() +"\t");
+			  else 
+				  postings.append(posting.getPosting()+ " " +
+						  posting.getIdf()+ " "+ posting.getIdf());
+			  i++;
+			  if ( i > MAX_LIST)
+				  break;
+		  }
+		  return postings.toString();
+	  }
 	  
 	 
 }

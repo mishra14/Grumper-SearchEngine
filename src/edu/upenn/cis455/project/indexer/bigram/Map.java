@@ -1,4 +1,5 @@
 package edu.upenn.cis455.project.indexer.bigram;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,55 +22,70 @@ import edu.upenn.cis455.project.bean.DocumentRecord;
 //import edu.upenn.cis455.project.indexer.Stemmer;
 import edu.upenn.cis455.project.scoring.Stemmer;
 
-public class Map extends Mapper<NullWritable, BytesWritable, Text, Text> {
-    
+public class Map extends Mapper<NullWritable, BytesWritable, Text, Text>
+{
+
 	private final Text url = new Text();
-	private ArrayList<String>allWords = new ArrayList<String>();
+	private ArrayList<String> allWords = new ArrayList<String>();
 	private final String splitOn = " ,.?\"!-[({\r\t\"\'\\_";
 
 	@Override
-    public void map(NullWritable key, BytesWritable value, Context context) 
-    		throws IOException, InterruptedException {
+	public void map(NullWritable key, BytesWritable value, Context context)
+			throws IOException, InterruptedException
+	{
 		Text bigram = new Text();
 		List<DocumentRecord> docList = getDocument(value);
-		for (DocumentRecord doc : docList){
-			if (doc != null){
-				 String line = doc.getDocumentString();
-				    url.set(doc.getDocumentId().trim());
-				    
-				    String rawContent = getHtmlText(line);
-				    getAllWords(rawContent);
-				    int numWords = allWords.size();
-				    
-				    for (int i = 0; i < numWords - 1; i++){
-				    	bigram.set(allWords.get(i) + " " + allWords.get(i + 1));
-				    	context.write(bigram , url);
-				    }  
+		for (DocumentRecord doc : docList)
+		{
+			if (doc != null)
+			{
+				String line = doc.getDocumentString();
+				//sanitize the url
+				String sanitizedUrl = doc.getDocumentId().trim();
+				if (sanitizedUrl.contains(" "))
+				{
+					sanitizedUrl.replaceAll(" ", "%20");
+				}
+				url.set(sanitizedUrl);
+
+				String rawContent = getHtmlText(line);
+				getAllWords(rawContent);
+				
+				int numWords = allWords.size();
+				for (int i = 0; i < numWords - 1; i++)
+				{
+					bigram.set(allWords.get(i) + " " + allWords.get(i + 1));
+					context.write(bigram, url);
+				}
 			}
 		}
-    }
-	
+	}
+
 	public void getAllWords(String content)
 	{
 		allWords.clear();
 		StringTokenizer tokenizer = new StringTokenizer(content, splitOn);
 		String word;
-		while (tokenizer.hasMoreTokens()) {
+		while (tokenizer.hasMoreTokens())
+		{
 			word = tokenizer.nextToken();
-	    	word = word.trim().toLowerCase().replaceAll("[^a-z]", "");
-	    	if (!stopwords.contains(word) && !word.isEmpty()){
-	    		allWords.add(stem(word));
-	    	}
-	    }
+			word = word.trim().toLowerCase().replaceAll("[^a-z0-9]", "");
+			if (!word.matches("[0-9]+") && !stopwords.contains(word)
+					&& !word.isEmpty())
+			{
+				allWords.add(stem(word));
+			}
+		}
 	}
-	
+
 	public String getHtmlText(String html)
 	{
-		Document doc = Jsoup.parse(html.replaceAll("(?i)<br[^>]*>", "<pre>\n</pre>"));
+		Document doc = Jsoup
+				.parse(html.replaceAll("(?i)<br[^>]*>", "<pre>\n</pre>"));
 		String textContent = doc.select("body").text();
 		return textContent;
 	}
-	
+
 	private List<DocumentRecord> getDocument(BytesWritable value)
 	{
 		ObjectMapper mapper = new ObjectMapper();
@@ -89,6 +105,7 @@ public class Map extends Mapper<NullWritable, BytesWritable, Text, Text> {
 		}
 		return docList;
 	}
+
 	public String stem(String word)
 	{
 		Stemmer stemmer = new Stemmer();
@@ -98,9 +115,9 @@ public class Map extends Mapper<NullWritable, BytesWritable, Text, Text> {
 		String stemmedWord = stemmer.toString();
 		return stemmedWord;
 	}
-	
-	private static ArrayList<String> stopwords =
-			new ArrayList<String> (Arrays.asList(("a,about,above,"
+
+	private static ArrayList<String> stopwords = new ArrayList<String>(
+			Arrays.asList(("a,about,above,"
 					+ "after,again,against,all,am,an,and,any,are,"
 					+ "aren't,as,at,be,because,been,before,being,"
 					+ "below,between,both,but,by,could,"

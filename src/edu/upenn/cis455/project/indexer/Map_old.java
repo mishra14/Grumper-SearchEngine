@@ -1,4 +1,4 @@
-package edu.upenn.cis455.project.indexer.trigram;
+package edu.upenn.cis455.project.indexer;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -13,74 +13,70 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
-import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.upenn.cis455.project.bean.DocumentRecord;
-//import edu.upenn.cis455.project.indexer.Stemmer;
 import edu.upenn.cis455.project.scoring.Stemmer;
 
-public class Map extends Mapper<NullWritable, BytesWritable, Text, Text>
+public class Map_old extends Mapper<NullWritable, BytesWritable, Text, Text>
 {
 
 	private final Text url = new Text();
-	private ArrayList<String> allWords = new ArrayList<String>();
-	private final String splitOn = " ,.?\"!-[({\r\t\"\'\\_";
+	private final String splitOn = " ,.?\"!-[({\t\"\'\\_";
 
 	@Override
 	public void map(NullWritable key, BytesWritable value, Context context)
 			throws IOException, InterruptedException
 	{
-		Text trigram = new Text();
-		List<DocumentRecord> docList = getDocument(value);
-		for (DocumentRecord doc : docList)
-		{
-			if (doc != null)
-			{
-				String line = doc.getDocumentString();
-				url.set(doc.getDocumentId().trim());
-
-				String rawContent = getHtmlText(line);
-				getAllWords(rawContent);
-				int numWords = allWords.size();
-
-				for (int i = 0; i < numWords - 2; i++)
-				{
-					trigram.set(allWords.get(i) + " " + allWords.get(i + 1)
-							+ " " + allWords.get(i + 2));
-					context.write(new Text(trigram), url);
-				}
-			}
-		}
-
+		Text word = new Text();
+		//List<DocumentRecord> docList = getDocument(value);
+//		for (DocumentRecord doc : docList)
+//		{
+//			if (doc != null)
+//			{
+//				String line = doc.getDocumentString();
+//				String sanitizedUrl = doc.getDocumentId().trim();
+//				if (sanitizedUrl.contains(" ")){
+//					sanitizedUrl.replaceAll(" ", "%20");
+//				}
+//				url.set(sanitizedUrl);
+//
+//				String rawContent = getHtmlText(line);
+//				StringTokenizer tokenizer = new StringTokenizer(rawContent, splitOn);
+//				while (tokenizer.hasMoreTokens())
+//				{
+//					String currWord = tokenizer.nextToken();
+//					currWord = currWord.toLowerCase()
+//							.replaceAll("[^a-z0-9]", "").trim();
+//					if (currWord.matches("[0-9]+"))
+//						return;
+//					// String stemmedWord = stem(currWord);
+//					if (!currWord.isEmpty() && !stopwords.contains(currWord))
+//					{
+//						
+//						word.set(stem(currWord));
+//						context.write(word, url);
+//						
+//					}
+//
+//				}
+//			}
+//		}
 	}
 
-	public void setUrl(String content)
+	public String stem(String word)
 	{
-		this.url.set(content.trim());
-
+		Stemmer stemmer = new Stemmer();
+		char[] charArray = word.toCharArray();
+		stemmer.add(charArray, word.length());
+		stemmer.stem();
+		String stemmedWord = stemmer.toString();
+		return stemmedWord;
 	}
-
-	public void getAllWords(String content)
-	{
-		allWords.clear();
-		StringTokenizer tokenizer = new StringTokenizer(content, splitOn);
-		String word;
-		while (tokenizer.hasMoreTokens())
-		{
-			word = tokenizer.nextToken();
-			word = word.trim().toLowerCase().replaceAll("[^a-z0-9]", "");
-			if (!word.matches("[0-9]+") && !stopwords.contains(word)
-					&& !word.isEmpty())
-			{
-				allWords.add(stem(word));
-			}
-		}
-	}
-
-	public String getHtmlText(String html)
+	private String getHtmlText(String html)
 	{
 		Document doc = Jsoup
 				.parse(html.replaceAll("(?i)<br[^>]*>", "<pre>\n</pre>"));
@@ -88,7 +84,24 @@ public class Map extends Mapper<NullWritable, BytesWritable, Text, Text>
 		return textContent;
 	}
 
-	private List<DocumentRecord> getDocument(BytesWritable value)
+	private DocumentRecord getDocument(BytesWritable value){
+		ObjectMapper mapper = new ObjectMapper();
+		DocumentRecord doc = null;
+		mapper.setVisibility(PropertyAccessor.ALL, Visibility.NONE);
+		mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
+		try
+		{
+			doc =  mapper.readValue(new String(value.getBytes()),
+					DocumentRecord.class);
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+		
+		return doc;
+	}
+	private List<DocumentRecord> getDocuments(BytesWritable value)
 	{
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.setVisibility(PropertyAccessor.ALL, Visibility.NONE);
@@ -107,19 +120,9 @@ public class Map extends Mapper<NullWritable, BytesWritable, Text, Text>
 		}
 		return docList;
 	}
-
-	public String stem(String word)
-	{
-		Stemmer stemmer = new Stemmer();
-		char[] charArray = word.toCharArray();
-		stemmer.add(charArray, word.length());
-		stemmer.stem();
-		String stemmedWord = stemmer.toString();
-		return stemmedWord;
-	}
-
-	private static ArrayList<String> stopwords = new ArrayList<String>(
-			Arrays.asList(("a,about,above,"
+	
+	private static ArrayList<String> stopwords =
+			new ArrayList<String> (Arrays.asList(("a,about,above,"
 					+ "after,again,against,all,am,an,and,any,are,"
 					+ "aren't,as,at,be,because,been,before,being,"
 					+ "below,between,both,but,by,could,"
@@ -139,4 +142,6 @@ public class Map extends Mapper<NullWritable, BytesWritable, Text, Text>
 					+ "where's,while,who's,why's,with,"
 					+ "won't,would,wouldn't,you,you'd,you'll,you're,you've,your,"
 					+ "yours,yourself,yourselves,").split(",")));
+	
+
 }
