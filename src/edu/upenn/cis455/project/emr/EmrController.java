@@ -70,32 +70,93 @@ import edu.upenn.cis455.project.bean.EmrResult;
 import edu.upenn.cis455.project.crawler.Hash;
 import edu.upenn.cis455.project.storage.S3EmrDA;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class EmrController.
+ */
 public class EmrController
 {
+	
+	/** The Constant MAX_LIST_SIZE. */
 	private static final int MAX_LIST_SIZE = 25;
+	
+	/** The Constant DELTA. */
 	private static final Double DELTA = 0.00001;
+	
+	/** The Constant DOCUMENTS_TO_MERGE. */
 	private static final int DOCUMENTS_TO_MERGE = 50;
+	
+	/** The Constant MAX_POSTINGS_SIZE. */
 	private static final int MAX_POSTINGS_SIZE = 80;
+	
+	/** The emr input path. */
 	private String emrInputPath;
+	
+	/** The emr output bucket name. */
 	private String emrOutputBucketName;
+	
+	/** The emr output prefix. */
 	private String emrOutputPrefix;
+	
+	/** The cluster log path. */
 	private String clusterLogPath;
+	
+	/** The emr jar path. */
 	private String emrJarPath;
+	
+	/** The emr step name. */
 	private String emrStepName;
+	
+	/** The cluster id. */
 	private String clusterId;
+	
+	/** The cluster name. */
 	private String clusterName;
+	
+	/** The ec2 access key name. */
 	private String ec2AccessKeyName;
+	
+	/** The s3 client. */
 	private AmazonS3Client s3Client;
+	
+	/** The table name. */
 	private String tableName;
+	
+	/** The primary key name. */
 	private String primaryKeyName;
+	
+	/** The value key name. */
 	private String valueKeyName;
+	
+	/** The range key name. */
 	private String rangeKeyName;
+	
+	/** The dynamo. */
 	private DynamoDB dynamo;
+	
+	/** The iterative. */
 	private boolean iterative;
+	
+	/** The done. */
 	private boolean done;
 
 	// this.dynamo = new DynamoDA<>(tableName, dynamoReturnClass);
 
+	/**
+	 * Instantiates a new emr controller.
+	 *
+	 * @param emrInputPath the emr input path
+	 * @param emrOutputBucketName the emr output bucket name
+	 * @param emrOutputPrefix the emr output prefix
+	 * @param clusterLogPath the cluster log path
+	 * @param emrJarPath the emr jar path
+	 * @param emrStepName the emr step name
+	 * @param clusterName the cluster name
+	 * @param ec2AccessKeyName the ec2 access key name
+	 * @param tableName the table name
+	 * @param primaryKeyName the primary key name
+	 * @param valueKeyName the value key name
+	 */
 	public EmrController(String emrInputPath, String emrOutputBucketName,
 			String emrOutputPrefix, String clusterLogPath, String emrJarPath,
 			String emrStepName, String clusterName, String ec2AccessKeyName,
@@ -119,6 +180,19 @@ public class EmrController
 		this.done = true;
 	}
 
+	/**
+	 * Instantiates a new emr controller.
+	 *
+	 * @param emrInputPath the emr input path
+	 * @param emrOutputBucketName the emr output bucket name
+	 * @param emrOutputPrefix the emr output prefix
+	 * @param emrJarPath the emr jar path
+	 * @param emrStepName the emr step name
+	 * @param clusterId the cluster id
+	 * @param tableName the table name
+	 * @param primaryKeyName the primary key name
+	 * @param valueKeyName the value key name
+	 */
 	public EmrController(String emrInputPath, String emrOutputBucketName,
 			String emrOutputPrefix, String emrJarPath, String emrStepName,
 			String clusterId, String tableName, String primaryKeyName,
@@ -140,6 +214,22 @@ public class EmrController
 		this.done = true;
 	}
 
+	/**
+	 * Instantiates a new emr controller.
+	 *
+	 * @param emrInputPath the emr input path
+	 * @param emrOutputBucketName the emr output bucket name
+	 * @param emrOutputPrefix the emr output prefix
+	 * @param clusterLogPath the cluster log path
+	 * @param emrJarPath the emr jar path
+	 * @param emrStepName the emr step name
+	 * @param clusterName the cluster name
+	 * @param ec2AccessKeyName the ec2 access key name
+	 * @param tableName the table name
+	 * @param primaryKeyName the primary key name
+	 * @param valueKeyName the value key name
+	 * @param rangeKeyName the range key name
+	 */
 	public EmrController(String emrInputPath, String emrOutputBucketName,
 			String emrOutputPrefix, String clusterLogPath, String emrJarPath,
 			String emrStepName, String clusterName, String ec2AccessKeyName,
@@ -165,6 +255,20 @@ public class EmrController
 		this.rangeKeyName = rangeKeyName;
 	}
 
+	/**
+	 * Instantiates a new emr controller.
+	 *
+	 * @param emrInputPath the emr input path
+	 * @param emrOutputBucketName the emr output bucket name
+	 * @param emrOutputPrefix the emr output prefix
+	 * @param emrJarPath the emr jar path
+	 * @param emrStepName the emr step name
+	 * @param clusterId the cluster id
+	 * @param tableName the table name
+	 * @param primaryKeyName the primary key name
+	 * @param valueKeyName the value key name
+	 * @param rangeKeyName the range key name
+	 */
 	public EmrController(String emrInputPath, String emrOutputBucketName,
 			String emrOutputPrefix, String emrJarPath, String emrStepName,
 			String clusterId, String tableName, String primaryKeyName,
@@ -187,6 +291,12 @@ public class EmrController
 		this.rangeKeyName = rangeKeyName;
 	}
 
+	/**
+	 * Run job.
+	 *
+	 * @return true, if successful
+	 * @throws InterruptedException the interrupted exception
+	 */
 	public boolean runJob() throws InterruptedException
 	{
 
@@ -236,6 +346,11 @@ public class EmrController
 		return success;
 	}
 
+	/**
+	 * Gets the credentials.
+	 *
+	 * @return the credentials
+	 */
 	private AWSCredentials getCredentials()
 	{
 		File file = new File("/usr/share/jetty/webapps/credentials");
@@ -277,6 +392,11 @@ public class EmrController
 		return awsCredentials;
 	}
 
+	/**
+	 * Gets the object names for bucket.
+	 *
+	 * @return the object names for bucket
+	 */
 	public List<String> getObjectNamesForBucket()
 	{
 		ListObjectsRequest listObjectsRequest = new ListObjectsRequest()
@@ -304,6 +424,12 @@ public class EmrController
 		return objectNames;
 	}
 
+	/**
+	 * Gets the object names for bucket.
+	 *
+	 * @param bucketName the bucket name
+	 * @return the object names for bucket
+	 */
 	public List<String> getObjectNamesForBucket(String bucketName)
 	{
 		ListObjectsRequest listObjectsRequest = new ListObjectsRequest()
@@ -329,6 +455,12 @@ public class EmrController
 		return objectNames;
 	}
 
+	/**
+	 * S3 to dynamo.
+	 *
+	 * @param objectNames the object names
+	 * @return the list
+	 */
 	public List<EmrResult> s3ToDynamo(List<String> objectNames)
 	{
 		List<EmrResult> results = new ArrayList<EmrResult>();
@@ -357,6 +489,12 @@ public class EmrController
 		return results;
 	}
 
+	/**
+	 * S3 to dynamo postings.
+	 *
+	 * @param objectNames the object names
+	 * @return the list
+	 */
 	public List<EmrResult> s3ToDynamoPostings(List<String> objectNames)
 	{
 		List<EmrResult> results = new ArrayList<EmrResult>();
@@ -368,27 +506,28 @@ public class EmrController
 			List<EmrResult> newResults = new ArrayList<EmrResult>();
 			for (EmrResult result : resultSet)
 			{
-				if(result.getKey().equals("category"))
+				if (result.getKey().equals("category"))
 				{
-					System.out.println("result - "+result);
-					
+					System.out.println("result - " + result);
+
 				}
 				String[] postings = result.getValue().split("\t");
 				int size = postings.length;
 				StringBuilder newValue = new StringBuilder();
-				int count=0;
-				for(int i=0;i<size;i++)
+				int count = 0;
+				for (int i = 0; i < size; i++)
 				{
 					newValue.append(postings[i]);
 					count++;
-					if(count >=MAX_POSTINGS_SIZE || i == size-1)
+					if (count >= MAX_POSTINGS_SIZE || i == size - 1)
 					{
-						count=0;
-						EmrResult newResult = new EmrResult(result.getKey(), newValue.toString()); 
-						if(result.getKey().equals("category"))
+						count = 0;
+						EmrResult newResult = new EmrResult(result.getKey(),
+								newValue.toString());
+						if (result.getKey().equals("category"))
 						{
-							System.out.println("new result - "+newResult);
-							
+							System.out.println("new result - " + newResult);
+
 						}
 						newResults.add(newResult);
 					}
@@ -398,7 +537,7 @@ public class EmrController
 					}
 				}
 			}
-			
+
 			/*for (EmrResult result : resultsInDocument)
 			{
 				int count = 0;
@@ -427,7 +566,7 @@ public class EmrController
 
 			}*/
 			results.addAll(newResults);
-			while(results.size() > MAX_LIST_SIZE)
+			while (results.size() > MAX_LIST_SIZE)
 			{
 				// System.out.println(results);
 				List<EmrResult> resultsToBeWritten = results.subList(0, 24);
@@ -447,6 +586,14 @@ public class EmrController
 		return results;
 	}
 
+	/**
+	 * Merge crawled documents.
+	 *
+	 * @param objectNames the object names
+	 * @param outputBucketName the output bucket name
+	 * @throws NoSuchAlgorithmException the no such algorithm exception
+	 * @throws JsonProcessingException the json processing exception
+	 */
 	public void mergeCrawledDocuments(List<String> objectNames,
 			String outputBucketName) throws NoSuchAlgorithmException,
 			JsonProcessingException
@@ -474,6 +621,15 @@ public class EmrController
 		}
 	}
 
+	/**
+	 * Write documents.
+	 *
+	 * @param mergedDocuments the merged documents
+	 * @param bucketName the bucket name
+	 * @return the string
+	 * @throws NoSuchAlgorithmException the no such algorithm exception
+	 * @throws JsonProcessingException the json processing exception
+	 */
 	public String writeDocuments(List<DocumentRecord> mergedDocuments,
 			String bucketName) throws NoSuchAlgorithmException,
 			JsonProcessingException
@@ -495,6 +651,12 @@ public class EmrController
 		return s3Key;
 	}
 
+	/**
+	 * Creates the cluster.
+	 *
+	 * @return the string
+	 * @throws InterruptedException the interrupted exception
+	 */
 	public String createCluster() throws InterruptedException
 	{
 		AWSCredentials awsCredentais = getCredentials();
@@ -554,6 +716,11 @@ public class EmrController
 		return flowResult.getJobFlowId();
 	}
 
+	/**
+	 * Terminate cluster.
+	 *
+	 * @throws InterruptedException the interrupted exception
+	 */
 	public void terminateCluster() throws InterruptedException
 	{
 		TerminateJobFlowsRequest terminateRequest = new TerminateJobFlowsRequest()
@@ -581,6 +748,11 @@ public class EmrController
 
 	}
 
+	/**
+	 * Batch write emr results.
+	 *
+	 * @param results the results
+	 */
 	public void batchWriteEmrResults(List<EmrResult> results)
 	{
 		try
@@ -607,11 +779,13 @@ public class EmrController
 				}
 				Item item = new Item().withPrimaryKey(primaryKey).with(
 						valueKeyName, result.getValue());
-				//System.out.println(item);
+				// System.out.println(item);
 				writeItems.addItemToPut(item);
 			}
-			try{
-				BatchWriteItemOutcome outcome = dynamo.batchWriteItem(writeItems);
+			try
+			{
+				BatchWriteItemOutcome outcome = dynamo
+						.batchWriteItem(writeItems);
 				do
 				{
 
@@ -628,12 +802,11 @@ public class EmrController
 				}
 				while (outcome.getUnprocessedItems().size() > 0);
 			}
-			catch(Exception e)
+			catch (Exception e)
 			{
 				System.out.println(writeItems.getItemsToPut());
 				e.printStackTrace();
 			}
-			
 
 		}
 		catch (Exception e)
@@ -644,6 +817,11 @@ public class EmrController
 		}
 	}
 
+	/**
+	 * Batch getand validate.
+	 *
+	 * @param results the results
+	 */
 	public void batchGetandValidate(List<EmrResult> results)
 	{
 		try
@@ -724,6 +902,11 @@ public class EmrController
 		}
 	}
 
+	/**
+	 * Batch delete emr results.
+	 *
+	 * @param results the results
+	 */
 	public void batchDeleteEmrResults(List<EmrResult> results)
 	{
 		// Multi-object delete by specifying only keys (no version ID).
@@ -765,6 +948,13 @@ public class EmrController
 		}
 	}
 
+	/**
+	 * Gets the document.
+	 *
+	 * @param bucketName the bucket name
+	 * @param prefix the prefix
+	 * @return the document
+	 */
 	public DocumentRecord getDocument(String bucketName, String prefix)
 	{
 		DocumentRecord doc = null;
@@ -802,6 +992,13 @@ public class EmrController
 		return doc;
 	}
 
+	/**
+	 * Gets the documents.
+	 *
+	 * @param bucketName the bucket name
+	 * @param prefix the prefix
+	 * @return the documents
+	 */
 	public List<DocumentRecord> getDocuments(String bucketName, String prefix)
 	{
 		List<DocumentRecord> documentList = new ArrayList<DocumentRecord>();
@@ -842,21 +1039,41 @@ public class EmrController
 		return documentList;
 	}
 
+	/**
+	 * Checks if is iterative.
+	 *
+	 * @return true, if is iterative
+	 */
 	public boolean isIterative()
 	{
 		return iterative;
 	}
 
+	/**
+	 * Sets the iterative.
+	 *
+	 * @param iterative the new iterative
+	 */
 	public void setIterative(boolean iterative)
 	{
 		this.iterative = iterative;
 	}
 
+	/**
+	 * Checks if is done.
+	 *
+	 * @return true, if is done
+	 */
 	public boolean isDone()
 	{
 		return done;
 	}
 
+	/**
+	 * Sets the done.
+	 *
+	 * @param done the new done
+	 */
 	public void setDone(boolean done)
 	{
 		this.done = done;

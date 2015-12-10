@@ -19,13 +19,30 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class DynamoDA.
+ *
+ * @param <T> the generic type
+ */
 public class DynamoDA<T>
 {
 
+	/** The dynamo db. */
 	private DynamoDB dynamoDB;
+	
+	/** The table. */
 	private Table table;
+	
+	/** The type parameter class. */
 	private final Class<T> typeParameterClass;
 
+	/**
+	 * Instantiates a new dynamo da.
+	 *
+	 * @param tableName the table name
+	 * @param typeParameterClass the type parameter class
+	 */
 	public DynamoDA(String tableName, Class<T> typeParameterClass)
 	{
 		File file = new File("/usr/share/jetty/webapps/credentials");
@@ -52,12 +69,14 @@ public class DynamoDA<T>
 		}
 		catch (FileNotFoundException e)
 		{
-			System.out.println("DynamoDA : reading from local credential file failed");
+			System.out
+					.println("DynamoDA : reading from local credential file failed");
 			e.printStackTrace();
 		}
 		catch (IOException e)
 		{
-			System.out.println("DynamoDA : reading from local credential file failed");
+			System.out
+					.println("DynamoDA : reading from local credential file failed");
 			e.printStackTrace();
 		}
 		BasicAWSCredentials awsCreds = new BasicAWSCredentials(accessKey,
@@ -67,6 +86,13 @@ public class DynamoDA<T>
 		this.typeParameterClass = typeParameterClass;
 	}
 
+	/**
+	 * Gets the item.
+	 *
+	 * @param primaryKey the primary key
+	 * @param primaryKeyValue the primary key value
+	 * @return the item
+	 */
 	public Item getItem(String primaryKey, String primaryKeyValue)
 	{
 		Item item = null;
@@ -83,6 +109,14 @@ public class DynamoDA<T>
 		return item;
 	}
 
+	/**
+	 * Gets the value.
+	 *
+	 * @param primaryKey the primary key
+	 * @param primaryKeyValue the primary key value
+	 * @param key the key
+	 * @return the value
+	 */
 	public T getValue(String primaryKey, String primaryKeyValue, String key)
 	{
 		Item item = getItem(primaryKey, primaryKeyValue);
@@ -107,6 +141,13 @@ public class DynamoDA<T>
 		return result;
 	}
 
+	/**
+	 * Put item.
+	 *
+	 * @param primaryKey the primary key
+	 * @param primaryKeyValue the primary key value
+	 * @param otherPairs the other pairs
+	 */
 	public void putItem(String primaryKey, String primaryKeyValue,
 			Map<String, T> otherPairs)
 	{
@@ -132,6 +173,14 @@ public class DynamoDA<T>
 
 	}
 
+	/**
+	 * Put item.
+	 *
+	 * @param primaryKey the primary key
+	 * @param primaryKeyValue the primary key value
+	 * @param key the key
+	 * @param value the value
+	 */
 	public void putItem(String primaryKey, String primaryKeyValue, String key,
 			T value)
 	{
@@ -155,6 +204,12 @@ public class DynamoDA<T>
 
 	}
 
+	/**
+	 * Delete item.
+	 *
+	 * @param primaryKey the primary key
+	 * @param primaryKeyValue the primary key value
+	 */
 	public void deleteItem(String primaryKey, String primaryKeyValue)
 	{
 		try

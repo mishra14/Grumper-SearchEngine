@@ -13,12 +13,29 @@ import com.amazonaws.services.dynamodbv2.model.KeyType;
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class PageRankDynamoThread.
+ */
 public class PageRankDynamoThread extends Thread
 {
+	
+	/** The table name. */
 	private String tableName;
+	
+	/** The read capacity. */
 	private long readCapacity;
+	
+	/** The write capacity. */
 	private long writeCapacity;
 
+	/**
+	 * Instantiates a new page rank dynamo thread.
+	 *
+	 * @param tableName the table name
+	 * @param readCapacity the read capacity
+	 * @param initialWriteCapacity the initial write capacity
+	 */
 	public PageRankDynamoThread(String tableName, long readCapacity,
 			long initialWriteCapacity)
 	{
@@ -28,6 +45,9 @@ public class PageRankDynamoThread extends Thread
 		this.writeCapacity = initialWriteCapacity;
 	}
 
+	/* (non-Javadoc)
+	 * @see java.lang.Thread#run()
+	 */
 	public void run()
 	{
 		try
@@ -41,6 +61,11 @@ public class PageRankDynamoThread extends Thread
 		}
 	}
 
+	/**
+	 * Creates the new table.
+	 *
+	 * @throws InterruptedException the interrupted exception
+	 */
 	private void createNewTable() throws InterruptedException
 	{
 		String primaryKeyName = "hostName";
@@ -69,6 +94,11 @@ public class PageRankDynamoThread extends Thread
 
 	}
 
+	/**
+	 * Delete old table.
+	 *
+	 * @throws InterruptedException the interrupted exception
+	 */
 	private void deleteOldTable() throws InterruptedException
 	{
 		DynamoDB dynamoDB = new DynamoDB(new AmazonDynamoDBClient(
@@ -78,6 +108,13 @@ public class PageRankDynamoThread extends Thread
 		table.waitForDelete();
 	}
 
+	/**
+	 * Update table write capacity.
+	 *
+	 * @param readCapacity the read capacity
+	 * @param writeCapacity the write capacity
+	 * @throws InterruptedException the interrupted exception
+	 */
 	public void updateTableWriteCapacity(long readCapacity, long writeCapacity)
 			throws InterruptedException
 	{

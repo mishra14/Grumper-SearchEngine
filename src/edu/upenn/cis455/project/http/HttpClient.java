@@ -18,122 +18,176 @@ import edu.upenn.cis455.project.crawler.CrawlWorkerServlet;
 import edu.upenn.cis455.project.parsers.RobotParser;
 import edu.upenn.cis455.project.storage.RobotsInfoDA;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class HttpClient.
+ */
 public class HttpClient
 {
-	private Queue<String> urlQueue;
-	private String content_type = null;
 	
-	public HttpClient(Queue<String> urlQueue){
+	/** The url queue. */
+	private Queue<String> urlQueue;
+	
+	/** The content_type. */
+	private String content_type = null;
+
+	/**
+	 * Instantiates a new http client.
+	 *
+	 * @param urlQueue the url queue
+	 */
+	public HttpClient(Queue<String> urlQueue)
+	{
 		this.urlQueue = urlQueue;
 	}
-	
+
+	/**
+	 * Gets the content_type.
+	 *
+	 * @return the content_type
+	 */
 	public String getContent_type()
 	{
 		return content_type;
 	}
 
+	/**
+	 * Send head.
+	 *
+	 * @param url the url
+	 * @return true, if successful
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	public boolean sendHead(String url) throws IOException
 	{
-		return sendHead(url,null);
+		return sendHead(url, null);
 	}
-	
+
 	/**
-	 * Sends HEAD request
-	 * @param url
-	 * @param lastAccessed date
+	 * Sends HEAD request.
+	 *
+	 * @param url the url
+	 * @param lastAccessed            date
 	 * @return true if response code is 200
-	 * @throws IOException
+	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
 	public boolean sendHead(String url, Date lastAccessed) throws IOException
 	{
 		URL req_url = new URL(url);
-		
-		if(url.startsWith("https://")){
-			HttpsURLConnection connection = (HttpsURLConnection) req_url.openConnection();
+
+		if (url.startsWith("https://"))
+		{
+			HttpsURLConnection connection = (HttpsURLConnection) req_url
+					.openConnection();
 			connection.setInstanceFollowRedirects(false);
 			connection.setRequestMethod("HEAD");
 			connection.setRequestProperty("User-Agent", "cis455crawler");
-			
-			if(lastAccessed!=null){
-				SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
+
+			if (lastAccessed != null)
+			{
+				SimpleDateFormat sdf = new SimpleDateFormat(
+						"EEE, dd MMM yyyy HH:mm:ss z");
 				sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
 				String d = sdf.format(lastAccessed);
 				connection.setRequestProperty("If-Modified-Since", d);
 			}
-			
-			if(connection.getResponseCode() == 301){
+
+			if (connection.getResponseCode() == 301)
+			{
 				String location = connection.getHeaderField("Location");
-	//			System.out.println("Redirected to: "+location);
+				// System.out.println("Redirected to: "+location);
 				urlQueue.enqueue(location);
 			}
-			
-			if(connection.getResponseCode()!=200){
-				System.out.println("Response code for "+url+" is: "+connection.getResponseCode());
+
+			if (connection.getResponseCode() != 200)
+			{
+				System.out.println("Response code for " + url + " is: "
+						+ connection.getResponseCode());
 				return false;
 			}
-			
-			if(connection.getHeaderField("Content-Language")!=null && !connection.getHeaderField("Content-Language").equals("en")){
+
+			if (connection.getHeaderField("Content-Language") != null
+					&& !connection.getHeaderField("Content-Language").equals(
+							"en"))
+			{
 				return false;
 			}
-			
+
 			Integer length = connection.getContentLength();
-			if(length > CrawlWorkerServlet.max_size*1000000){
-				System.out.println("Document greater than max size!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+			if (length > CrawlWorkerServlet.max_size * 1000000)
+			{
+				System.out
+						.println("Document greater than max size!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 				return false;
 			}
-			
+
 			return true;
-			
-		}else if(url.startsWith("http://")){
-			HttpURLConnection connection = (HttpURLConnection) req_url.openConnection();
+
+		}
+		else if (url.startsWith("http://"))
+		{
+			HttpURLConnection connection = (HttpURLConnection) req_url
+					.openConnection();
 			connection.setInstanceFollowRedirects(false);
 			connection.setRequestMethod("HEAD");
 			connection.setRequestProperty("User-Agent", "cis455crawler");
-			
-			if(lastAccessed!=null){
-				SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
+
+			if (lastAccessed != null)
+			{
+				SimpleDateFormat sdf = new SimpleDateFormat(
+						"EEE, dd MMM yyyy HH:mm:ss z");
 				sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
 				String d = sdf.format(lastAccessed);
 				connection.setRequestProperty("If-Modified-Since", d);
 			}
-			
-			if(connection.getResponseCode() == 301){
+
+			if (connection.getResponseCode() == 301)
+			{
 				String location = connection.getHeaderField("Location");
-				System.out.println("Redirected to: "+location);
+				System.out.println("Redirected to: " + location);
 				urlQueue.enqueue(location);
 			}
-			
-			if(connection.getResponseCode()!=200){
-				System.out.println("Response code for "+url+" is: "+connection.getResponseCode());
+
+			if (connection.getResponseCode() != 200)
+			{
+				System.out.println("Response code for " + url + " is: "
+						+ connection.getResponseCode());
 				return false;
 			}
-			
-			if(connection.getHeaderField("Content-Language")!=null && !connection.getHeaderField("Content-Language").equals("en")){
-			return false;
-		}
-			
+
+			if (connection.getHeaderField("Content-Language") != null
+					&& !connection.getHeaderField("Content-Language").equals(
+							"en"))
+			{
+				return false;
+			}
+
 			Integer length = connection.getContentLength();
-			if(length > CrawlWorkerServlet.max_size*1000000){
-				System.out.println("Document greater than max size!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+			if (length > CrawlWorkerServlet.max_size * 1000000)
+			{
+				System.out
+						.println("Document greater than max size!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 				return false;
 			}
-			
+
 			return true;
-		
+
 		}
-		
+
 		return false;
 	}
-	
+
 	/**
 	 * Fetch robots.txt and store in db
-	 * @param robots url
-	 * @throws Exception 
+	 *
+	 * @param robots            url
+	 * @param domain the domain
+	 * @throws Exception the exception
 	 */
-	public void fetchRobots(String robots,String domain) throws Exception
+	public void fetchRobots(String robots, String domain) throws Exception
 	{
 		String robots_doc = fetch(robots);
-		//Store robots in db
+		// Store robots in db
 		RobotParser parser = new RobotParser();
 		parser.parse(robots_doc);
 		RobotsInfo info = new RobotsInfo();
@@ -141,63 +195,63 @@ public class HttpClient
 		info.setLastAccessed(new Date());
 		info.setRobotsInfo(parser.getInfo());
 		RobotsInfoDA.putInfo(info);
-		
+
 	}
 
 	/**
-	 * Fetches the requested document and parses the url
-	 * @param url
-	 * @param urlQueue 
+	 * Fetches the requested document and parses the url.
+	 *
+	 * @param url the url
 	 * @return the document in string format
-	 * @throws IOException
+	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
 	public String fetch(String url) throws IOException
 	{
 		URL req_url = new URL(url);
 		InputStream input = null;
 		Integer length = null;
-		if(url.startsWith("https://")){
-			HttpsURLConnection connection = (HttpsURLConnection) req_url.openConnection();
+		if (url.startsWith("https://"))
+		{
+			HttpsURLConnection connection = (HttpsURLConnection) req_url
+					.openConnection();
 			connection.setDoOutput(true);
 			connection.setRequestMethod("GET");
 			connection.setChunkedStreamingMode(0);
 			connection.setRequestProperty("User-Agent", "cis455crawler");
 			input = connection.getInputStream();
-			
-			length = connection.getContentLength();
-			content_type = connection.getContentType();
-		}else if(url.startsWith("http://")){
-			HttpURLConnection connection = (HttpURLConnection) req_url.openConnection();
-			connection.setRequestMethod("GET");
-			connection.setDoOutput(true);
-			connection.setChunkedStreamingMode(0);
-			connection.setRequestProperty("User-Agent", "cis455crawler");
-			input = connection.getInputStream();
-			
+
 			length = connection.getContentLength();
 			content_type = connection.getContentType();
 		}
-		
+		else if (url.startsWith("http://"))
+		{
+			HttpURLConnection connection = (HttpURLConnection) req_url
+					.openConnection();
+			connection.setRequestMethod("GET");
+			connection.setDoOutput(true);
+			connection.setChunkedStreamingMode(0);
+			connection.setRequestProperty("User-Agent", "cis455crawler");
+			input = connection.getInputStream();
+
+			length = connection.getContentLength();
+			content_type = connection.getContentType();
+		}
+
 		BufferedReader br = new BufferedReader(new InputStreamReader(input));
 		int total_read = 0;
 		int b;
 		StringBuilder s = new StringBuilder();
-		if(length == -1)
+		if (length == -1)
 			length = Integer.MAX_VALUE;
-				
-		while(total_read<length && ((b = br.read())!=-1)){
-			s.append((char)b);
+
+		while (total_read < length && ((b = br.read()) != -1))
+		{
+			s.append((char) b);
 			total_read++;
 		}
-		
+
 		return s.toString();
-		
+
 	}
-	
-	
-
-	
-
-	
 
 }

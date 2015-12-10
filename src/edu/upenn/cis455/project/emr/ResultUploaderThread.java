@@ -19,17 +19,47 @@ import com.amazonaws.services.dynamodbv2.model.WriteRequest;
 import edu.upenn.cis455.project.bean.EmrResult;
 import edu.upenn.cis455.project.crawler.Hash;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class ResultUploaderThread.
+ */
 public class ResultUploaderThread extends Thread
 {
+	
+	/** The max list size. */
 	private static int MAX_LIST_SIZE = 25;
+	
+	/** The dynamo. */
 	private DynamoDB dynamo;
+	
+	/** The table name. */
 	private String tableName;
+	
+	/** The primary key name. */
 	private String primaryKeyName;
+	
+	/** The range key name. */
 	private String rangeKeyName;
+	
+	/** The value key name. */
 	private String valueKeyName;
+	
+	/** The file paths. */
 	private List<File> filePaths;
+	
+	/** The id. */
 	private int id;
 
+	/**
+	 * Instantiates a new result uploader thread.
+	 *
+	 * @param tableName the table name
+	 * @param primaryKeyName the primary key name
+	 * @param rangeKeyName the range key name
+	 * @param valueKeyName the value key name
+	 * @param files the files
+	 * @param id the id
+	 */
 	public ResultUploaderThread(String tableName, String primaryKeyName,
 			String rangeKeyName, String valueKeyName, List<File> files, int id)
 	{
@@ -44,6 +74,9 @@ public class ResultUploaderThread extends Thread
 		this.id = id;
 	}
 
+	/* (non-Javadoc)
+	 * @see java.lang.Thread#run()
+	 */
 	public void run()
 	{
 		try
@@ -58,6 +91,12 @@ public class ResultUploaderThread extends Thread
 
 	}
 
+	/**
+	 * S3 to dynamo postings.
+	 *
+	 * @param files the files
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	public void s3ToDynamoPostings(List<File> files) throws IOException
 	{
 		List<EmrResult> results = new ArrayList<EmrResult>();
@@ -92,6 +131,13 @@ public class ResultUploaderThread extends Thread
 		}
 	}
 
+	/**
+	 * Batch write emr results.
+	 *
+	 * @param results the results
+	 * @param range the range
+	 * @return the int
+	 */
 	public int batchWriteEmrResults(List<EmrResult> results, int range)
 	{
 		try

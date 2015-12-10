@@ -4,15 +4,21 @@ import com.sleepycat.persist.PrimaryIndex;
 
 import edu.upenn.cis455.project.bean.Rank;
 
+// TODO: Auto-generated Javadoc
 /**
- * Data Accessor class for the document entity class
- * 
- * @author cis455
+ * Data Accessor class for the document entity class.
  *
+ * @author cis455
  */
 public class RankDA
 {
 
+	/**
+	 * Gets the rank.
+	 *
+	 * @param url the url
+	 * @return the rank
+	 */
 	public static Rank getRank(String url)
 	{
 		Rank rank = null;
@@ -28,6 +34,12 @@ public class RankDA
 		return rank;
 	}
 
+	/**
+	 * Put rank.
+	 *
+	 * @param rank the rank
+	 * @return the rank
+	 */
 	public static Rank putRank(Rank rank)
 	{
 		Rank inertedRank = null;
@@ -43,6 +55,12 @@ public class RankDA
 		return inertedRank;
 	}
 
+	/**
+	 * Removes the document.
+	 *
+	 * @param url the url
+	 * @return true, if successful
+	 */
 	public static boolean removeDocument(String url)
 	{
 		if (DBWrapper.getStore() != null)
@@ -57,6 +75,11 @@ public class RankDA
 		return false;
 	}
 
+	/**
+	 * Gets the size.
+	 *
+	 * @return the size
+	 */
 	public static long getSize()
 	{
 		long result = -1;

@@ -11,11 +11,22 @@ import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class PageRankTool.
+ */
 public class PageRankTool extends Configured implements Tool
 {
 
+	/** The Constant INTERATION_COUNT. */
 	private static final int INTERATION_COUNT = 10;
 
+	/**
+	 * The main method.
+	 *
+	 * @param args the arguments
+	 * @throws Exception the exception
+	 */
 	public static void main(String[] args) throws Exception
 	{
 		int res = 1;
@@ -35,6 +46,9 @@ public class PageRankTool extends Configured implements Tool
 		System.exit(res);
 	}
 
+	/* (non-Javadoc)
+	 * @see org.apache.hadoop.util.Tool#run(java.lang.String[])
+	 */
 	@Override
 	public int run(String[] args) throws Exception
 	{

@@ -7,15 +7,20 @@ import edu.upenn.cis455.project.storage.DBWrapper;
 import edu.upenn.cis455.project.storage.UserDA;
 import junit.framework.TestCase;
 
+// TODO: Auto-generated Javadoc
 /**
- * This class tests the storage API by storing and then reading various entities
- * 
- * @author cis455
+ * This class tests the storage API by storing and then reading various entities.
  *
+ * @author cis455
  */
 public class StorageTest extends TestCase
 {
 
+	/**
+	 * Test user storage valid look up.
+	 *
+	 * @throws Exception the exception
+	 */
 	@Test
 	public void testUserStorageValidLookUp() throws Exception
 	{
@@ -28,6 +33,11 @@ public class StorageTest extends TestCase
 		assertEquals(storedUser.getPassword(), user.getPassword());
 	}
 
+	/**
+	 * Test user storage in valid look up.
+	 *
+	 * @throws Exception the exception
+	 */
 	@Test
 	public void testUserStorageInValidLookUp() throws Exception
 	{

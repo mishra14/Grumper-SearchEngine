@@ -14,16 +14,26 @@ import java.util.Map;
 import edu.upenn.cis455.project.http.Http;
 import edu.upenn.cis455.project.http.HttpResponse;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class MasterPingThread.
+ */
 public class MasterPingThread extends Thread
 {
 
 	/** The socket. */
 	private Socket socket;
 
+	/** The inactive interval. */
 	private static long INACTIVE_INTERVAL = 30000;
+	
+	/** The sleep interval. */
 	private static long SLEEP_INTERVAL = 10000;
+	
+	/** The workers. */
 	private Map<String, WorkerStatus> workers;
 
+	/** The worker list. */
 	private List<String> workerList;
 
 	/** The run. */
@@ -32,10 +42,8 @@ public class MasterPingThread extends Thread
 	/**
 	 * Instantiates a new ping thread.
 	 *
-	 * @param url
-	 *            the url
-	 * @param status
-	 *            the status
+	 * @param workers the workers
+	 * @param workerList the worker list
 	 */
 	public MasterPingThread(Map<String, WorkerStatus> workers,
 			List<String> workerList)
@@ -97,6 +105,11 @@ public class MasterPingThread extends Thread
 		}
 	}
 
+	/**
+	 * Builds the worker string.
+	 *
+	 * @return the string builder
+	 */
 	private StringBuilder buildWorkerString()
 	{
 		StringBuilder workerString = new StringBuilder();
@@ -111,6 +124,14 @@ public class MasterPingThread extends Thread
 		return workerString;
 	}
 
+	/**
+	 * Send updated list to worker.
+	 *
+	 * @param worker the worker
+	 * @param body the body
+	 * @throws UnknownHostException the unknown host exception
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	private void sendUpdatedListToWorker(String worker, String body)
 			throws UnknownHostException, IOException
 	{
@@ -147,6 +168,9 @@ public class MasterPingThread extends Thread
 		run = false;
 	}
 
+	/**
+	 * Update workers.
+	 */
 	private void updateWorkers()
 	{
 		System.out.println("crawl master ping thread : updating");

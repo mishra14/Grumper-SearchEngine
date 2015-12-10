@@ -26,11 +26,22 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import edu.upenn.cis455.project.bean.UrlList;
 import edu.upenn.cis455.project.crawler.Hash;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class S3UrlListDA.
+ */
 public class S3UrlListDA
 {
+	
+	/** The bucket name. */
 	private String bucketName;
+	
+	/** The s3client. */
 	private AmazonS3 s3client;
 
+	/**
+	 * Instantiates a new s3 url list da.
+	 */
 	public S3UrlListDA()
 	{
 		File file = new File("/usr/share/jetty/webapps/credentials");
@@ -74,6 +85,12 @@ public class S3UrlListDA
 		this.s3client = new AmazonS3Client(awsCreds);
 	}
 
+	/**
+	 * Url list exists.
+	 *
+	 * @param urlList the url list
+	 * @return true, if successful
+	 */
 	public boolean urlListExists(UrlList urlList)
 	{
 		boolean result = true;
@@ -99,6 +116,12 @@ public class S3UrlListDA
 		return result;
 	}
 
+	/**
+	 * Gets the url list.
+	 *
+	 * @param url the url
+	 * @return the url list
+	 */
 	public UrlList getUrlList(String url)
 	{
 		UrlList urlList = null;
@@ -141,6 +164,11 @@ public class S3UrlListDA
 		return urlList;
 	}
 
+	/**
+	 * Put url list.
+	 *
+	 * @param urlList the url list
+	 */
 	public void putUrlList(UrlList urlList)
 	{
 		try
@@ -175,6 +203,11 @@ public class S3UrlListDA
 		}
 	}
 
+	/**
+	 * Delete url list.
+	 *
+	 * @param urlList the url list
+	 */
 	public void deleteUrlList(UrlList urlList)
 	{
 

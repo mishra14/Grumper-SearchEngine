@@ -27,13 +27,28 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import edu.upenn.cis455.project.bean.DocumentRecord;
 import edu.upenn.cis455.project.crawler.Hash;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class S3DocumentDA.
+ */
 public class S3DocumentDA
 {
+	
+	/** The bucket name. */
 	private String bucketName;
+	
+	/** The table name. */
 	private String tableName;
+	
+	/** The dynamo. */
 	private DynamoDA<String> dynamo;
+	
+	/** The s3client. */
 	private AmazonS3 s3client;
 
+	/**
+	 * Instantiates a new s3 document da.
+	 */
 	public S3DocumentDA()
 	{
 		File file = new File("/usr/share/jetty/webapps/credentials");
@@ -79,6 +94,12 @@ public class S3DocumentDA
 		this.s3client = new AmazonS3Client(awsCreds);
 	}
 
+	/**
+	 * Document exists.
+	 *
+	 * @param doc the doc
+	 * @return true, if successful
+	 */
 	public boolean documentExists(DocumentRecord doc)
 	{
 		boolean result = true;
@@ -101,6 +122,12 @@ public class S3DocumentDA
 		return result;
 	}
 
+	/**
+	 * Gets the document.
+	 *
+	 * @param url the url
+	 * @return the document
+	 */
 	public DocumentRecord getDocument(String url)
 	{
 		DocumentRecord doc = null;
@@ -114,12 +141,13 @@ public class S3DocumentDA
 				GetObjectRequest req = new GetObjectRequest(bucketName, key);
 				S3Object s3Object = s3client.getObject(req);
 				InputStream objectData = s3Object.getObjectContent();
-		        BufferedReader reader = new BufferedReader(new InputStreamReader(objectData));
-		        StringBuilder s3Content = new StringBuilder();
-		        String line;
-				while((line=reader.readLine())!=null)
+				BufferedReader reader = new BufferedReader(
+						new InputStreamReader(objectData));
+				StringBuilder s3Content = new StringBuilder();
+				String line;
+				while ((line = reader.readLine()) != null)
 				{
-					s3Content.append(line+"\r\n");
+					s3Content.append(line + "\r\n");
 				}
 				reader.close();
 				objectData.close();
@@ -144,30 +172,35 @@ public class S3DocumentDA
 		return doc;
 	}
 
+	/**
+	 * Put document.
+	 *
+	 * @param doc the doc
+	 */
 	public void putDocument(DocumentRecord doc)
 	{
 		try
 		{
 			// hash url to get key
 			String s3Key = Hash.hashKey(doc.getDocumentString());
-			
+
 			// put document into s3
 			ObjectMapper mapper = new ObjectMapper();
 			mapper.setVisibility(PropertyAccessor.ALL, Visibility.NONE);
 			mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
 			ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
 			String json = ow.writeValueAsString(doc);
-			ByteArrayInputStream inputStream = new ByteArrayInputStream(json.getBytes());
+			ByteArrayInputStream inputStream = new ByteArrayInputStream(
+					json.getBytes());
 			ObjectMetadata omd = new ObjectMetadata();
 			omd.setContentLength(json.getBytes().length);
 			PutObjectRequest request = new PutObjectRequest(bucketName, s3Key,
 					inputStream, omd);
 			s3client.putObject(request);
-			
+
 			// put the key into dynamo
 			dynamo.putItem("documentUrl", doc.getDocumentId(), "s3Key", s3Key);
-			
-			
+
 			/*
 			ObjectMapper mapper = new ObjectMapper();
 			mapper.setVisibility(PropertyAccessor.ALL, Visibility.NONE);
@@ -197,6 +230,11 @@ public class S3DocumentDA
 		}
 	}
 
+	/**
+	 * Delete document.
+	 *
+	 * @param doc the doc
+	 */
 	public void deleteDocument(DocumentRecord doc)
 	{
 
@@ -216,6 +254,11 @@ public class S3DocumentDA
 		}
 	}
 
+	/**
+	 * Delete document.
+	 *
+	 * @param url the url
+	 */
 	public void deleteDocument(String url)
 	{
 		// first get hash key from dynamo db
@@ -278,9 +321,9 @@ public class S3DocumentDA
 		GetObjectRequest req = new GetObjectRequest(s3.bucketName, key2);
 		S3Object s3Object = s3.s3client.getObject(req);
 		InputStream objectData = s3Object.getObjectContent();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(objectData));
-        StringBuilder s3Content = new StringBuilder();
-        String line;
+	    BufferedReader reader = new BufferedReader(new InputStreamReader(objectData));
+	    StringBuilder s3Content = new StringBuilder();
+	    String line;
 		while((line=reader.readLine())!=null)
 		{
 			s3Content.append(line+"\r\n");

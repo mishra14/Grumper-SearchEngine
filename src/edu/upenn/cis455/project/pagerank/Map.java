@@ -18,12 +18,20 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.upenn.cis455.project.bean.UrlList;
 import edu.upenn.cis455.project.storage.DynamoDA;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class Map.
+ */
 public class Map extends Mapper<NullWritable, BytesWritable, Text, Text>
 {
 
+	/** The dynamo. */
 	private DynamoDA<Float> dynamo = new DynamoDA<Float>(
 			"edu.upenn.cis455.project.pagerank", Float.class);
 
+	/* (non-Javadoc)
+	 * @see org.apache.hadoop.mapreduce.Mapper#map(KEYIN, VALUEIN, org.apache.hadoop.mapreduce.Mapper.Context)
+	 */
 	@Override
 	public void map(NullWritable key, BytesWritable value, Context context)
 			throws IOException, InterruptedException
@@ -56,6 +64,12 @@ public class Map extends Mapper<NullWritable, BytesWritable, Text, Text>
 		}
 	}
 
+	/**
+	 * Gets the url list.
+	 *
+	 * @param value the value
+	 * @return the url list
+	 */
 	private UrlList getUrlList(BytesWritable value)
 	{
 		ObjectMapper mapper = new ObjectMapper();
@@ -74,6 +88,12 @@ public class Map extends Mapper<NullWritable, BytesWritable, Text, Text>
 		return urlList;
 	}
 
+	/**
+	 * Gets the url lists.
+	 *
+	 * @param value the value
+	 * @return the url lists
+	 */
 	private List<UrlList> getUrlLists(BytesWritable value)
 	{
 		ObjectMapper mapper = new ObjectMapper();
