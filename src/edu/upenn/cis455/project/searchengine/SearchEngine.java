@@ -61,6 +61,7 @@ public class SearchEngine extends HttpServlet
 	public String search(String searchQuery)
 	{
 		String results = null;
+		ExecutorService pool = Executors.newFixedThreadPool(3);;
 		try {
 			String BDBStore = "/home/cis455/SeacheEngineCache";
 			DBWrapper.openDBWrapper(BDBStore);
@@ -82,11 +83,9 @@ public class SearchEngine extends HttpServlet
 				urlTfidfScores = new Heap(100);
 				pageRankMap = new HashMap<>();
 				
-				ExecutorService pool = Executors.newFixedThreadPool(2);
-				
 				if (searchQuery.isEmpty())
 				{
-					System.out.println("Please enter a search query!");
+					System.out.println("Search query was empty");
 				}
 				
 				else
@@ -104,17 +103,17 @@ public class SearchEngine extends HttpServlet
 					
 					Callable<HashMap<String, Float>> callableCosineSimUnigrams = new CosineSimilarityCallable(queryTerms, "UnigramIndex");
 					Callable<HashMap<String, Float>> callableCosineSimBigrams = new CosineSimilarityCallable(queryTerms, "BigramIndex");
-					//Callable<HashMap<String, Float>> callableCosineSimTrigrams = new CosineSimilarityCallable(queryTerms, "TrigramIndex");
+					Callable<HashMap<String, Float>> callableCosineSimTrigrams = new CosineSimilarityCallable(queryTerms, "TrigramIndex");
 					
 					Future<HashMap<String, Float>> cosSimUnigramsFuture = pool.submit(callableCosineSimUnigrams);
 					Future<HashMap<String, Float>> bigramFuture = pool.submit(callableCosineSimBigrams);
-					//Future<HashMap<String, Float>> trigramFuture = pool.submit(callableCosineSimTrigrams);
+					Future<HashMap<String, Float>> trigramFuture = pool.submit(callableCosineSimTrigrams);
 
 					try
 					{
 						cosineSimilarityUnigrams = cosSimUnigramsFuture.get();
 						cosineSimilarityBigrams = bigramFuture.get();
-						//cosineSimilarityTrigrams = trigramFuture.get();
+						cosineSimilarityTrigrams = trigramFuture.get();						
 					}
 					catch (InterruptedException | ExecutionException e)
 					{
@@ -129,8 +128,6 @@ public class SearchEngine extends HttpServlet
 				results = resultsForCache.toString();
 				//CachedResultsInfo cacheInfo = new CachedResultsInfo(searchQuery, results, new Date());
 				//dbw.putCachedResultsInfo(cacheInfo);
-				System.out.println("Closing dbwrapper");
-				DBWrapper.closeDBWrapper();
 			}
 		}
 		catch (Exception e)
@@ -138,6 +135,12 @@ public class SearchEngine extends HttpServlet
 			e.printStackTrace();
 		}
 		
+		finally
+		{
+			System.out.println("Closing dbwrapper");
+			DBWrapper.closeDBWrapper();
+			pool.shutdown();
+		}
 		System.out.println("Results are: " + results);
 		return results;
 	}
