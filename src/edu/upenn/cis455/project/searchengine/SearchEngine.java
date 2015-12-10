@@ -23,7 +23,7 @@ public class SearchEngine extends HttpServlet
 	 */
 	private static final long serialVersionUID = 1L;
 	private int maxResults = 20;
-	private int resultCount = 0;
+	private int resultCount;
 	private HashMap<String, Float> cosineSimilarityUnigrams;
 	private HashMap<String, Float> cosineSimilarityBigrams;
 	private HashMap<String, Float> cosineSimilarityTrigrams;
@@ -39,7 +39,13 @@ public class SearchEngine extends HttpServlet
 	
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException
 	{
-				
+		PrintWriter out = response.getWriter();
+		String searchQuery = request.getParameter("query");
+		System.out.println("search query received: "+searchQuery);
+		String results = search(searchQuery);
+		System.out.println("results: " + results);
+		out.write(results);
+		response.flushBuffer();	
 	}
 	
 	public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException
@@ -47,12 +53,16 @@ public class SearchEngine extends HttpServlet
 		PrintWriter out = response.getWriter();
 		String searchQuery = request.getParameter("query");
 		System.out.println("search query received: "+searchQuery);
-		out.write("searchQuery Result1 Result2 Result3 Result4");
+		String results = search(searchQuery);
+		out.write(results);
 		response.flushBuffer();
 	}
 	
-	public void search(String searchQuery)
+	public String search(String searchQuery)
 	{
+		resultCount = 0;
+		String results = null;
+		ExecutorService pool = Executors.newFixedThreadPool(3);;
 		try {
 			String BDBStore = "/home/cis455/SeacheEngineCache";
 			DBWrapper.openDBWrapper(BDBStore);
@@ -60,7 +70,7 @@ public class SearchEngine extends HttpServlet
 			if (cacheDA.getCachedResultsInfo(searchQuery) != null)
 			{
 				System.out.println("Query was cached");
-				getCachedResults(searchQuery);
+				results = getCachedResults(searchQuery);
 				
 			}
 			
@@ -74,11 +84,9 @@ public class SearchEngine extends HttpServlet
 				urlTfidfScores = new Heap(100);
 				pageRankMap = new HashMap<>();
 				
-				ExecutorService pool = Executors.newFixedThreadPool(2);
-				
 				if (searchQuery.isEmpty())
 				{
-					System.out.println("Please enter a search query!");
+					System.out.println("Search query was empty");
 				}
 				
 				else
@@ -96,17 +104,17 @@ public class SearchEngine extends HttpServlet
 					
 					Callable<HashMap<String, Float>> callableCosineSimUnigrams = new CosineSimilarityCallable(queryTerms, "UnigramIndex");
 					Callable<HashMap<String, Float>> callableCosineSimBigrams = new CosineSimilarityCallable(queryTerms, "BigramIndex");
-					//Callable<HashMap<String, Float>> callableCosineSimTrigrams = new CosineSimilarityCallable(queryTerms, "TrigramIndex");
+					Callable<HashMap<String, Float>> callableCosineSimTrigrams = new CosineSimilarityCallable(queryTerms, "TrigramIndex");
 					
 					Future<HashMap<String, Float>> cosSimUnigramsFuture = pool.submit(callableCosineSimUnigrams);
 					Future<HashMap<String, Float>> bigramFuture = pool.submit(callableCosineSimBigrams);
-					//Future<HashMap<String, Float>> trigramFuture = pool.submit(callableCosineSimTrigrams);
+					Future<HashMap<String, Float>> trigramFuture = pool.submit(callableCosineSimTrigrams);
 
 					try
 					{
 						cosineSimilarityUnigrams = cosSimUnigramsFuture.get();
 						cosineSimilarityBigrams = bigramFuture.get();
-						//cosineSimilarityTrigrams = trigramFuture.get();
+						cosineSimilarityTrigrams = trigramFuture.get();						
 					}
 					catch (InterruptedException | ExecutionException e)
 					{
@@ -118,16 +126,24 @@ public class SearchEngine extends HttpServlet
 				}
 				
 				System.out.println("Adding query to cache");
-				//CachedResultsInfo cacheInfo = new CachedResultsInfo(searchQuery, resultsForCache.toString(), new Date());
+				results = resultsForCache.toString();
+				//CachedResultsInfo cacheInfo = new CachedResultsInfo(searchQuery, results, new Date());
 				//dbw.putCachedResultsInfo(cacheInfo);
-				System.out.println("Closing dbwrapper");
-				DBWrapper.closeDBWrapper();
 			}
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
 		}
+		
+		finally
+		{
+			System.out.println("Closing dbwrapper");
+			DBWrapper.closeDBWrapper();
+			pool.shutdown();
+		}
+		System.out.println("Results are: " + results);
+		return results;
 	}
 	
 	private void computeScores()
@@ -217,7 +233,7 @@ public class SearchEngine extends HttpServlet
 		return allTerms;
 	}
 	
-	public void getCachedResults(String query)
+	public String getCachedResults(String query)
 	{
 		String cachedResults = cacheDA.getCachedResultsInfo(query).getResults();
 		System.out.println("SEARCH RESULTS:");
@@ -225,6 +241,7 @@ public class SearchEngine extends HttpServlet
 		{
 			System.out.println(result);
 		}
+		return cachedResults;
 	}
 	
 	public String stem(String word)
@@ -251,7 +268,7 @@ public class SearchEngine extends HttpServlet
 //		searchEngine.search("pakistan");
 //		searchEngine.search("Adamson university"); 
 		//searchEngine.search("mark zuckerberg");
-		searchEngine.search("bill clinton");
+		searchEngine.search("barack");
 		//searchEngine.search("university of pennsylvania");
 		//searchEngine.search("india");
 		//searchEngine.search("adamson university");
