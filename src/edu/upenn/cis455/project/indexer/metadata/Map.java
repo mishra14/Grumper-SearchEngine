@@ -69,11 +69,11 @@ public class Map extends Mapper<LongWritable, Text, Text, Text>
 		ArrayList<String> metadata = new ArrayList<String>();
 
 		if (!title.isEmpty())
-			metadata.addAll(Arrays.asList(title.split("[ \t\n\r,\\-?.:,]")));
+			metadata.addAll(Arrays.asList(title.split("[ \t\n\r,\\-?.:,\'\"]")));
 		if(!keywords.isEmpty())
-			metadata.addAll(Arrays.asList(keywords.split("[ \t\n\r,\\-?.:,]")));
+			metadata.addAll(Arrays.asList(keywords.split("[ \t\n\r,\\-?.:,\'\"]")));
 		if (!description.isEmpty())
-			metadata.addAll(Arrays.asList(description.split("[ \t\n\r,\\-?.:,]")));
+			metadata.addAll(Arrays.asList(description.split("[ \t\n\r,\\-?.:,\"\']")));
 
 		return metadata;
 

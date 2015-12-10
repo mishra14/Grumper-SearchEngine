@@ -25,9 +25,9 @@ public class Reduce extends Reducer<Text, Text, Text, Text>
 		computeFrequecy(values);
 		// ArrayList<Postings> postingsList = createPostings();
 		String postingsList = createPostingsList();
-		//context.write(key, new Text(postingsList));
-		 DynamoIndexerDA dynamo = new DynamoIndexerDA(tablename);
-		 dynamo.save(key.toString(), postingsList);
+		// context.write(key, new Text(postingsList));
+		DynamoIndexerDA dynamo = new DynamoIndexerDA(tablename);
+		dynamo.save(key.toString(), postingsList);
 	}
 
 	private void computeFrequecy(Iterable<Text> docIDs)
@@ -50,6 +50,7 @@ public class Reduce extends Reducer<Text, Text, Text, Text>
 			}
 		}
 	}
+
 	private ArrayList<Postings> sortPostings()
 	{
 
@@ -73,15 +74,15 @@ public class Reduce extends Reducer<Text, Text, Text, Text>
 		{
 			if (i < size)
 				postings.append(posting.getPosting() + " " + posting.getTfidf()
-				+ "\t");
+						+ " " + posting.getIdf() + "\t");
 			else
-				postings.append(posting.getPosting() + " " + posting.getTfidf());
+				postings.append(posting.getPosting() + " " + posting.getTfidf()
+						+ " " + posting.getIdf());
 			i++;
 			if (i > MAX_LIST)
 				break;
 		}
 		return postings.toString();
 	}
-	
 
 }
