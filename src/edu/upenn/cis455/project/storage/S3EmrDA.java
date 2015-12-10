@@ -20,11 +20,24 @@ import com.amazonaws.services.s3.model.S3Object;
 
 import edu.upenn.cis455.project.bean.EmrResult;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class S3EmrDA.
+ */
 public class S3EmrDA
 {
+	
+	/** The bucket name. */
 	private String bucketName;
+	
+	/** The s3client. */
 	private AmazonS3 s3client;
 
+	/**
+	 * Instantiates a new s3 emr da.
+	 *
+	 * @param bucketName the bucket name
+	 */
 	public S3EmrDA(String bucketName)
 	{
 		File file = new File("/usr/share/jetty/webapps/credentials");
@@ -68,6 +81,12 @@ public class S3EmrDA
 		this.s3client = new AmazonS3Client(awsCreds);
 	}
 
+	/**
+	 * Gets the emr result.
+	 *
+	 * @param prefix the prefix
+	 * @return the emr result
+	 */
 	public List<EmrResult> getEmrResult(String prefix)
 	{
 		List<EmrResult> result = new ArrayList<EmrResult>();
@@ -104,6 +123,11 @@ public class S3EmrDA
 		return result;
 	}
 
+	/**
+	 * Delete emr result.
+	 *
+	 * @param prefix the prefix
+	 */
 	public void deleteEmrResult(String prefix)
 	{
 		try

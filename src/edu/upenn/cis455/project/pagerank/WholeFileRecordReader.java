@@ -14,38 +14,72 @@ import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class WholeFileRecordReader.
+ */
 public class WholeFileRecordReader extends
-		RecordReader<NullWritable, BytesWritable> {
+		RecordReader<NullWritable, BytesWritable>
+{
+	
+	/** The split. */
 	private FileSplit split;
+	
+	/** The conf. */
 	private Configuration conf;
+	
+	/** The fileread. */
 	private boolean fileread = false;
+	
+	/** The value. */
 	private BytesWritable value = new BytesWritable();
 
+	/* (non-Javadoc)
+	 * @see org.apache.hadoop.mapreduce.RecordReader#getCurrentKey()
+	 */
 	@Override
 	public NullWritable getCurrentKey() throws IOException,
-			InterruptedException {
+			InterruptedException
+	{
 		return NullWritable.get();
 	}
 
+	/* (non-Javadoc)
+	 * @see org.apache.hadoop.mapreduce.RecordReader#getProgress()
+	 */
 	@Override
-	public float getProgress() throws IOException, InterruptedException {
+	public float getProgress() throws IOException, InterruptedException
+	{
 		return 0;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.apache.hadoop.mapreduce.RecordReader#close()
+	 */
 	@Override
-	public void close() throws IOException {
+	public void close() throws IOException
+	{
 	}
 
+	/* (non-Javadoc)
+	 * @see org.apache.hadoop.mapreduce.RecordReader#initialize(org.apache.hadoop.mapreduce.InputSplit, org.apache.hadoop.mapreduce.TaskAttemptContext)
+	 */
 	@Override
 	public void initialize(InputSplit split, TaskAttemptContext context)
-			throws IOException, InterruptedException {
+			throws IOException, InterruptedException
+	{
 		this.split = (FileSplit) split;
 		this.conf = context.getConfiguration();
 	}
 
+	/* (non-Javadoc)
+	 * @see org.apache.hadoop.mapreduce.RecordReader#nextKeyValue()
+	 */
 	@Override
-	public boolean nextKeyValue() throws IOException, InterruptedException {
-		if (fileread) {
+	public boolean nextKeyValue() throws IOException, InterruptedException
+	{
+		if (fileread)
+		{
 			return false;
 		}
 
@@ -55,11 +89,14 @@ public class WholeFileRecordReader extends
 		final Path file = split.getPath();
 		FileSystem fs = file.getFileSystem(conf);
 		FSDataInputStream inputStream = fs.open(file);
-		try {
+		try
+		{
 			IOUtils.readFully(inputStream, filecontent, 0, filesize);
 			value.set(filecontent, 0, filesize);
 			this.fileread = true;
-		} finally {
+		}
+		finally
+		{
 			IOUtils.closeStream(inputStream);
 		}
 
@@ -67,9 +104,13 @@ public class WholeFileRecordReader extends
 
 	}
 
+	/* (non-Javadoc)
+	 * @see org.apache.hadoop.mapreduce.RecordReader#getCurrentValue()
+	 */
 	@Override
 	public BytesWritable getCurrentValue() throws IOException,
-			InterruptedException {
+			InterruptedException
+	{
 		return value;
 	}
 

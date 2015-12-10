@@ -8,6 +8,7 @@ import java.net.URL;
 import edu.upenn.cis455.project.http.Http;
 import edu.upenn.cis455.project.http.HttpResponse;
 
+// TODO: Auto-generated Javadoc
 /**
  * This class is used to instantiate a pinger thread used by the worker servlet
  * to send status updates to the master.

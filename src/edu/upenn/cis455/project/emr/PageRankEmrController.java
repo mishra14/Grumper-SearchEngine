@@ -30,11 +30,27 @@ import edu.upenn.cis455.project.bean.UrlList;
 import edu.upenn.cis455.project.crawler.Hash;
 import edu.upenn.cis455.project.storage.S3UrlListDA;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class PageRankEmrController.
+ */
 public class PageRankEmrController
 {
+	
+	/** The Constant URLS_TO_MERGE. */
 	private static final int URLS_TO_MERGE = 100;
+	
+	/** The s3 client. */
 	private static AmazonS3Client s3Client = new AmazonS3Client();
 
+	/**
+	 * The main method.
+	 *
+	 * @param args the arguments
+	 * @throws InterruptedException the interrupted exception
+	 * @throws NoSuchAlgorithmException the no such algorithm exception
+	 * @throws JsonProcessingException the json processing exception
+	 */
 	public static void main(String[] args) throws InterruptedException,
 			NoSuchAlgorithmException, JsonProcessingException
 	{
@@ -79,6 +95,14 @@ public class PageRankEmrController
 		System.out.println("Page rank terminated");
 	}
 
+	/**
+	 * Merge url lists.
+	 *
+	 * @param inputBucketName the input bucket name
+	 * @param outputBucketName the output bucket name
+	 * @throws NoSuchAlgorithmException the no such algorithm exception
+	 * @throws JsonProcessingException the json processing exception
+	 */
 	public static void mergeUrlLists(String inputBucketName,
 			String outputBucketName) throws NoSuchAlgorithmException,
 			JsonProcessingException
@@ -112,6 +136,15 @@ public class PageRankEmrController
 		}
 	}
 
+	/**
+	 * Write url lists.
+	 *
+	 * @param mergedUrlLists the merged url lists
+	 * @param bucketName the bucket name
+	 * @return the string
+	 * @throws NoSuchAlgorithmException the no such algorithm exception
+	 * @throws JsonProcessingException the json processing exception
+	 */
 	public static String writeUrlLists(List<UrlList> mergedUrlLists,
 			String bucketName) throws NoSuchAlgorithmException,
 			JsonProcessingException
@@ -133,6 +166,13 @@ public class PageRankEmrController
 		return s3Key;
 	}
 
+	/**
+	 * Gets the url list.
+	 *
+	 * @param bucketName the bucket name
+	 * @param key the key
+	 * @return the url list
+	 */
 	public static UrlList getUrlList(String bucketName, String key)
 	{
 		UrlList urlList = null;
@@ -170,6 +210,12 @@ public class PageRankEmrController
 		return urlList;
 	}
 
+	/**
+	 * Gets the object names for bucket.
+	 *
+	 * @param bucketName the bucket name
+	 * @return the object names for bucket
+	 */
 	public static List<String> getObjectNamesForBucket(String bucketName)
 	{
 		ListObjectsRequest listObjectsRequest = new ListObjectsRequest()

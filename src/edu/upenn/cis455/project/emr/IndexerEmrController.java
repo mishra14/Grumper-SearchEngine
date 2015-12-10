@@ -9,9 +9,21 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 import edu.upenn.cis455.project.bean.DocumentRecord;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class IndexerEmrController.
+ */
 public class IndexerEmrController
 {
 
+	/**
+	 * The main method.
+	 *
+	 * @param args the arguments
+	 * @throws NoSuchAlgorithmException the no such algorithm exception
+	 * @throws JsonProcessingException the json processing exception
+	 * @throws InterruptedException the interrupted exception
+	 */
 	public static void main(String[] args) throws NoSuchAlgorithmException,
 			JsonProcessingException, InterruptedException
 	{
@@ -31,7 +43,8 @@ public class IndexerEmrController
 		String valueKeyName = "Postings";
 		EmrController controller = new EmrController(emrInputPath,
 				emrOutputBucketName, emrOutputPrefix, emrJarPath, emrStepName,
-				clusterId, tableName, primaryKeyName, valueKeyName, rangeKeyName);
+				clusterId, tableName, primaryKeyName, valueKeyName,
+				rangeKeyName);
 		/*EmrController controller = new EmrController(emrInputPath,
 				emrOutputBucketName, emrOutputPrefix, clusterLogPath,
 				emrJarPath, emrStepName, clusterName, ec2AccessKeyName,
@@ -42,7 +55,7 @@ public class IndexerEmrController
 				controller.getObjectNamesForBucket(documentBucketName),
 				"edu.upenn.cis455.project.indexer.documents");*/
 		controller.setIterative(false);
-		//controller.runJob();
+		// controller.runJob();
 		controller.s3ToDynamoPostings(controller.getObjectNamesForBucket());
 		/*List<String> docs = controller
 				.getObjectNamesForBucket("edu.upenn.cis455.project.documents");

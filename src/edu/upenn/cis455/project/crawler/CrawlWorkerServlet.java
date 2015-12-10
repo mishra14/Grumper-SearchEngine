@@ -17,24 +17,44 @@ import edu.upenn.cis455.project.bean.DocumentRecord;
 import edu.upenn.cis455.project.bean.Queue;
 import edu.upenn.cis455.project.storage.DBWrapper;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class CrawlWorkerServlet.
+ */
 public class CrawlWorkerServlet extends HttpServlet
 {
 
+	/** The Constant serialVersionUID. */
 	private static final long serialVersionUID = 1973672093393240348L;
-	
-	//Max size in megabytes
+
+	/** The Constant max_size. */
+	// Max size in megabytes
 	public static final int max_size = 1;
+	
+	/** The Constant threshold. */
 	public static final int threshold = 5000;
-	
 
+	/** The workers. */
 	private List<String> workers;
-	private WorkerStatus status;
-	private WorkerPingThread pingThread;
-	private Queue<String> urlQueue;
-	private String port;
-	private ArrayList<DocumentRecord> crawledDocs;
 	
+	/** The status. */
+	private WorkerStatus status;
+	
+	/** The ping thread. */
+	private WorkerPingThread pingThread;
+	
+	/** The url queue. */
+	private Queue<String> urlQueue;
+	
+	/** The port. */
+	private String port;
+	
+	/** The crawled docs. */
+	private ArrayList<DocumentRecord> crawledDocs;
 
+	/* (non-Javadoc)
+	 * @see javax.servlet.GenericServlet#init()
+	 */
 	public void init()
 	{
 		System.out.println("crawl worker servlet started");
@@ -61,24 +81,31 @@ public class CrawlWorkerServlet extends HttpServlet
 		workers = new ArrayList<String>();
 		urlQueue = new Queue<String>();
 		crawledDocs = new ArrayList<DocumentRecord>();
-		
-		//Setup db wrapper
+
+		// Setup db wrapper
 		try
 		{
 			DBWrapper.openDBWrapper("/usr/share/jetty/webapps/db");
 		}
 		catch (Exception e)
 		{
-			System.out.println("Could not open DB Wrapper: "+e);
+			System.out.println("Could not open DB Wrapper: " + e);
 		}
 	}
-	
-	public void destroy(){
-		
+
+	/* (non-Javadoc)
+	 * @see javax.servlet.GenericServlet#destroy()
+	 */
+	public void destroy()
+	{
+
 		DBWrapper.closeDBWrapper();
-		
+
 	}
 
+	/* (non-Javadoc)
+	 * @see javax.servlet.http.HttpServlet#doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+	 */
 	public void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws java.io.IOException
 	{
@@ -99,14 +126,14 @@ public class CrawlWorkerServlet extends HttpServlet
 			String numThreads = request.getParameter("crawlthreads");
 			int threadCount = Integer.valueOf(numThreads);
 			updateWorkerList(request);
-			
+
 			int self_id = getSelfId(request.getLocalAddr());
-			
+
 			addToQueue(request.getParameter("urls"));
-			System.out.println("crawl worker : queue - "+urlQueue);
+			System.out.println("crawl worker : queue - " + urlQueue);
 			// if status is idle then spawn crawl thread
 			boolean isCrawling = false;
-			
+
 			synchronized (status)
 			{
 				if (status.getStatus().equals(WorkerStatus.statusType.idle))
@@ -117,28 +144,33 @@ public class CrawlWorkerServlet extends HttpServlet
 					status.setStatus(WorkerStatus.statusType.crawling);
 					isCrawling = false;
 				}
-				else if(status.getStatus().equals(WorkerStatus.statusType.crawling)){
+				else if (status.getStatus().equals(
+						WorkerStatus.statusType.crawling))
+				{
 					isCrawling = true;
 				}
 			}
-			
-			
-			//Start crawler threads only if crawling has not already started
-			if(!isCrawling){
-				Thread [] threads = new Thread[threadCount];
-				for(int i=0;i<threadCount;i++){
-					CrawlerThread crawlerThread = new CrawlerThread(urlQueue, status, self_id, this.workers.size(), crawledDocs);
+
+			// Start crawler threads only if crawling has not already started
+			if (!isCrawling)
+			{
+				Thread[] threads = new Thread[threadCount];
+				for (int i = 0; i < threadCount; i++)
+				{
+					CrawlerThread crawlerThread = new CrawlerThread(urlQueue,
+							status, self_id, this.workers.size(), crawledDocs);
 					Thread thread = new Thread(crawlerThread);
 					thread.start();
 					threads[i] = thread;
 				}
 			}
-			
-			//Check condition for pushdata
-			TimerTask timerTask = new PushToDB(this.workers.size(),this.crawledDocs);
+
+			// Check condition for pushdata
+			TimerTask timerTask = new PushToDB(this.workers.size(),
+					this.crawledDocs);
 			Timer timer = new Timer(true);
 			timer.scheduleAtFixedRate(timerTask, 0, 60000);
-			
+
 		}
 		else if (pathInfo.equalsIgnoreCase("/pushdata"))
 		{
@@ -149,7 +181,7 @@ public class CrawlWorkerServlet extends HttpServlet
 			out.print("<html>" + pageContent.toString() + "</html>");
 			response.flushBuffer();
 			addToQueue(request.getParameter("urls"));
-			System.out.println("crawl worker : queue - "+urlQueue);
+			System.out.println("crawl worker : queue - " + urlQueue);
 		}
 		else if (pathInfo.equalsIgnoreCase("/updateWorkers"))
 		{
@@ -163,25 +195,42 @@ public class CrawlWorkerServlet extends HttpServlet
 		}
 	}
 
+	/**
+	 * Gets the self id.
+	 *
+	 * @param ip the ip
+	 * @return the self id
+	 */
 	private int getSelfId(String ip)
 	{
-		String local = ip+":"+this.port;
-		System.out.println("local ip: "+local);
+		String local = ip + ":" + this.port;
+		System.out.println("local ip: " + local);
 		int i;
-		for(i=0;i<this.workers.size();i++){
-			if(workers.get(i).equals(local))
+		for (i = 0; i < this.workers.size(); i++)
+		{
+			if (workers.get(i).equals(local))
 				break;
 		}
-		
+
 		return i;
 	}
 
+	/**
+	 * Adds the to queue.
+	 *
+	 * @param urlString the url string
+	 */
 	private void addToQueue(String urlString)
 	{
 		String[] urls = urlString.split(";");
 		urlQueue.enqueueAll(new ArrayList<String>(Arrays.asList(urls)));
 	}
 
+	/**
+	 * Update worker list.
+	 *
+	 * @param request the request
+	 */
 	private void updateWorkerList(HttpServletRequest request)
 	{
 		int numWorkers = Integer
@@ -200,6 +249,7 @@ public class CrawlWorkerServlet extends HttpServlet
 		{
 			workers = workerList;
 		}
-		System.out.println("crawl worker : updated qorker list to - " + workers);
+		System.out
+				.println("crawl worker : updated qorker list to - " + workers);
 	}
 }
