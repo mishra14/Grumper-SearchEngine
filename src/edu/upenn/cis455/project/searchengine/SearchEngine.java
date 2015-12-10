@@ -16,27 +16,55 @@ import edu.upenn.cis455.project.storage.DynamoDA;
 import edu.upenn.cis455.project.storage.DBWrapper;
 import edu.upenn.cis455.project.storage.SearchEngineCacheDA;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class SearchEngine.
+ *
+ */
 public class SearchEngine extends HttpServlet
 {
-	/**
-	 * 
-	 */
+	
+	/** The Constant serialVersionUID. */
 	private static final long serialVersionUID = 1L;
+	
+	/** The max number of results that will be displayed. */
 	private int maxResults = 20;
+	
+	/** The number of results found so far. */
 	private int resultCount;
+	
+	/** The cosine similarity of unigrams. */
 	private HashMap<String, Float> cosineSimilarityUnigrams;
+	
+	/** The cosine similarity of bigrams. */
 	private HashMap<String, Float> cosineSimilarityBigrams;
+	
+	/** The cosine similarity of trigrams. */
 	private HashMap<String, Float> cosineSimilarityTrigrams;
+	
+	/** The page rank map. */
 	private HashMap<String, Float> pageRankMap;
+	
+	/** The url final scores. */
 	private Heap urlTfidfScores, urlFinalScores;
+	
+	/** The results for cache. */
 	private StringBuffer resultsForCache;
+	
+	/** The cache data accessor. */
 	private SearchEngineCacheDA cacheDA = new SearchEngineCacheDA();
 
+	/* (non-Javadoc)
+	 * @see javax.servlet.GenericServlet#init()
+	 */
 	public void init()
 	{
 		
 	}
 	
+	/* (non-Javadoc)
+	 * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+	 */
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException
 	{
 		PrintWriter out = response.getWriter();
@@ -48,6 +76,9 @@ public class SearchEngine extends HttpServlet
 		response.flushBuffer();	
 	}
 	
+	/* (non-Javadoc)
+	 * @see javax.servlet.http.HttpServlet#doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+	 */
 	public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException
 	{
 		PrintWriter out = response.getWriter();
@@ -58,6 +89,12 @@ public class SearchEngine extends HttpServlet
 		response.flushBuffer();
 	}
 	
+	/**
+	 * Search.
+	 *
+	 * @param searchQuery the search query
+	 * @return the string of search results
+	 */
 	public String search(String searchQuery)
 	{
 		resultCount = 0;
@@ -102,19 +139,19 @@ public class SearchEngine extends HttpServlet
 						//Callable<HashMap<String, Integer>>
 					}
 					
-					Callable<HashMap<String, Float>> callableCosineSimUnigrams = new CosineSimilarityCallable(queryTerms, "UnigramIndex");
-					Callable<HashMap<String, Float>> callableCosineSimBigrams = new CosineSimilarityCallable(queryTerms, "BigramIndex");
-					Callable<HashMap<String, Float>> callableCosineSimTrigrams = new CosineSimilarityCallable(queryTerms, "TrigramIndex");
+					Callable<HashMap<String, Float>> callableCosineSimUnigrams = new CosineSimilarityCallable(queryTerms, "Unigram");
+					//Callable<HashMap<String, Float>> callableCosineSimBigrams = new CosineSimilarityCallable(queryTerms, "BigramIndex");
+					//Callable<HashMap<String, Float>> callableCosineSimTrigrams = new CosineSimilarityCallable(queryTerms, "Trigram");
 					
 					Future<HashMap<String, Float>> cosSimUnigramsFuture = pool.submit(callableCosineSimUnigrams);
-					Future<HashMap<String, Float>> bigramFuture = pool.submit(callableCosineSimBigrams);
-					Future<HashMap<String, Float>> trigramFuture = pool.submit(callableCosineSimTrigrams);
+					//Future<HashMap<String, Float>> bigramFuture = pool.submit(callableCosineSimBigrams);
+					//Future<HashMap<String, Float>> trigramFuture = pool.submit(callableCosineSimTrigrams);
 
 					try
 					{
 						cosineSimilarityUnigrams = cosSimUnigramsFuture.get();
-						cosineSimilarityBigrams = bigramFuture.get();
-						cosineSimilarityTrigrams = trigramFuture.get();						
+						//cosineSimilarityBigrams = bigramFuture.get();
+						//cosineSimilarityTrigrams = trigramFuture.get();						
 					}
 					catch (InterruptedException | ExecutionException e)
 					{
@@ -142,10 +179,13 @@ public class SearchEngine extends HttpServlet
 			DBWrapper.closeDBWrapper();
 			pool.shutdown();
 		}
-		System.out.println("Results are: " + results);
+//		System.out.println("Results are: " + results);
 		return results;
 	}
 	
+	/**
+	 * Compute scores for the matches.
+	 */
 	private void computeScores()
 	{
 		Float pageRank = new Float(1);
@@ -204,6 +244,11 @@ public class SearchEngine extends HttpServlet
 		}
 	}
 	
+	/**
+	 * Gets the ranked results.
+	 *
+	 * @return the ranked results
+	 */
 	private void getRankedResults()
 	{
 		resultsForCache = new StringBuffer();
@@ -218,6 +263,13 @@ public class SearchEngine extends HttpServlet
 		}
 	}
 	
+	/**
+	 * Gets the query terms.
+	 *
+	 * @param content the content
+	 * @param includeStopWords the include stop words
+	 * @return the query terms
+	 */
 	public ArrayList<String> getQueryTerms(String content, Boolean includeStopWords){
 		ArrayList<String> allTerms = new ArrayList<String>();
 		StringTokenizer tokenizer = new StringTokenizer(content, " ,.?\"!-");
@@ -233,6 +285,12 @@ public class SearchEngine extends HttpServlet
 		return allTerms;
 	}
 	
+	/**
+	 * Gets the cached results.
+	 *
+	 * @param query the query
+	 * @return the cached results
+	 */
 	public String getCachedResults(String query)
 	{
 		String cachedResults = cacheDA.getCachedResultsInfo(query).getResults();
@@ -244,6 +302,12 @@ public class SearchEngine extends HttpServlet
 		return cachedResults;
 	}
 	
+	/**
+	 * Stem the word.
+	 *
+	 * @param word : the word to be stemmed
+	 * @return the string
+	 */
 	public String stem(String word)
 	{
 		Stemmer stemmer = new Stemmer();
@@ -254,6 +318,12 @@ public class SearchEngine extends HttpServlet
 		return stemmedWord;
 	}
 	
+	/**
+	 * The main method.
+	 *
+	 * @param args the arguments
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	public static void main(String args[]) throws IOException
 	{
 		SearchEngine searchEngine = new SearchEngine();
@@ -268,7 +338,7 @@ public class SearchEngine extends HttpServlet
 //		searchEngine.search("pakistan");
 //		searchEngine.search("Adamson university"); 
 		//searchEngine.search("mark zuckerberg");
-		searchEngine.search("barack");
+		searchEngine.search("love new york");
 		//searchEngine.search("university of pennsylvania");
 		//searchEngine.search("india");
 		//searchEngine.search("adamson university");
@@ -283,6 +353,7 @@ public class SearchEngine extends HttpServlet
 
 	}
 	
+	/** The stopwords. */
 	private static ArrayList<String> stopwords =
 			new ArrayList<String> (Arrays.asList(("a,about,above,"
 					+ "after,again,against,all,am,an,and,any,are,"
