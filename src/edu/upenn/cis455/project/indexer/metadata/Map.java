@@ -1,14 +1,9 @@
-package edu.upenn.cis455.project.indexer.bigram;
+package edu.upenn.cis455.project.indexer.metadata;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import java.util.StringTokenizer;
-
-import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.jsoup.Jsoup;
@@ -16,29 +11,24 @@ import org.jsoup.nodes.Document;
 
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.upenn.cis455.project.bean.DocumentRecord;
-//import edu.upenn.cis455.project.indexer.Stemmer;
 import edu.upenn.cis455.project.scoring.Stemmer;
 
 public class Map extends Mapper<LongWritable, Text, Text, Text>
 {
 
 	private final Text url = new Text();
-	private ArrayList<String> allWords = new ArrayList<String>();
-	private final String splitOn = " ,.?\"!-[({\r\t\"\'\\_:";
 
 	@Override
 	public void map(LongWritable key, Text value, Context context)
 			throws IOException, InterruptedException
 	{
-		Text bigram = new Text();
 		DocumentRecord doc = getDocument(value);
 		if (doc != null)
 		{
-			String line = doc.getDocumentString();
+			String html = doc.getDocumentString();
 			// sanitize the url
 			String sanitizedUrl = doc.getDocumentId().trim();
 			if (sanitizedUrl.contains(" "))
@@ -47,46 +37,49 @@ public class Map extends Mapper<LongWritable, Text, Text, Text>
 			}
 			url.set(sanitizedUrl);
 
-			String rawContent = getHtmlText(line);
-			getAllWords(rawContent);
+			ArrayList<String> metadata = getMetadata(html);
 
-			int numWords = allWords.size();
-			for (int i = 0; i < numWords - 1; i++)
+			for (String data : metadata)
 			{
-				bigram.set(allWords.get(i) + " " + allWords.get(i + 1));
-				context.write(bigram, url);
+				data = data.trim().toLowerCase();
+				if (data.length() > 50)
+					continue;
+				if (!data.isEmpty() & !stopwords.contains(data))
+				{
+					context.write(new Text(stem(data)), url);
+				}
 			}
+
 		}
 	}
 
-	public void getAllWords(String content)
+	public ArrayList<String> getMetadata(String html)
 	{
-		allWords.clear();
-		StringTokenizer tokenizer = new StringTokenizer(content, splitOn);
-		String word;
-		while (tokenizer.hasMoreTokens())
-		{
-			word = tokenizer.nextToken();
-			if ( word.length() > 500)
-				continue;
-			word = word.trim().toLowerCase().replaceAll("[^a-z0-9]", "");
-			if (!word.matches("[0-9]+") && !stopwords.contains(word)
-					&& !word.isEmpty())
-			{
-				allWords.add(stem(word));
-			}
-		}
-	}
+		Document doc = Jsoup.parse(html);
 
-	public String getHtmlText(String html)
-	{
-		html = html.replaceAll("<", " <");
-		html = html.replaceAll(">", "> ");
-		Document doc = Jsoup
-				.parse(html.replaceAll("(?i)<br[^>]*>", "<pre>\n</pre>"));
-		String textContent = doc.select("body").text();
-		return textContent;
+		String title = doc.title();
+		String keywords = "";
+		String description = "";
+		if ( doc.getElementsByTag("meta").size() > 0){
+			description = doc.getElementsByTag("meta").get(0)
+				.attr("description");
+			keywords = doc.getElementsByTag("meta").get(0).attr("content");
+		}
+
+		ArrayList<String> metadata = new ArrayList<String>();
+
+		if (!title.isEmpty())
+			metadata.addAll(Arrays.asList(title.split("[ \t\n\r,\\-?.:,\'\"]")));
+		if(!keywords.isEmpty())
+			metadata.addAll(Arrays.asList(keywords.split("[ \t\n\r,\\-?.:,\'\"]")));
+		if (!description.isEmpty())
+			metadata.addAll(Arrays.asList(description.split("[ \t\n\r,\\-?.:,\"\']")));
+
+		return metadata;
+
 	}
+	
+	
 
 	private DocumentRecord getDocument(Text value)
 	{
@@ -115,25 +108,24 @@ public class Map extends Mapper<LongWritable, Text, Text, Text>
 		String stemmedWord = stemmer.toString();
 		return stemmedWord;
 	}
+
 	private static ArrayList<String> stopwords = new ArrayList<String>(
-			Arrays.asList(("a,about,above,"
+			Arrays.asList(("about,above,"
 					+ "after,again,against,all,am,an,and,any,are,"
 					+ "aren't,as,at,be,because,been,before,being,"
 					+ "below,between,both,but,by,could,"
 					+ "couldn't,did,didn't,do,does,doesn't,doing,don't,"
 					+ "down,during,each,few,for,from,further,had,hadn't,"
-					+ "has,hasn't,have,haven't,having,he,he'd,he'll,he's,"
+					+ "he,he'd,he'll,he's,"
 					+ "her,here,here's,hers,herself,him,himself,his,"
 					+ "how's,i,i'd,i'll,i'm,i've,if,in,into,is,isn't,it,"
-					+ "it's,its,itself,let's,me,more,mustn't,my,myself,"
+					+ "it's,its,itself,let's,me,mustn't,my,myself,"
 					+ "no,nor,of,off,on,once,only,or,other,ought,our,ours,"
-					+ "ourselves,out,over,own,shan't,she,she'd,she'll,"
 					+ "she's,should,shouldn't,so,some,such,than,that,that's,"
 					+ "the,their,theirs,them,themselves,then,there,there's,"
 					+ "these,they,they'd,they'll,they're,they've,this,those,"
 					+ "through,to,too,under,until,up,very,was,wasn't,we,we'd,"
 					+ "we'll,we're,we've,were,weren't,what's,when's,"
 					+ "where's,while,who's,why's,with,"
-					+ "won't,would,wouldn't,you,you'd,you'll,you're,you've,your,"
 					+ "yours,yourself,yourselves,").split(",")));
 }

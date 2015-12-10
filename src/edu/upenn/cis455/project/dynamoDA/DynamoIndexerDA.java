@@ -25,6 +25,7 @@ import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedQueryList;
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughputExceededException;
 
 import edu.upenn.cis455.project.crawler.Hash;
+import edu.upenn.cis455.project.storage.InvertedIndex_old;
 import edu.upenn.cis455.project.storage.InvertedIndex;
 import edu.upenn.cis455.project.storage.Postings;
 
@@ -47,14 +48,14 @@ public class DynamoIndexerDA
 		this.tableName = tableName;
 		this.config = new DynamoDBMapperConfig(
 				new DynamoDBMapperConfig.TableNameOverride(this.tableName));
-		db = new AmazonDynamoDBClient();
-		// setupDB();
+		//db = new AmazonDynamoDBClient();
+		setupDB();
 		mapper = new DynamoDBMapper(db);
 	}
 
 	private void setupDB()
 	{
-		File file = new File("rootkey.csv");
+		File file = new File("credentials");
 		FileReader reader;
 		try
 		{
@@ -81,12 +82,19 @@ public class DynamoIndexerDA
 
 	}
 
-	//
+	public void save(String word, String postings){
+		InvertedIndex index = new InvertedIndex();
+		index.setWord(word);
+		index.setPostings(postings);
+		mapper.save(index, config);
+		
+	}
+	
 	public void saveIndex(String word, ArrayList<Postings> allPostings,
 			Context context)
 	{
 
-		InvertedIndex index = new InvertedIndex();
+		InvertedIndex_old index = new InvertedIndex_old();
 		index.setWord(word);
 		ArrayList<Postings> postingsList = new ArrayList<Postings>();
 		int count = 0;
@@ -125,7 +133,7 @@ public class DynamoIndexerDA
 			ArrayList<Postings> allPostings, Context context)
 					throws InterruptedException
 	{
-		InvertedIndex index = new InvertedIndex();
+		InvertedIndex_old index = new InvertedIndex_old();
 		index.setWord(word);
 		// ArrayList<Postings>allPostings = parseAllPostings(postingsString);
 		ArrayList<Postings> postingsList = new ArrayList<Postings>();
@@ -171,7 +179,7 @@ public class DynamoIndexerDA
 		if (numPostings < MAX_LIST)
 		{
 			// write to db
-			InvertedIndex index = new InvertedIndex();
+			InvertedIndex_old index = new InvertedIndex_old();
 			try
 			{
 				index.setWord(word);
@@ -189,7 +197,7 @@ public class DynamoIndexerDA
 		{
 			// breakdown the list into multiple and do batch write
 			ArrayList<Postings> postingsList = new ArrayList<Postings>();
-			ArrayList<InvertedIndex> rowEntry = new ArrayList<InvertedIndex>();
+			ArrayList<InvertedIndex_old> rowEntry = new ArrayList<InvertedIndex_old>();
 			int totalLen = 0;
 			Postings postings;
 			long range = 0;
@@ -217,7 +225,7 @@ public class DynamoIndexerDA
 					if (rowEntry.size() < BATCH_LIMIT)
 					{
 
-						InvertedIndex index = new InvertedIndex();
+						InvertedIndex_old index = new InvertedIndex_old();
 						index.setWord(word);
 						index.setPostings(postingsList);
 						index.setRangeKey(range);
@@ -279,19 +287,57 @@ public class DynamoIndexerDA
 	// return list;
 	// }
 
-	public PaginatedQueryList<InvertedIndex> loadIndex(String word)
+	public ArrayList<Postings> loadIndex(String word)
 	{
-		InvertedIndex queryIndex = new InvertedIndex();
-		queryIndex.setWord(word);
-		DynamoDBQueryExpression<InvertedIndex> query = new DynamoDBQueryExpression<InvertedIndex>()
-				.withHashKeyValues(queryIndex);
-		PaginatedQueryList<InvertedIndex> resultList = mapper
-				.query(InvertedIndex.class, query, config);
-		// for (InvertedIndex index : resultList)
-		// {
-		// System.out.println("RESULT " + index);
-		// }
-		return resultList;
+//		InvertedIndex queryIndex = new InvertedIndex();
+//		queryIndex.setWord(word);
+//		DynamoDBQueryExpression<InvertedIndex> query = new DynamoDBQueryExpression<InvertedIndex>()
+//				.withHashKeyValues(queryIndex);
+		InvertedIndex result = mapper.load(InvertedIndex.class, word,  config);
+		if (result != null)
+		{
+			String postingsList = result.getPostings();
+			return unmarshall(postingsList);
+		}
+		else
+			return null;
+//		PaginatedQueryList<InvertedIndex> resultList = mapper
+//				.query(InvertedIndex.class, query, config);
+//		 for (InvertedIndex index : resultList)
+//		 {
+//		 System.out.println("RESULT " + index);
+//		 }
+//		return resultList;
+		
+		
 	}
 
+	private ArrayList<Postings> unmarshall(String postingsList){
+		try {
+			ArrayList<Postings> list = new ArrayList<Postings>();
+			String[] allPostings = postingsList.split("\t");
+			for(String posting : allPostings){		
+				Postings postings = new Postings();
+				String[] pair = posting.trim().split(" ", 2);
+				postings.setPosting(pair[0]);
+				pair = pair[1].split(" ");
+				postings.setTfidf(Float.parseFloat(pair[0].trim()));
+				postings.setIdf(Float.parseFloat(pair[1].trim()));
+				list.add(postings);
+			}
+			return list;
+		} catch (Exception e){
+			
+		}
+		return null;
+	}
+	
+	public static void main (String[] args){
+		DynamoIndexerDA dynamo = new DynamoIndexerDA("Unigram");
+		ArrayList<Postings> result = dynamo.loadIndex("barack");
+		for (Postings index : result)
+			 {
+			 System.out.println("RESULT " + index.toString());
+			 }
+	}
 }

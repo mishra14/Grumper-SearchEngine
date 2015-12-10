@@ -1,20 +1,13 @@
 package edu.upenn.cis455.project.storage;
-
-import java.util.ArrayList;
-
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMarshalling;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBRangeKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
-
 
 @DynamoDBTable(tableName = "CUSTOM_TABLE_NAME")
 public class InvertedIndex
 {
 	private String word;
-	private long range;
-	private ArrayList<Postings> postingsList;
+	private String postings;
 
 	@DynamoDBHashKey(attributeName = "Word")
 	public String getWord()
@@ -26,30 +19,21 @@ public class InvertedIndex
 	{
 		this.word = word;
 	}
-
-	@DynamoDBRangeKey(attributeName = "Range")
-	public long getRangeKey(){
-		return this.range;
-	}
-	public void setRangeKey(long range){
-		this.range = range;
-	}
 	
 	@DynamoDBAttribute(attributeName = "Postings")
-	@DynamoDBMarshalling(marshallerClass = PostingsMarshaller.class)
-	public ArrayList<Postings> getPostings()
+	public String getPostings()
 	{
-		return this.postingsList;
+		return this.postings;
 	}
 
-	public void setPostings(ArrayList<Postings> postingsList)
+	public void setPostings(String postingsList)
 	{
-		this.postingsList = postingsList;
+		this.postings = postingsList;
 	}
 
 	@Override
 	public String toString()
 	{
-		return "InvertedIndex [word=" + word + ", postingsList=" + postingsList + "]";
+		return "InvertedIndex [word=" + word + ", postingsList=" + postings + "]";
 	}
 }
