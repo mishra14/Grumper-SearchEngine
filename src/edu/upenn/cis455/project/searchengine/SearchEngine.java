@@ -23,7 +23,7 @@ public class SearchEngine extends HttpServlet
 	 */
 	private static final long serialVersionUID = 1L;
 	private int maxResults = 20;
-	private int resultCount = 0;
+	private int resultCount;
 	private HashMap<String, Float> cosineSimilarityUnigrams;
 	private HashMap<String, Float> cosineSimilarityBigrams;
 	private HashMap<String, Float> cosineSimilarityTrigrams;
@@ -60,6 +60,7 @@ public class SearchEngine extends HttpServlet
 	
 	public String search(String searchQuery)
 	{
+		resultCount = 0;
 		String results = null;
 		ExecutorService pool = Executors.newFixedThreadPool(3);;
 		try {
