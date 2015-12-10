@@ -48,39 +48,39 @@ public class DynamoIndexerDA
 		this.tableName = tableName;
 		this.config = new DynamoDBMapperConfig(
 				new DynamoDBMapperConfig.TableNameOverride(this.tableName));
-		db = new AmazonDynamoDBClient();
-		// setupDB();
+		//db = new AmazonDynamoDBClient();
+		setupDB();
 		mapper = new DynamoDBMapper(db);
 	}
 
-//	private void setupDB()
-//	{
-//		File file = new File("rootkey.csv");
-//		FileReader reader;
-//		try
-//		{
-//			reader = new FileReader(file);
-//			BufferedReader br = new BufferedReader(reader);
-//			String line = br.readLine();
-//			AWSAccessKeyId = line.split("=")[1].trim();
-//			line = br.readLine();
-//			AWSSecretKey = line.split("=")[1].trim();
-//			db = new AmazonDynamoDBClient(
-//					new BasicAWSCredentials(AWSAccessKeyId, AWSSecretKey));
-//			br.close();
-//
-//		}
-//		catch (FileNotFoundException e)
-//		{
-//
-//			e.printStackTrace();
-//		}
-//		catch (IOException e)
-//		{
-//			e.printStackTrace();
-//		}
-//
-//	}
+	private void setupDB()
+	{
+		File file = new File("credentials");
+		FileReader reader;
+		try
+		{
+			reader = new FileReader(file);
+			BufferedReader br = new BufferedReader(reader);
+			String line = br.readLine();
+			AWSAccessKeyId = line.split("=")[1].trim();
+			line = br.readLine();
+			AWSSecretKey = line.split("=")[1].trim();
+			db = new AmazonDynamoDBClient(
+					new BasicAWSCredentials(AWSAccessKeyId, AWSSecretKey));
+			br.close();
+
+		}
+		catch (FileNotFoundException e)
+		{
+
+			e.printStackTrace();
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+
+	}
 
 	public void save(String word, String postings){
 		InvertedIndex index = new InvertedIndex();
@@ -294,9 +294,13 @@ public class DynamoIndexerDA
 //		DynamoDBQueryExpression<InvertedIndex> query = new DynamoDBQueryExpression<InvertedIndex>()
 //				.withHashKeyValues(queryIndex);
 		InvertedIndex result = mapper.load(InvertedIndex.class, word,  config);
-		String postingsList = result.getPostings();
-		return unmarshall(postingsList);
-		
+		if (result != null)
+		{
+			String postingsList = result.getPostings();
+			return unmarshall(postingsList);
+		}
+		else
+			return null;
 //		PaginatedQueryList<InvertedIndex> resultList = mapper
 //				.query(InvertedIndex.class, query, config);
 //		 for (InvertedIndex index : resultList)

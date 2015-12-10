@@ -3,19 +3,34 @@ package edu.upenn.cis455.project.searchengine;
 import java.util.*;
 import java.util.concurrent.*;
 
-import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedQueryList;
-
 import edu.upenn.cis455.project.dynamoDA.DynamoIndexerDA;
-import edu.upenn.cis455.project.storage.InvertedIndex;
 import edu.upenn.cis455.project.storage.Postings;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class CosineSimilarityCallable.
+ */
 public class CosineSimilarityCallable implements Callable<HashMap<String, Float>>
 {
-	private ArrayList<String> query;
-	private HashMap<String, Float> cosineSimilarity, queryTf, seenUrlsDenominator;
-	private DynamoIndexerDA dbAccessor;
-	private float queryDenominator = 0;
 	
+	/** The query. */
+	private ArrayList<String> query;
+	
+	/** The  different maps used. */
+	private HashMap<String, Float> cosineSimilarity, queryTf, seenUrlsDenominator;
+	
+	/** The db accessor. */
+	private DynamoIndexerDA dbAccessor;
+	
+	/** The query denominator. */
+	private float queryDenominator;
+	
+	/**
+	 * Instantiates a new cosine similarity callable.
+	 *
+	 * @param query the query
+	 * @param tablename the tablename
+	 */
 	public CosineSimilarityCallable(ArrayList<String> query, String tablename)
 	{
 		this.query = new ArrayList<String>();
@@ -24,9 +39,13 @@ public class CosineSimilarityCallable implements Callable<HashMap<String, Float>
 
 	}	
 	
+	/* (non-Javadoc)
+	 * @see java.util.concurrent.Callable#call()
+	 */
 	@Override
 	public HashMap<String, Float> call() throws Exception
 	{
+		queryDenominator = 0;
 		System.out.println("in cosine sim callable");
 		ArrayList<Postings> postings;
 		cosineSimilarity = new HashMap<String, Float>();
@@ -39,31 +58,30 @@ public class CosineSimilarityCallable implements Callable<HashMap<String, Float>
 			for(String term : query)
 			{
 				System.out.println("finding matches for " + term + "...");
-				PaginatedQueryList<InvertedIndex> resultList = dbAccessor.loadIndex(term);
-				System.out.println("accessed dynamo, result list size: " + resultList.size());
-				
-				if (!resultList.isEmpty())
+				postings = dbAccessor.loadIndex(term);
+				if (postings != null)
 				{
-					postings = new ArrayList<Postings>();
+					System.out.println("accessed dynamo, result list size: " + postings.size());
 					System.out.println("found matching urls for ngram: " + term);
-					for (InvertedIndex result: resultList)
-					{
-						ArrayList<Postings> currPosting = result.getPostings();
-						//System.out.println("Postings: " + currPosting);
-						if (currPosting != null)
-							postings.add(currPosting.get(0));
-						if (postings.size() == 100)
-						{
-							computeCosineSimilarity(term, postings);
-							postings = new ArrayList<Postings>();
-						}
-					}
-					
-					if (!postings.isEmpty())
-					{
-						computeCosineSimilarity(term, postings);
-						postings = new ArrayList<Postings>();
-					}
+					computeCosineSimilarity(term, postings);
+//					for (InvertedIndex result: resultList)
+//					{
+//						ArrayList<Postings> currPosting = result.getPostings();
+//						//System.out.println("Postings: " + currPosting);
+//						if (currPosting != null)
+//							postings.add(currPosting.get(0));
+//						if (postings.size() == 100)
+//						{
+//							computeCosineSimilarity(term, postings);
+//							postings = new ArrayList<Postings>();
+//						}
+//					}
+//					
+//					if (!postings.isEmpty())
+//					{
+//						computeCosineSimilarity(term, postings);
+//						postings = new ArrayList<Postings>();
+//					}
 				}	
 			}
 			
@@ -84,6 +102,9 @@ public class CosineSimilarityCallable implements Callable<HashMap<String, Float>
 		return cosineSimilarity;
 	}
 	
+	/**
+	 * Compute query tf.
+	 */
 	private void computeQueryTf()
 	{
 		HashMap<String, Float> tfMap = new HashMap<String, Float>();
@@ -108,6 +129,12 @@ public class CosineSimilarityCallable implements Callable<HashMap<String, Float>
 		}
 	}
 	
+	/**
+	 * Compute cosine similarity.
+	 *
+	 * @param term the term
+	 * @param postings the postings
+	 */
 	private void computeCosineSimilarity(String term, ArrayList<Postings> postings)
 	{
 		String url;
@@ -137,6 +164,12 @@ public class CosineSimilarityCallable implements Callable<HashMap<String, Float>
 		}
 	}
 	
+	/**
+	 * Sets the query ngrams based on the tablename.
+	 *
+	 * @param queryTerms the query terms
+	 * @param tablename the tablename
+	 */
 	private void setQueryNgrams(ArrayList<String> queryTerms, String tablename)
 	{	
 		if (tablename.equals("BigramIndex") && queryTerms.size() >= 2)
@@ -152,7 +185,7 @@ public class CosineSimilarityCallable implements Callable<HashMap<String, Float>
 			}
 		}
 		
-		else if (tablename.equals("TrigramIndex") && queryTerms.size() >= 3)
+		else if (tablename.equals("Trigram") && queryTerms.size() >= 3)
 		{
 			System.out.println("Finding trigrams");
 			for (int i = 0; i < queryTerms.size() - 2; i++)
@@ -165,7 +198,7 @@ public class CosineSimilarityCallable implements Callable<HashMap<String, Float>
 			}
 		}
 		
-		else if (tablename.equals("UnigramIndex"))
+		else if (tablename.equals("Unigram"))
 		{
 			System.out.println("Finding unigrams");
 			this.query = queryTerms;
