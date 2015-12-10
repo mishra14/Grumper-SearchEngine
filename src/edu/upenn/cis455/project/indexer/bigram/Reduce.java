@@ -8,6 +8,8 @@ import java.util.HashSet;
 import java.util.Set;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
+
+import edu.upenn.cis455.project.dynamoDA.DynamoIndexerDA;
 import edu.upenn.cis455.project.storage.Postings;
 
 public class Reduce extends Reducer<Text, Text, Text, Text>
@@ -16,18 +18,17 @@ public class Reduce extends Reducer<Text, Text, Text, Text>
 	private final static int bucketSize = 119866;
 	private final static int MAX_LIST = 2000;
 	private int df;
-	//private static final String tablename = "BigramIndex";
+	private static final String tablename = "Bigram";
 
 	@Override
 	protected void reduce(Text key, Iterable<Text> values, Context context)
 			throws IOException, InterruptedException
 	{
 		df = computeDF(values);
-		// ArrayList<Postings> postingsList = createPostings();
 		String postingsList = createPostingsList();
-		context.write(key, new Text(postingsList));
-		// DynamoIndexerDA dynamo = new DynamoIndexerDA(tablename);
-		// dynamo.saveIndexWithBackOff (key.toString(), postingsList, context);
+		//context.write(key, new Text(postingsList));
+		 DynamoIndexerDA dynamo = new DynamoIndexerDA(tablename);
+		 dynamo.save(key.toString(), postingsList);
 	}
 
 	private int computeDF(Iterable<Text> docIDs)
