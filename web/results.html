@@ -1,0 +1,139 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>Grumper Search Engine</title>
+<!-- Custom Theme files -->
+<link href="css/style.css" rel="stylesheet" type="text/css" media="all"/>
+<!-- Custom Theme files -->
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="keywords" content="Flat Search Box Responsive, Login form web template, Sign up Web Templates, Flat Web Templates, Login signup Responsive web template, Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, SonyErricsson, Motorola web design" />
+<!--Google Fonts-->
+<link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+<script language="JavaScript" type="text/javascript" src="bing.js"></script> 
+<script type="text/javascript">
+// search("abc","WebResult");
+// window.onload = getSearchParameters();
+// $("#searchresults").onload = getSearchParameters();
+$(document).ready(getSearchParameters);
+function getSearchParameters(){
+	var prmstr = decodeURIComponent(window.location.search.substr(1).split("=")[1].split('+').join(' '));
+	// Send query to servlet
+	// var arrayLength;
+	// var number_of_pages;
+	// var show_per_page;
+	var posting = $.post("searchengine/search", {query : prmstr } ,function(data,status){
+		// alert(data);
+		// var cars = "one two three four";
+		var array = data.split(" ");
+	
+		var arrayLength = array.length;
+		// alert(arrayLength);
+		//how much items per page to show
+		var show_per_page = 30; 
+		//getting the amount of elements inside content div
+		var number_of_items = arrayLength*3;
+		//calculate the number of pages we are going to have
+		var number_of_pages = Math.ceil(number_of_items/show_per_page);
+		// alert(number_of_pages);
+		//set the value of our hidden input fields
+		$('#current_page').val(0);
+		$('#show_per_page').val(show_per_page);
+
+		for (var i = 0; i < arrayLength; i++) {
+		 // var p = document.createElement('p');
+		 var a = document.createElement('a');
+		 a.href = array[i];
+		 $(a).append(array[i]);
+		 // $(p).append("Result "+i);
+		// Append the anchor tag and paragraph with the description to the results div.
+		$('#searchresults').append(a,"<br><br>");
+
+		}
+	
+		var navigation_html = '<a class="previous_link" href="javascript:previous();">Prev</a>';
+		var current_link = 0;
+		// alert(number_of_pages);
+		while(number_of_pages > current_link){
+			navigation_html += '<a class="page_link" href="javascript:go_to_page(' + current_link +')" longdesc="' + current_link +'">'+ (current_link + 1) +'</a>';
+			current_link++;
+		}
+		navigation_html += '<a class="next_link" href="javascript:next();">Next</a>';
+		
+		$('#page_navigation').html(navigation_html);
+		
+		//add active_page class to the first page link
+		$('#page_navigation .page_link:first').addClass('active_page');
+		
+		//hide all the elements inside content div
+		$('#searchresults').children().css('display', 'none');
+		
+		//and show the first n (show_per_page) elements
+		$('#searchresults').children().slice(0, show_per_page).css('display', 'block');
+	});
+  }
+
+  function previous(){
+	
+	new_page = parseInt($('#current_page').val()) - 1;
+	//if there is an item before the current active link run the function
+	if($('.active_page').prev('.page_link').length==true){
+		go_to_page(new_page);
+	}
+	
+}
+
+function next(){
+	new_page = parseInt($('#current_page').val()) + 1;
+	//if there is an item after the current active link run the function
+	if($('.active_page').next('.page_link').length==true){
+		go_to_page(new_page);
+	}
+	
+}
+function go_to_page(page_num){
+	//get the number of items shown per page
+	var show_per_page = parseInt($('#show_per_page').val());
+	
+	//get the element number where to start the slice from
+	start_from = page_num * show_per_page;
+	
+	//get the element number where to end the slice
+	end_on = start_from + show_per_page;
+	
+	//hide all children elements of content div, get specific items and show them
+	$('#searchresults').children().css('display', 'none').slice(start_from, end_on).css('display', 'block');
+	
+	/*get the page link that has longdesc attribute of the current page and add active_page class to it
+	and remove that class from previously active page link*/
+	$('.page_link[longdesc=' + page_num +']').addClass('active_page').siblings('.active_page').removeClass('active_page');
+	
+	//update the current page input field
+	$('#current_page').val(page_num);
+}
+	
+</script>
+
+<!--Google Fonts-->
+</head>
+<body>
+<!--search start here-->
+<div class="s-bar">
+	   <form method = "get" action="results.html">
+		<input type="text" name ="query" onfocus="this.value = '';" onblur="if (this.value == '') {this.value = 'Ask Grumper';}">
+		<input type="submit" value="Search"/>
+	  </form>
+</div>
+
+<!-- the input fields that will hold the variables we will use -->
+<input type='hidden' id='current_page' />
+<input type='hidden' id='show_per_page' />
+<div id="images"></div>
+<div id="searchresults"></div>
+<div id="results"></div> 
+<div id='page_navigation'></div>
+
+</body>
+</html>
