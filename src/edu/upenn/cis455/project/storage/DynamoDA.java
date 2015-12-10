@@ -28,7 +28,7 @@ public class DynamoDA<T>
 
 	public DynamoDA(String tableName, Class<T> typeParameterClass)
 	{
-		File file = new File("rootkey.csv");
+		File file = new File("/usr/share/jetty/webapps/credentials");
 		String accessKey = null;
 		String secretKey = null;
 		try

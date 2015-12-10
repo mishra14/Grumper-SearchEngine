@@ -39,7 +39,13 @@ public class SearchEngine extends HttpServlet
 	
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException
 	{
-				
+		PrintWriter out = response.getWriter();
+		String searchQuery = request.getParameter("query");
+		System.out.println("search query received: "+searchQuery);
+		String results = search(searchQuery);
+		System.out.println("results: " + results);
+		out.write(results);
+		response.flushBuffer();	
 	}
 	
 	public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException
@@ -47,12 +53,14 @@ public class SearchEngine extends HttpServlet
 		PrintWriter out = response.getWriter();
 		String searchQuery = request.getParameter("query");
 		System.out.println("search query received: "+searchQuery);
-		out.write("searchQuery Result1 Result2 Result3 Result4");
+		String results = search(searchQuery);
+		out.write(results);
 		response.flushBuffer();
 	}
 	
-	public void search(String searchQuery)
+	public String search(String searchQuery)
 	{
+		String results = null;
 		try {
 			String BDBStore = "/home/cis455/SeacheEngineCache";
 			DBWrapper.openDBWrapper(BDBStore);
@@ -60,7 +68,7 @@ public class SearchEngine extends HttpServlet
 			if (cacheDA.getCachedResultsInfo(searchQuery) != null)
 			{
 				System.out.println("Query was cached");
-				getCachedResults(searchQuery);
+				results = getCachedResults(searchQuery);
 				
 			}
 			
@@ -118,7 +126,8 @@ public class SearchEngine extends HttpServlet
 				}
 				
 				System.out.println("Adding query to cache");
-				//CachedResultsInfo cacheInfo = new CachedResultsInfo(searchQuery, resultsForCache.toString(), new Date());
+				results = resultsForCache.toString();
+				//CachedResultsInfo cacheInfo = new CachedResultsInfo(searchQuery, results, new Date());
 				//dbw.putCachedResultsInfo(cacheInfo);
 				System.out.println("Closing dbwrapper");
 				DBWrapper.closeDBWrapper();
@@ -128,6 +137,9 @@ public class SearchEngine extends HttpServlet
 		{
 			e.printStackTrace();
 		}
+		
+		System.out.println("Results are: " + results);
+		return results;
 	}
 	
 	private void computeScores()
@@ -217,7 +229,7 @@ public class SearchEngine extends HttpServlet
 		return allTerms;
 	}
 	
-	public void getCachedResults(String query)
+	public String getCachedResults(String query)
 	{
 		String cachedResults = cacheDA.getCachedResultsInfo(query).getResults();
 		System.out.println("SEARCH RESULTS:");
@@ -225,6 +237,7 @@ public class SearchEngine extends HttpServlet
 		{
 			System.out.println(result);
 		}
+		return cachedResults;
 	}
 	
 	public String stem(String word)
@@ -251,7 +264,7 @@ public class SearchEngine extends HttpServlet
 //		searchEngine.search("pakistan");
 //		searchEngine.search("Adamson university"); 
 		//searchEngine.search("mark zuckerberg");
-		searchEngine.search("bill clinton");
+		searchEngine.search("barack");
 		//searchEngine.search("university of pennsylvania");
 		//searchEngine.search("india");
 		//searchEngine.search("adamson university");
