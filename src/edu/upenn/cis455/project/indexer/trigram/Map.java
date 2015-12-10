@@ -70,6 +70,8 @@ public class Map extends Mapper<LongWritable, Text, Text, Text>
 		while (tokenizer.hasMoreTokens())
 		{
 			word = tokenizer.nextToken();
+			if (word.length() > 1000)
+				continue;
 			word = word.trim().toLowerCase().replaceAll("[^a-z0-9]", "");
 			if (!word.matches("[0-9]+") && !stopwords.contains(word)
 					&& !word.isEmpty())
@@ -81,6 +83,8 @@ public class Map extends Mapper<LongWritable, Text, Text, Text>
 
 	public String getHtmlText(String html)
 	{
+		html = html.replaceAll("<", " <");
+		html = html.replaceAll(">", "> ");
 		Document doc = Jsoup
 				.parse(html.replaceAll("(?i)<br[^>]*>", "<pre>\n</pre>"));
 		String textContent = doc.select("body").text();

@@ -53,19 +53,6 @@ public class Reduce extends Reducer<Text, Text, Text, Text>
 		return docIDset.size();
 	}
 
-	// private ArrayList<Postings> createPostings(){
-	//
-	// ArrayList<Postings> postingsList = new ArrayList<Postings>();
-	// for(String docID: tf.keySet()){
-	// float idf = (float) Math.log(bucketSize/df);// replace later with
-	// bucketsize
-	// float tfidf = tf.get(docID) * idf ;
-	// Postings newPostings = new Postings(docID, tfidf, idf);
-	// postingsList.add(newPostings);
-	// }
-	// Collections.sort(postingsList);
-	// return postingsList;
-	// }
 	private ArrayList<Postings> sortPostings()
 	{
 
@@ -91,10 +78,10 @@ public class Reduce extends Reducer<Text, Text, Text, Text>
 		for (Postings posting : postingsList)
 		{
 			if (i < size)
-				postings.append(posting.getPosting() + " " + posting.getIdf()
+				postings.append(posting.getPosting() + " " + posting.getTfidf()
 						+ " " + posting.getIdf() + "\t");
 			else
-				postings.append(posting.getPosting() + " " + posting.getIdf()
+				postings.append(posting.getPosting() + " " + posting.getTfidf()
 						+ " " + posting.getIdf());
 			i++;
 			if (i > MAX_LIST)

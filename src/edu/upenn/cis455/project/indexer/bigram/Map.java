@@ -28,7 +28,7 @@ public class Map extends Mapper<LongWritable, Text, Text, Text>
 
 	private final Text url = new Text();
 	private ArrayList<String> allWords = new ArrayList<String>();
-	private final String splitOn = " ,.?\"!-[({\r\t\"\'\\_";
+	private final String splitOn = " ,.?\"!-[({\r\t\"\'\\_:";
 
 	@Override
 	public void map(LongWritable key, Text value, Context context)
@@ -67,6 +67,8 @@ public class Map extends Mapper<LongWritable, Text, Text, Text>
 		while (tokenizer.hasMoreTokens())
 		{
 			word = tokenizer.nextToken();
+			if ( word.length() > 500)
+				continue;
 			word = word.trim().toLowerCase().replaceAll("[^a-z0-9]", "");
 			if (!word.matches("[0-9]+") && !stopwords.contains(word)
 					&& !word.isEmpty())
@@ -78,6 +80,8 @@ public class Map extends Mapper<LongWritable, Text, Text, Text>
 
 	public String getHtmlText(String html)
 	{
+		html = html.replaceAll("<", " <");
+		html = html.replaceAll(">", "> ");
 		Document doc = Jsoup
 				.parse(html.replaceAll("(?i)<br[^>]*>", "<pre>\n</pre>"));
 		String textContent = doc.select("body").text();
