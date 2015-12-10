@@ -117,6 +117,7 @@ public class PushToDB extends TimerTask
 			}
 			String host = url.getHost();
 			int port = url.getPort() == -1 ? url.getDefaultPort() : url.getPort();
+			System.out.println("Sending pushdata to host: "+host+" port: "+port);
 			Socket socket = null;
 			PrintWriter clientSocketOut = null;
 			HttpResponse response = null;

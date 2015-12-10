@@ -285,6 +285,7 @@ public class CrawlMasterServlet extends HttpServlet
 		URL url = new URL(workerUrl);
 		String host = url.getHost();
 		int port = url.getPort() == -1 ? url.getDefaultPort() : url.getPort();
+		System.out.println("Sending job in master to host: "+host+" port: "+port);
 		socket = new Socket(host, port);
 		PrintWriter clientSocketOut = new PrintWriter(new OutputStreamWriter(
 				socket.getOutputStream()));
