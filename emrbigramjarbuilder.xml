@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="create_run_jar" name="Create Runnable Jar for Project cis455project with Jar-in-Jar Loader">
+    <!--this file was created by Eclipse Runnable JAR Export Wizard-->
+    <!--ANT 1.7 is required                                        -->
+    <target name="create_run_jar">
+        <jar destfile="/media/sf_shared/emrbigram.jar">
+            <manifest>
+                <attribute name="Main-Class" value="org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader"/>
+                <attribute name="Rsrc-Main-Class" value="edu.upenn.cis455.project.emr.BigramEmrController"/>
+                <attribute name="Class-Path" value="."/>
+                <attribute name="Rsrc-Class-Path" value="./ jtidy-r938.jar junit.jar servlet-api.jar je-6.2.31.jar easymock-3.4.jar jsoup-1.8.3.jar je-6.4.9.jar aws-java-sdk-1.10.38.jar commons-logging-1.1.3.jar jackson-core-2.5.3.jar jackson-annotations-2.5.3.jar commons-codec-1.6.jar javax.mail-api-1.4.6.jar freemarker-2.3.18.jar jackson-databind-2.5.3.jar joda-time-2.8.1.jar spring-core-3.0.7.jar spring-beans-3.0.7.jar spring-context-3.0.7.jar httpcore-4.3.3.jar httpclient-4.3.6.jar aspectjweaver.jar aspectjrt.jar jackson-core-2.6.3.jar hadoop-common-2.0.2-alpha.jar hadoop-mapreduce-client-core-2.0.2-alpha.jar"/>
+            </manifest>
+            <zipfileset src="jar-in-jar-loader.zip"/>
+            <fileset dir="/home/cis455/git/cis455project/target/classes"/>
+            <zipfileset dir="/home/cis455/git/cis455project/lib" includes="jtidy-r938.jar"/>
+            <zipfileset dir="/home/cis455/git/cis455project/lib" includes="junit.jar"/>
+            <zipfileset dir="/home/cis455/git/cis455project/lib" includes="servlet-api.jar"/>
+            <zipfileset dir="/home/cis455/git/cis455project/lib" includes="je-6.2.31.jar"/>
+            <zipfileset dir="/home/cis455/git/cis455project/lib" includes="easymock-3.4.jar"/>
+            <zipfileset dir="/home/cis455/git/cis455project/lib" includes="jsoup-1.8.3.jar"/>
+            <zipfileset dir="/home/cis455/git/cis455project/lib" includes="je-6.4.9.jar"/>
+            <zipfileset dir="/home/cis455/aws-java-sdk/1.10.38/lib" includes="aws-java-sdk-1.10.38.jar"/>
+            <zipfileset dir="/home/cis455/aws-java-sdk/1.10.38/third-party/commons-logging-1.1.3" includes="commons-logging-1.1.3.jar"/>
+            <zipfileset dir="/home/cis455/aws-java-sdk/1.10.38/third-party/jackson-core-2.5.3" includes="jackson-core-2.5.3.jar"/>
+            <zipfileset dir="/home/cis455/aws-java-sdk/1.10.38/third-party/jackson-annotations-2.5.3" includes="jackson-annotations-2.5.3.jar"/>
+            <zipfileset dir="/home/cis455/aws-java-sdk/1.10.38/third-party/commons-codec-1.6" includes="commons-codec-1.6.jar"/>
+            <zipfileset dir="/home/cis455/aws-java-sdk/1.10.38/third-party/javax-mail-1.4.6" includes="javax.mail-api-1.4.6.jar"/>
+            <zipfileset dir="/home/cis455/aws-java-sdk/1.10.38/third-party/freemarker-2.3.18" includes="freemarker-2.3.18.jar"/>
+            <zipfileset dir="/home/cis455/aws-java-sdk/1.10.38/third-party/jackson-databind-2.5.3" includes="jackson-databind-2.5.3.jar"/>
+            <zipfileset dir="/home/cis455/aws-java-sdk/1.10.38/third-party/joda-time-2.8.1" includes="joda-time-2.8.1.jar"/>
+            <zipfileset dir="/home/cis455/aws-java-sdk/1.10.38/third-party/spring-3.0" includes="spring-core-3.0.7.jar"/>
+            <zipfileset dir="/home/cis455/aws-java-sdk/1.10.38/third-party/spring-3.0" includes="spring-beans-3.0.7.jar"/>
+            <zipfileset dir="/home/cis455/aws-java-sdk/1.10.38/third-party/spring-3.0" includes="spring-context-3.0.7.jar"/>
+            <zipfileset dir="/home/cis455/aws-java-sdk/1.10.38/third-party/httpcomponents-client-4.3" includes="httpcore-4.3.3.jar"/>
+            <zipfileset dir="/home/cis455/aws-java-sdk/1.10.38/third-party/httpcomponents-client-4.3" includes="httpclient-4.3.6.jar"/>
+            <zipfileset dir="/home/cis455/aws-java-sdk/1.10.38/third-party/aspectj-1.6" includes="aspectjweaver.jar"/>
+            <zipfileset dir="/home/cis455/aws-java-sdk/1.10.38/third-party/aspectj-1.6" includes="aspectjrt.jar"/>
+            <zipfileset dir="/home/cis455/git/cis455project/lib" includes="jackson-core-2.6.3.jar"/>
+            <zipfileset dir="/home/cis455/git/cis455project/lib" includes="hadoop-common-2.0.2-alpha.jar"/>
+            <zipfileset dir="/home/cis455/git/cis455project/lib" includes="hadoop-mapreduce-client-core-2.0.2-alpha.jar"/>
+        </jar>
+    </target>
+</project>

@@ -21,7 +21,7 @@ import edu.upenn.cis455.project.crawler.Hash;
 
 public class ResultUploaderThread extends Thread
 {
-	private static int MAX_LIST_SIZE = 1000;
+	private static int MAX_LIST_SIZE = 25;
 	private DynamoDB dynamo;
 	private String tableName;
 	private String primaryKeyName;
@@ -68,49 +68,24 @@ public class ResultUploaderThread extends Thread
 			FileReader fileReader = new FileReader(file);
 			BufferedReader reader = new BufferedReader(fileReader);
 			String line;
-			StringBuilder value = new StringBuilder();
 			while ((line = reader.readLine()) != null)
 			{
 				EmrResult emrResult = new EmrResult(line);
 				if (emrResult.isValid())
 				{
-					int count = 0;
-					int range = 0;
-					for (int i = 0; i < emrResult.getValue().length(); i++)
+					results.add(emrResult);
+					while (results.size() > MAX_LIST_SIZE)
 					{
-						if (emrResult.getValue().charAt(i) == '\t')
-						{
-							count++;
-							if (count > 100)
-							{
-								EmrResult result = new EmrResult(
-										emrResult.getKey(), value.toString());
-								value.setLength(0);
-								results.add(result);
-								while (results.size() > MAX_LIST_SIZE)
-								{
-									List<EmrResult> resultsToBeWritten = results
-											.subList(0, MAX_LIST_SIZE);
-									range = batchWriteEmrResults(
-											resultsToBeWritten, range);
-									results.removeAll(resultsToBeWritten);
-								}
-								count = 0;
-							}
-							else
-							{
-								value.append(emrResult.getValue().charAt(i));
-							}
-						}
-						else
-						{
-							value.append(emrResult.getValue().charAt(i));
-						}
+						List<EmrResult> resultsToBeWritten = results.subList(0,
+								MAX_LIST_SIZE);
+						batchWriteEmrResults(resultsToBeWritten, 0);
+						results.removeAll(resultsToBeWritten);
 					}
-					if (results.size() > 0)
-					{
-						batchWriteEmrResults(results, range);
-					}
+
+				}
+				if (results.size() > 0)
+				{
+					batchWriteEmrResults(results, 0);
 				}
 			}
 			reader.close();

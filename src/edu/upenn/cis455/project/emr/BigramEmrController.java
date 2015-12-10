@@ -6,37 +6,22 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
-import com.amazonaws.services.dynamodbv2.document.BatchWriteItemOutcome;
-import com.amazonaws.services.dynamodbv2.document.DynamoDB;
-import com.amazonaws.services.dynamodbv2.document.Item;
-import com.amazonaws.services.dynamodbv2.document.PrimaryKey;
-import com.amazonaws.services.dynamodbv2.document.TableWriteItems;
-import com.amazonaws.services.dynamodbv2.model.WriteRequest;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.ListObjectsRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import edu.upenn.cis455.project.bean.EmrResult;
-import edu.upenn.cis455.project.crawler.Hash;
-import edu.upenn.cis455.project.storage.S3EmrDA;
-
-public class IndexerEmrController
+public class BigramEmrController
 {
 	private static AmazonS3Client s3Client = new AmazonS3Client(
 			getCredentials());
@@ -51,7 +36,7 @@ public class IndexerEmrController
 	private static String clusterId = "j-Q5KFD4DZEMVI";
 	private static String clusterName = "indexer cluster";
 	private static String ec2AccessKeyName = "test";
-	private static String tableName = "IndexerTest";
+	private static String tableName = "Bigram";
 	private static String primaryKeyName = "Word";
 	private static String rangeKeyName = "Range";
 	private static String valueKeyName = "Postings";
@@ -101,7 +86,7 @@ public class IndexerEmrController
 		// controller.s3ToDynamoPostings(controller.getObjectNamesForBucket());
 		//List<String> docs = getObjectNamesForBucket(projectDocumentBucket);
 		System.out.println(docs.size());*/
-		//moveEmrResultToDynamo();
+		moveEmrResultToDynamo();
 		System.out.println("Indexer Terminated");
 		System.out.println(new Date());
 	}
@@ -110,9 +95,9 @@ public class IndexerEmrController
 	{
 		try
 		{
-			String folderPath = "./documents";
-			String emrResultsBucket = "edu.upenn.cis455.project.indexer.indexed.large/unigram";
-			int result = 0;// syncBucket(emrResultsBucket, folderPath);
+			String folderPath = "./documentsBigram";
+			String emrResultsBucket = "edu.upenn.cis455.project.indexer.indexed.large/bigram";
+			int result = syncBucket(emrResultsBucket, folderPath);
 			if (result == 0)
 			{
 				System.out.println("Indexer Controller : Syncing done");
@@ -162,6 +147,10 @@ public class IndexerEmrController
 
 		}
 		catch (InterruptedException e)
+		{
+			e.printStackTrace();
+		}
+		catch (IOException e)
 		{
 			e.printStackTrace();
 		}
