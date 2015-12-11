@@ -23,27 +23,32 @@ public class CrawlerThread implements Runnable
 
 	/** The url queue. */
 	private Queue<String> urlQueue;
-	
+
 	/** The status. */
 	private WorkerStatus status;
-	
+
 	/** The self_id. */
 	private int self_id;
-	
+
 	/** The num_workers. */
 	private int num_workers;
-	
+
 	/** The crawled docs. */
 	private ArrayList<DocumentRecord> crawledDocs;
 
 	/**
 	 * Instantiates a new crawler thread.
 	 *
-	 * @param urlQueue the url queue
-	 * @param status the status
-	 * @param self_id the self_id
-	 * @param num_workers the num_workers
-	 * @param crawledDocs the crawled docs
+	 * @param urlQueue
+	 *            the url queue
+	 * @param status
+	 *            the status
+	 * @param self_id
+	 *            the self_id
+	 * @param num_workers
+	 *            the num_workers
+	 * @param crawledDocs
+	 *            the crawled docs
 	 */
 	public CrawlerThread(Queue<String> urlQueue, WorkerStatus status,
 			int self_id, int num_workers, ArrayList<DocumentRecord> crawledDocs)

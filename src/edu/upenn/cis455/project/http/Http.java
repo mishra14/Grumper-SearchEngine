@@ -22,9 +22,11 @@ public class Http
 	/**
 	 * Parses the response.
 	 *
-	 * @param connection the connection
+	 * @param connection
+	 *            the connection
 	 * @return the http response
-	 * @throws IOException Signals that an I/O exception has occurred.
+	 * @throws IOException
+	 *             Signals that an I/O exception has occurred.
 	 */
 	public static HttpResponse parseResponse(HttpsURLConnection connection)
 			throws IOException
@@ -67,9 +69,11 @@ public class Http
 	/**
 	 * Parses the response.
 	 *
-	 * @param socket the socket
+	 * @param socket
+	 *            the socket
 	 * @return the http response
-	 * @throws IOException             Signals that an I/O exception has occurred.
+	 * @throws IOException
+	 *             Signals that an I/O exception has occurred.
 	 */
 	public static HttpResponse parseResponse(Socket socket) throws IOException
 	{

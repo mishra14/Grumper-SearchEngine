@@ -16,7 +16,8 @@ public class RankDA
 	/**
 	 * Gets the rank.
 	 *
-	 * @param url the url
+	 * @param url
+	 *            the url
 	 * @return the rank
 	 */
 	public static Rank getRank(String url)
@@ -37,7 +38,8 @@ public class RankDA
 	/**
 	 * Put rank.
 	 *
-	 * @param rank the rank
+	 * @param rank
+	 *            the rank
 	 * @return the rank
 	 */
 	public static Rank putRank(Rank rank)
@@ -58,7 +60,8 @@ public class RankDA
 	/**
 	 * Removes the document.
 	 *
-	 * @param url the url
+	 * @param url
+	 *            the url
 	 * @return true, if successful
 	 */
 	public static boolean removeDocument(String url)

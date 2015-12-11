@@ -19,22 +19,25 @@ import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType;
  */
 public class PageRankDynamoThread extends Thread
 {
-	
+
 	/** The table name. */
 	private String tableName;
-	
+
 	/** The read capacity. */
 	private long readCapacity;
-	
+
 	/** The write capacity. */
 	private long writeCapacity;
 
 	/**
 	 * Instantiates a new page rank dynamo thread.
 	 *
-	 * @param tableName the table name
-	 * @param readCapacity the read capacity
-	 * @param initialWriteCapacity the initial write capacity
+	 * @param tableName
+	 *            the table name
+	 * @param readCapacity
+	 *            the read capacity
+	 * @param initialWriteCapacity
+	 *            the initial write capacity
 	 */
 	public PageRankDynamoThread(String tableName, long readCapacity,
 			long initialWriteCapacity)
@@ -64,7 +67,8 @@ public class PageRankDynamoThread extends Thread
 	/**
 	 * Creates the new table.
 	 *
-	 * @throws InterruptedException the interrupted exception
+	 * @throws InterruptedException
+	 *             the interrupted exception
 	 */
 	private void createNewTable() throws InterruptedException
 	{
@@ -97,7 +101,8 @@ public class PageRankDynamoThread extends Thread
 	/**
 	 * Delete old table.
 	 *
-	 * @throws InterruptedException the interrupted exception
+	 * @throws InterruptedException
+	 *             the interrupted exception
 	 */
 	private void deleteOldTable() throws InterruptedException
 	{
@@ -111,9 +116,12 @@ public class PageRankDynamoThread extends Thread
 	/**
 	 * Update table write capacity.
 	 *
-	 * @param readCapacity the read capacity
-	 * @param writeCapacity the write capacity
-	 * @throws InterruptedException the interrupted exception
+	 * @param readCapacity
+	 *            the read capacity
+	 * @param writeCapacity
+	 *            the write capacity
+	 * @throws InterruptedException
+	 *             the interrupted exception
 	 */
 	public void updateTableWriteCapacity(long readCapacity, long writeCapacity)
 			throws InterruptedException

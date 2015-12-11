@@ -18,13 +18,13 @@ public class RobotsTxtInfo
 
 	/** The disallowed links. */
 	private HashMap<String, ArrayList<String>> disallowedLinks;
-	
+
 	/** The allowed links. */
 	private HashMap<String, ArrayList<String>> allowedLinks;
 
 	/** The crawl delays. */
 	private HashMap<String, Integer> crawlDelays;
-	
+
 	/** The sitemap links. */
 	private ArrayList<String> sitemapLinks;
 
@@ -46,8 +46,10 @@ public class RobotsTxtInfo
 	/**
 	 * Adds the disallowed link.
 	 *
-	 * @param key the key
-	 * @param value the value
+	 * @param key
+	 *            the key
+	 * @param value
+	 *            the value
 	 */
 	public void addDisallowedLink(String key, String value)
 	{
@@ -70,8 +72,10 @@ public class RobotsTxtInfo
 	/**
 	 * Adds the allowed link.
 	 *
-	 * @param key the key
-	 * @param value the value
+	 * @param key
+	 *            the key
+	 * @param value
+	 *            the value
 	 */
 	public void addAllowedLink(String key, String value)
 	{
@@ -94,8 +98,10 @@ public class RobotsTxtInfo
 	/**
 	 * Adds the crawl delay.
 	 *
-	 * @param key the key
-	 * @param value the value
+	 * @param key
+	 *            the key
+	 * @param value
+	 *            the value
 	 */
 	public void addCrawlDelay(String key, Integer value)
 	{
@@ -105,7 +111,8 @@ public class RobotsTxtInfo
 	/**
 	 * Adds the sitemap link.
 	 *
-	 * @param val the val
+	 * @param val
+	 *            the val
 	 */
 	public void addSitemapLink(String val)
 	{
@@ -115,7 +122,8 @@ public class RobotsTxtInfo
 	/**
 	 * Adds the user agent.
 	 *
-	 * @param key the key
+	 * @param key
+	 *            the key
 	 */
 	public void addUserAgent(String key)
 	{
@@ -125,7 +133,8 @@ public class RobotsTxtInfo
 	/**
 	 * Contains user agent.
 	 *
-	 * @param key the key
+	 * @param key
+	 *            the key
 	 * @return true, if successful
 	 */
 	public boolean containsUserAgent(String key)
@@ -136,7 +145,8 @@ public class RobotsTxtInfo
 	/**
 	 * Gets the disallowed links.
 	 *
-	 * @param key the key
+	 * @param key
+	 *            the key
 	 * @return the disallowed links
 	 */
 	public ArrayList<String> getDisallowedLinks(String key)
@@ -147,7 +157,8 @@ public class RobotsTxtInfo
 	/**
 	 * Gets the allowed links.
 	 *
-	 * @param key the key
+	 * @param key
+	 *            the key
 	 * @return the allowed links
 	 */
 	public ArrayList<String> getAllowedLinks(String key)
@@ -158,7 +169,8 @@ public class RobotsTxtInfo
 	/**
 	 * Gets the crawl delay.
 	 *
-	 * @param key the key
+	 * @param key
+	 *            the key
 	 * @return the crawl delay
 	 */
 	public int getCrawlDelay(String key)
@@ -203,7 +215,8 @@ public class RobotsTxtInfo
 	/**
 	 * Crawl contain agent.
 	 *
-	 * @param key the key
+	 * @param key
+	 *            the key
 	 * @return true, if successful
 	 */
 	public boolean crawlContainAgent(String key)
@@ -214,9 +227,11 @@ public class RobotsTxtInfo
 	/**
 	 * Parses the robots txt.
 	 *
-	 * @param robots the robots
+	 * @param robots
+	 *            the robots
 	 * @return the robots txt info
-	 * @throws NumberFormatException the number format exception
+	 * @throws NumberFormatException
+	 *             the number format exception
 	 */
 	public static RobotsTxtInfo parseRobotsTxt(String robots)
 			throws NumberFormatException

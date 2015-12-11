@@ -26,10 +26,10 @@ public class MasterPingThread extends Thread
 
 	/** The inactive interval. */
 	private static long INACTIVE_INTERVAL = 30000;
-	
+
 	/** The sleep interval. */
 	private static long SLEEP_INTERVAL = 10000;
-	
+
 	/** The workers. */
 	private Map<String, WorkerStatus> workers;
 
@@ -42,8 +42,10 @@ public class MasterPingThread extends Thread
 	/**
 	 * Instantiates a new ping thread.
 	 *
-	 * @param workers the workers
-	 * @param workerList the worker list
+	 * @param workers
+	 *            the workers
+	 * @param workerList
+	 *            the worker list
 	 */
 	public MasterPingThread(Map<String, WorkerStatus> workers,
 			List<String> workerList)
@@ -127,10 +129,14 @@ public class MasterPingThread extends Thread
 	/**
 	 * Send updated list to worker.
 	 *
-	 * @param worker the worker
-	 * @param body the body
-	 * @throws UnknownHostException the unknown host exception
-	 * @throws IOException Signals that an I/O exception has occurred.
+	 * @param worker
+	 *            the worker
+	 * @param body
+	 *            the body
+	 * @throws UnknownHostException
+	 *             the unknown host exception
+	 * @throws IOException
+	 *             Signals that an I/O exception has occurred.
 	 */
 	private void sendUpdatedListToWorker(String worker, String body)
 			throws UnknownHostException, IOException

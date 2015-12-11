@@ -26,17 +26,18 @@ import edu.upenn.cis455.project.bean.EmrResult;
  */
 public class S3EmrDA
 {
-	
+
 	/** The bucket name. */
 	private String bucketName;
-	
+
 	/** The s3client. */
 	private AmazonS3 s3client;
 
 	/**
 	 * Instantiates a new s3 emr da.
 	 *
-	 * @param bucketName the bucket name
+	 * @param bucketName
+	 *            the bucket name
 	 */
 	public S3EmrDA(String bucketName)
 	{
@@ -84,7 +85,8 @@ public class S3EmrDA
 	/**
 	 * Gets the emr result.
 	 *
-	 * @param prefix the prefix
+	 * @param prefix
+	 *            the prefix
 	 * @return the emr result
 	 */
 	public List<EmrResult> getEmrResult(String prefix)
@@ -126,7 +128,8 @@ public class S3EmrDA
 	/**
 	 * Delete emr result.
 	 *
-	 * @param prefix the prefix
+	 * @param prefix
+	 *            the prefix
 	 */
 	public void deleteEmrResult(String prefix)
 	{

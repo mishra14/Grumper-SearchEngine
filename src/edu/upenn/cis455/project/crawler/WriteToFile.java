@@ -11,12 +11,14 @@ import java.io.PrintWriter;
  */
 public class WriteToFile
 {
-	
+
 	/**
 	 * Write.
 	 *
-	 * @param url the url
-	 * @param idx the idx
+	 * @param url
+	 *            the url
+	 * @param idx
+	 *            the idx
 	 */
 	public static synchronized void write(String url, int idx)
 	{

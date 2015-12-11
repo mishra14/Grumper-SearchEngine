@@ -27,63 +27,67 @@ import com.fasterxml.jackson.core.JsonProcessingException;
  */
 public class BigramEmrController
 {
-	
+
 	/** The s3 client. */
 	private static AmazonS3Client s3Client = new AmazonS3Client(
 			getCredentials());
-	
+
 	/** The project document bucket. */
 	private static String projectDocumentBucket = "edu.upenn.cis455.project.documents";
-	
+
 	/** The indexer document bucket. */
 	private static String indexerDocumentBucket = "edu.upenn.cis455.project.indexer.documents.large2";
-	
+
 	/** The emr input path. */
 	private static String emrInputPath = "s3://test-indexer/";
-	
+
 	/** The emr output bucket name. */
 	private static String emrOutputBucketName = "edu.upenn.cis455.project.indexer";
-	
+
 	/** The emr output prefix. */
 	private static String emrOutputPrefix = "output";
-	
+
 	/** The cluster log path. */
 	private static String clusterLogPath = "s3://edu.upenn.cis455.project.indexer/log";
-	
+
 	/** The emr jar path. */
 	private static String emrJarPath = "s3://edu.upenn.cis455.project.indexer/code/indexerUnigram.jar";
-	
+
 	/** The emr step name. */
 	private static String emrStepName = "indexer";
-	
+
 	/** The cluster id. */
 	private static String clusterId = "j-Q5KFD4DZEMVI";
-	
+
 	/** The cluster name. */
 	private static String clusterName = "indexer cluster";
-	
+
 	/** The ec2 access key name. */
 	private static String ec2AccessKeyName = "test";
-	
+
 	/** The table name. */
 	private static String tableName = "Bigram";
-	
+
 	/** The primary key name. */
 	private static String primaryKeyName = "Word";
-	
+
 	/** The range key name. */
 	private static String rangeKeyName = "Range";
-	
+
 	/** The value key name. */
 	private static String valueKeyName = "Postings";
 
 	/**
 	 * The main method.
 	 *
-	 * @param args the arguments
-	 * @throws NoSuchAlgorithmException the no such algorithm exception
-	 * @throws JsonProcessingException the json processing exception
-	 * @throws InterruptedException the interrupted exception
+	 * @param args
+	 *            the arguments
+	 * @throws NoSuchAlgorithmException
+	 *             the no such algorithm exception
+	 * @throws JsonProcessingException
+	 *             the json processing exception
+	 * @throws InterruptedException
+	 *             the interrupted exception
 	 */
 	public static void main(String[] args) throws NoSuchAlgorithmException,
 			JsonProcessingException, InterruptedException
@@ -206,11 +210,15 @@ public class BigramEmrController
 	/**
 	 * Sync bucket.
 	 *
-	 * @param bucketName the bucket name
-	 * @param path the path
+	 * @param bucketName
+	 *            the bucket name
+	 * @param path
+	 *            the path
 	 * @return the int
-	 * @throws IOException Signals that an I/O exception has occurred.
-	 * @throws InterruptedException the interrupted exception
+	 * @throws IOException
+	 *             Signals that an I/O exception has occurred.
+	 * @throws InterruptedException
+	 *             the interrupted exception
 	 */
 	public static int syncBucket(String bucketName, String path)
 			throws IOException, InterruptedException
@@ -235,7 +243,8 @@ public class BigramEmrController
 	/**
 	 * Gets the object names for bucket.
 	 *
-	 * @param bucketName the bucket name
+	 * @param bucketName
+	 *            the bucket name
 	 * @return the object names for bucket
 	 */
 	public static List<String> getObjectNamesForBucket(String bucketName)
@@ -316,7 +325,8 @@ public class BigramEmrController
 	/**
 	 * Reset directory.
 	 *
-	 * @param path the path
+	 * @param path
+	 *            the path
 	 */
 	public static void resetDirectory(String path)
 	{

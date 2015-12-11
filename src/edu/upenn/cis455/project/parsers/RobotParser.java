@@ -11,10 +11,10 @@ import edu.upenn.cis455.project.crawler.info.RobotsTxtInfo;
  */
 public class RobotParser
 {
-	
+
 	/** The comment. */
 	private Pattern comment = Pattern.compile("\\s*#.*");
-	
+
 	/** The info. */
 	private RobotsTxtInfo info;
 
@@ -31,7 +31,8 @@ public class RobotParser
 	/**
 	 * Parses the.
 	 *
-	 * @param text the text
+	 * @param text
+	 *            the text
 	 */
 	public void parse(String text)
 	{

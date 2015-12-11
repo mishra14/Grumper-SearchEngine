@@ -12,11 +12,11 @@ import com.sleepycat.persist.model.PrimaryKey;
 @Entity
 public class User
 {
-	
+
 	/** The user name. */
 	@PrimaryKey
 	private String userName;
-	
+
 	/** The password. */
 	private String password;
 
@@ -31,8 +31,10 @@ public class User
 	/**
 	 * Instantiates a new user.
 	 *
-	 * @param userName the user name
-	 * @param password the password
+	 * @param userName
+	 *            the user name
+	 * @param password
+	 *            the password
 	 */
 	public User(String userName, String password)
 	{
@@ -54,7 +56,8 @@ public class User
 	/**
 	 * Sets the user name.
 	 *
-	 * @param userName the new user name
+	 * @param userName
+	 *            the new user name
 	 */
 	public void setUserName(String userName)
 	{
@@ -74,7 +77,8 @@ public class User
 	/**
 	 * Sets the password.
 	 *
-	 * @param password the new password
+	 * @param password
+	 *            the new password
 	 */
 	public void setPassword(String password)
 	{

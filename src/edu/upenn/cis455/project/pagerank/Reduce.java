@@ -13,10 +13,10 @@ import edu.upenn.cis455.project.storage.DynamoDA;
  */
 public class Reduce extends Reducer<Text, Text, Text, Text>
 {
-	
+
 	/** The Constant damper. */
 	private static final Float damper = (float) 0.6;
-	
+
 	/** The dynamo. */
 	private DynamoDA<Float> dynamo = new DynamoDA<Float>(
 			"edu.upenn.cis455.project.pagerank", Float.class);

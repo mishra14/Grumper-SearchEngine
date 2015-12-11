@@ -21,10 +21,10 @@ public class RobotsInfo
 
 	/** The robots info. */
 	private RobotsTxtInfo robotsInfo;
-	
+
 	/** The agent match. */
 	private String agentMatch;
-	
+
 	/** The last accessed. */
 	private Date lastAccessed;
 
@@ -41,7 +41,8 @@ public class RobotsInfo
 	/**
 	 * Sets the domain.
 	 *
-	 * @param domain the new domain
+	 * @param domain
+	 *            the new domain
 	 */
 	public void setDomain(String domain)
 	{
@@ -61,7 +62,8 @@ public class RobotsInfo
 	/**
 	 * Sets the robots info.
 	 *
-	 * @param robotsInfo the new robots info
+	 * @param robotsInfo
+	 *            the new robots info
 	 */
 	public void setRobotsInfo(RobotsTxtInfo robotsInfo)
 	{
@@ -82,7 +84,8 @@ public class RobotsInfo
 	/**
 	 * Sets the agent match.
 	 *
-	 * @param agentMatch the new agent match
+	 * @param agentMatch
+	 *            the new agent match
 	 */
 	private void setAgentMatch(String agentMatch)
 	{
@@ -113,7 +116,8 @@ public class RobotsInfo
 	/**
 	 * Sets the last accessed.
 	 *
-	 * @param lastAccessed the new last accessed
+	 * @param lastAccessed
+	 *            the new last accessed
 	 */
 	public void setLastAccessed(Date lastAccessed)
 	{

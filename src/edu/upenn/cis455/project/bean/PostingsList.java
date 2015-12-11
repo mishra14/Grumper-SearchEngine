@@ -8,18 +8,20 @@ import java.util.Map;
  */
 public class PostingsList
 {
-	
+
 	/** The df. */
 	private int df;
-	
+
 	/** The postings. */
 	private Map<String, Integer> postings;
 
 	/**
 	 * Instantiates a new postings list.
 	 *
-	 * @param df the df
-	 * @param postings the postings
+	 * @param df
+	 *            the df
+	 * @param postings
+	 *            the postings
 	 */
 	public PostingsList(int df, Map<String, Integer> postings)
 	{
@@ -41,7 +43,8 @@ public class PostingsList
 	/**
 	 * Sets the df.
 	 *
-	 * @param df the new df
+	 * @param df
+	 *            the new df
 	 */
 	public void setDf(int df)
 	{
@@ -61,7 +64,8 @@ public class PostingsList
 	/**
 	 * Sets the postings.
 	 *
-	 * @param postings the postings
+	 * @param postings
+	 *            the postings
 	 */
 	public void setPostings(Map<String, Integer> postings)
 	{

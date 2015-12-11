@@ -29,32 +29,36 @@ import edu.upenn.cis455.project.crawler.Hash;
  */
 public class DocumentMergerThread extends Thread
 {
-	
+
 	/** The Constant MAX_DOCUMENT_SIZE. */
 	private static final long MAX_DOCUMENT_SIZE = 60000000;
-	
+
 	/** The id. */
 	private int id;
-	
+
 	/** The project document bucket. */
 	private String projectDocumentBucket;
-	
+
 	/** The merged document bucket. */
 	private String mergedDocumentBucket;
-	
+
 	/** The object names. */
 	private List<String> objectNames;
-	
+
 	/** The s3 client. */
 	private AmazonS3Client s3Client;
 
 	/**
 	 * Instantiates a new document merger thread.
 	 *
-	 * @param projectDocumentBucket the project document bucket
-	 * @param mergedDocumentBucket the merged document bucket
-	 * @param objectNames the object names
-	 * @param id the id
+	 * @param projectDocumentBucket
+	 *            the project document bucket
+	 * @param mergedDocumentBucket
+	 *            the merged document bucket
+	 * @param objectNames
+	 *            the object names
+	 * @param id
+	 *            the id
 	 */
 	public DocumentMergerThread(String projectDocumentBucket,
 			String mergedDocumentBucket, List<String> objectNames, int id)
@@ -94,8 +98,10 @@ public class DocumentMergerThread extends Thread
 	/**
 	 * Merge crawled documents.
 	 *
-	 * @throws NoSuchAlgorithmException the no such algorithm exception
-	 * @throws JsonProcessingException the json processing exception
+	 * @throws NoSuchAlgorithmException
+	 *             the no such algorithm exception
+	 * @throws JsonProcessingException
+	 *             the json processing exception
 	 */
 	public void mergeCrawledDocuments() throws NoSuchAlgorithmException,
 			JsonProcessingException
@@ -134,8 +140,10 @@ public class DocumentMergerThread extends Thread
 	/**
 	 * Gets the document.
 	 *
-	 * @param bucketName the bucket name
-	 * @param prefix the prefix
+	 * @param bucketName
+	 *            the bucket name
+	 * @param prefix
+	 *            the prefix
 	 * @return the document
 	 */
 	public DocumentRecord getDocument(String bucketName, String prefix)
@@ -179,11 +187,15 @@ public class DocumentMergerThread extends Thread
 	/**
 	 * Write documents.
 	 *
-	 * @param mergedDocuments the merged documents
-	 * @param bucketName the bucket name
+	 * @param mergedDocuments
+	 *            the merged documents
+	 * @param bucketName
+	 *            the bucket name
 	 * @return the string
-	 * @throws NoSuchAlgorithmException the no such algorithm exception
-	 * @throws JsonProcessingException the json processing exception
+	 * @throws NoSuchAlgorithmException
+	 *             the no such algorithm exception
+	 * @throws JsonProcessingException
+	 *             the json processing exception
 	 */
 	public String writeDocuments(List<DocumentRecord> mergedDocuments,
 			String bucketName) throws NoSuchAlgorithmException,

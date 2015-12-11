@@ -24,17 +24,18 @@ import edu.upenn.cis455.project.storage.RobotsInfoDA;
  */
 public class HttpClient
 {
-	
+
 	/** The url queue. */
 	private Queue<String> urlQueue;
-	
+
 	/** The content_type. */
 	private String content_type = null;
 
 	/**
 	 * Instantiates a new http client.
 	 *
-	 * @param urlQueue the url queue
+	 * @param urlQueue
+	 *            the url queue
 	 */
 	public HttpClient(Queue<String> urlQueue)
 	{
@@ -54,9 +55,11 @@ public class HttpClient
 	/**
 	 * Send head.
 	 *
-	 * @param url the url
+	 * @param url
+	 *            the url
 	 * @return true, if successful
-	 * @throws IOException Signals that an I/O exception has occurred.
+	 * @throws IOException
+	 *             Signals that an I/O exception has occurred.
 	 */
 	public boolean sendHead(String url) throws IOException
 	{
@@ -66,10 +69,13 @@ public class HttpClient
 	/**
 	 * Sends HEAD request.
 	 *
-	 * @param url the url
-	 * @param lastAccessed            date
+	 * @param url
+	 *            the url
+	 * @param lastAccessed
+	 *            date
 	 * @return true if response code is 200
-	 * @throws IOException Signals that an I/O exception has occurred.
+	 * @throws IOException
+	 *             Signals that an I/O exception has occurred.
 	 */
 	public boolean sendHead(String url, Date lastAccessed) throws IOException
 	{
@@ -180,9 +186,12 @@ public class HttpClient
 	/**
 	 * Fetch robots.txt and store in db
 	 *
-	 * @param robots            url
-	 * @param domain the domain
-	 * @throws Exception the exception
+	 * @param robots
+	 *            url
+	 * @param domain
+	 *            the domain
+	 * @throws Exception
+	 *             the exception
 	 */
 	public void fetchRobots(String robots, String domain) throws Exception
 	{
@@ -201,9 +210,11 @@ public class HttpClient
 	/**
 	 * Fetches the requested document and parses the url.
 	 *
-	 * @param url the url
+	 * @param url
+	 *            the url
 	 * @return the document in string format
-	 * @throws IOException Signals that an I/O exception has occurred.
+	 * @throws IOException
+	 *             Signals that an I/O exception has occurred.
 	 */
 	public String fetch(String url) throws IOException
 	{

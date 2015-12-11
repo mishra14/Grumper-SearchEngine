@@ -12,18 +12,20 @@ import edu.upenn.cis455.project.storage.S3DocumentDA;
  */
 public class PushToDB extends TimerTask
 {
-	
+
 	/** The num workers. */
 	private int numWorkers;
-	
+
 	/** The crawled docs. */
 	private ArrayList<DocumentRecord> crawledDocs;
 
 	/**
 	 * Instantiates a new push to db.
 	 *
-	 * @param numWorkers the num workers
-	 * @param crawledDocs the crawled docs
+	 * @param numWorkers
+	 *            the num workers
+	 * @param crawledDocs
+	 *            the crawled docs
 	 */
 	public PushToDB(int numWorkers, ArrayList<DocumentRecord> crawledDocs)
 	{

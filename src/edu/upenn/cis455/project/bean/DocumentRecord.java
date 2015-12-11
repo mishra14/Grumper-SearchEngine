@@ -32,16 +32,16 @@ public class DocumentRecord
 	/** The document id. */
 	@PrimaryKey
 	private String documentId;
-	
+
 	/** The document string. */
 	private String documentString;
-	
+
 	/** The html. */
 	private boolean html;
-	
+
 	/** The xml. */
 	private boolean xml;
-	
+
 	/** The last crawled. */
 	private long lastCrawled;
 
@@ -59,11 +59,16 @@ public class DocumentRecord
 	/**
 	 * Instantiates a new document record.
 	 *
-	 * @param documentId the document id
-	 * @param documentString the document string
-	 * @param html the html
-	 * @param xml the xml
-	 * @param lastCrawled the last crawled
+	 * @param documentId
+	 *            the document id
+	 * @param documentString
+	 *            the document string
+	 * @param html
+	 *            the html
+	 * @param xml
+	 *            the xml
+	 * @param lastCrawled
+	 *            the last crawled
 	 */
 	public DocumentRecord(String documentId, String documentString,
 			boolean html, boolean xml, long lastCrawled)
@@ -79,9 +84,12 @@ public class DocumentRecord
 	/**
 	 * Instantiates a new document record.
 	 *
-	 * @param documentId the document id
-	 * @param documentString the document string
-	 * @param lastCrawled the last crawled
+	 * @param documentId
+	 *            the document id
+	 * @param documentString
+	 *            the document string
+	 * @param lastCrawled
+	 *            the last crawled
 	 */
 	public DocumentRecord(String documentId, String documentString,
 			long lastCrawled)
@@ -106,7 +114,8 @@ public class DocumentRecord
 	/**
 	 * Sets the document id.
 	 *
-	 * @param documentId the new document id
+	 * @param documentId
+	 *            the new document id
 	 */
 	public void setDocumentId(String documentId)
 	{
@@ -126,7 +135,8 @@ public class DocumentRecord
 	/**
 	 * Sets the document.
 	 *
-	 * @param documentString the new document
+	 * @param documentString
+	 *            the new document
 	 */
 	public void setDocument(String documentString)
 	{
@@ -146,7 +156,8 @@ public class DocumentRecord
 	/**
 	 * Sets the html.
 	 *
-	 * @param html the new html
+	 * @param html
+	 *            the new html
 	 */
 	public void setHtml(boolean html)
 	{
@@ -176,7 +187,8 @@ public class DocumentRecord
 	/**
 	 * Sets the last crawled.
 	 *
-	 * @param lastCrawled the new last crawled
+	 * @param lastCrawled
+	 *            the new last crawled
 	 */
 	public void setLastCrawled(long lastCrawled)
 	{
@@ -186,7 +198,8 @@ public class DocumentRecord
 	/**
 	 * Gets the date.
 	 *
-	 * @param dateString the date string
+	 * @param dateString
+	 *            the date string
 	 * @return the date
 	 */
 	public static Date getDate(String dateString)
@@ -217,9 +230,12 @@ public class DocumentRecord
 	 * Gets the document.
 	 *
 	 * @return the document
-	 * @throws ParserConfigurationException the parser configuration exception
-	 * @throws SAXException the SAX exception
-	 * @throws IOException Signals that an I/O exception has occurred.
+	 * @throws ParserConfigurationException
+	 *             the parser configuration exception
+	 * @throws SAXException
+	 *             the SAX exception
+	 * @throws IOException
+	 *             Signals that an I/O exception has occurred.
 	 */
 	public Document getDocument() throws ParserConfigurationException,
 			SAXException, IOException

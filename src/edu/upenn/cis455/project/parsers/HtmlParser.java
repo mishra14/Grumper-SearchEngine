@@ -14,13 +14,16 @@ import edu.upenn.cis455.project.bean.Queue;
  */
 public class HtmlParser
 {
-	
+
 	/**
 	 * Parses the.
 	 *
-	 * @param content the content
-	 * @param url the url
-	 * @param urlQueue the url queue
+	 * @param content
+	 *            the content
+	 * @param url
+	 *            the url
+	 * @param urlQueue
+	 *            the url queue
 	 */
 	public static void parse(String content, String url, Queue<String> urlQueue)
 	{
@@ -31,8 +34,10 @@ public class HtmlParser
 	/**
 	 * Extract links.
 	 *
-	 * @param doc the doc
-	 * @param urlQueue the url queue
+	 * @param doc
+	 *            the doc
+	 * @param urlQueue
+	 *            the url queue
 	 */
 	private static void extractLinks(Document doc, Queue<String> urlQueue)
 	{

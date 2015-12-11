@@ -11,17 +11,17 @@ import com.sleepycat.persist.model.PrimaryKey;
 @Entity
 public class UrlList
 {
-	
+
 	/** The parent url. */
 	@PrimaryKey
 	private String parentUrl;
-	
+
 	/** The urls. */
 	private Set<String> urls;
-	
+
 	/** The updated. */
 	private boolean updated;
-	
+
 	/** The last crawled. */
 	private long lastCrawled;
 
@@ -36,10 +36,14 @@ public class UrlList
 	/**
 	 * Instantiates a new url list.
 	 *
-	 * @param parentUrl the parent url
-	 * @param urls the urls
-	 * @param updated the updated
-	 * @param lastCrawled the last crawled
+	 * @param parentUrl
+	 *            the parent url
+	 * @param urls
+	 *            the urls
+	 * @param updated
+	 *            the updated
+	 * @param lastCrawled
+	 *            the last crawled
 	 */
 	public UrlList(String parentUrl, Set<String> urls, boolean updated,
 			long lastCrawled)
@@ -64,7 +68,8 @@ public class UrlList
 	/**
 	 * Sets the parent url.
 	 *
-	 * @param parentUrl the new parent url
+	 * @param parentUrl
+	 *            the new parent url
 	 */
 	public void setParentUrl(String parentUrl)
 	{
@@ -84,7 +89,8 @@ public class UrlList
 	/**
 	 * Sets the urls.
 	 *
-	 * @param urls the new urls
+	 * @param urls
+	 *            the new urls
 	 */
 	public void setUrls(Set<String> urls)
 	{
@@ -104,7 +110,8 @@ public class UrlList
 	/**
 	 * Sets the updated.
 	 *
-	 * @param updated the new updated
+	 * @param updated
+	 *            the new updated
 	 */
 	public void setUpdated(boolean updated)
 	{
@@ -124,7 +131,8 @@ public class UrlList
 	/**
 	 * Sets the last crawled.
 	 *
-	 * @param lastCrawled the new last crawled
+	 * @param lastCrawled
+	 *            the new last crawled
 	 */
 	public void setLastCrawled(long lastCrawled)
 	{

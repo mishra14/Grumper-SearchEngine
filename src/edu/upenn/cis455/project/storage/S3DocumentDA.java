@@ -33,16 +33,16 @@ import edu.upenn.cis455.project.crawler.Hash;
  */
 public class S3DocumentDA
 {
-	
+
 	/** The bucket name. */
 	private String bucketName;
-	
+
 	/** The table name. */
 	private String tableName;
-	
+
 	/** The dynamo. */
 	private DynamoDA<String> dynamo;
-	
+
 	/** The s3client. */
 	private AmazonS3 s3client;
 
@@ -97,7 +97,8 @@ public class S3DocumentDA
 	/**
 	 * Document exists.
 	 *
-	 * @param doc the doc
+	 * @param doc
+	 *            the doc
 	 * @return true, if successful
 	 */
 	public boolean documentExists(DocumentRecord doc)
@@ -125,7 +126,8 @@ public class S3DocumentDA
 	/**
 	 * Gets the document.
 	 *
-	 * @param url the url
+	 * @param url
+	 *            the url
 	 * @return the document
 	 */
 	public DocumentRecord getDocument(String url)
@@ -175,7 +177,8 @@ public class S3DocumentDA
 	/**
 	 * Put document.
 	 *
-	 * @param doc the doc
+	 * @param doc
+	 *            the doc
 	 */
 	public void putDocument(DocumentRecord doc)
 	{
@@ -233,7 +236,8 @@ public class S3DocumentDA
 	/**
 	 * Delete document.
 	 *
-	 * @param doc the doc
+	 * @param doc
+	 *            the doc
 	 */
 	public void deleteDocument(DocumentRecord doc)
 	{
@@ -257,7 +261,8 @@ public class S3DocumentDA
 	/**
 	 * Delete document.
 	 *
-	 * @param url the url
+	 * @param url
+	 *            the url
 	 */
 	public void deleteDocument(String url)
 	{

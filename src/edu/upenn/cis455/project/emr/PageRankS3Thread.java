@@ -35,36 +35,41 @@ import edu.upenn.cis455.project.crawler.Hash;
  */
 public class PageRankS3Thread extends Thread
 {
-	
+
 	/** The Constant URLS_TO_MERGE. */
 	private static final int URLS_TO_MERGE = 150;
-	
+
 	/** The s3 client. */
 	private static AmazonS3Client s3Client = new AmazonS3Client();
-	
+
 	/** The project url bucket. */
 	private String projectUrlBucket = "edu.upenn.cis455.project.urls";
-	
+
 	/** The page rank url bucket. */
 	private String pageRankUrlBucket = "edu.upenn.cis455.project.pagerank.urls";
-	
+
 	/** The page rank bucket. */
 	private String pageRankBucket = "edu.upenn.cis455.project.pagerank";
-	
+
 	/** The emr output bucket name. */
 	private String emrOutputBucketName = pageRankBucket;
-	
+
 	/** The emr output prefix. */
 	private String emrOutputPrefix = "output";
 
 	/**
 	 * Instantiates a new page rank s3 thread.
 	 *
-	 * @param projectUrlBucket the project url bucket
-	 * @param pageRankUrlBucket the page rank url bucket
-	 * @param pageRankBucket the page rank bucket
-	 * @param emrOutputBucketName the emr output bucket name
-	 * @param emrOutputPrefix the emr output prefix
+	 * @param projectUrlBucket
+	 *            the project url bucket
+	 * @param pageRankUrlBucket
+	 *            the page rank url bucket
+	 * @param pageRankBucket
+	 *            the page rank bucket
+	 * @param emrOutputBucketName
+	 *            the emr output bucket name
+	 * @param emrOutputPrefix
+	 *            the emr output prefix
 	 */
 	public PageRankS3Thread(String projectUrlBucket, String pageRankUrlBucket,
 			String pageRankBucket, String emrOutputBucketName,
@@ -102,8 +107,10 @@ public class PageRankS3Thread extends Thread
 	/**
 	 * Gets the object names for bucket.
 	 *
-	 * @param bucketName the bucket name
-	 * @param prefix the prefix
+	 * @param bucketName
+	 *            the bucket name
+	 * @param prefix
+	 *            the prefix
 	 * @return the object names for bucket
 	 */
 	public List<String> getObjectNamesForBucket(String bucketName, String prefix)
@@ -162,8 +169,10 @@ public class PageRankS3Thread extends Thread
 	/**
 	 * Delete object.
 	 *
-	 * @param bucketName the bucket name
-	 * @param prefix the prefix
+	 * @param bucketName
+	 *            the bucket name
+	 * @param prefix
+	 *            the prefix
 	 */
 	public void deleteObject(String bucketName, String prefix)
 	{
@@ -183,10 +192,14 @@ public class PageRankS3Thread extends Thread
 	/**
 	 * Merge url lists.
 	 *
-	 * @param inputBucketName the input bucket name
-	 * @param outputBucketName the output bucket name
-	 * @throws NoSuchAlgorithmException the no such algorithm exception
-	 * @throws JsonProcessingException the json processing exception
+	 * @param inputBucketName
+	 *            the input bucket name
+	 * @param outputBucketName
+	 *            the output bucket name
+	 * @throws NoSuchAlgorithmException
+	 *             the no such algorithm exception
+	 * @throws JsonProcessingException
+	 *             the json processing exception
 	 */
 	public void mergeUrlLists(String inputBucketName, String outputBucketName)
 			throws NoSuchAlgorithmException, JsonProcessingException
@@ -223,11 +236,15 @@ public class PageRankS3Thread extends Thread
 	/**
 	 * Write url lists.
 	 *
-	 * @param mergedUrlLists the merged url lists
-	 * @param bucketName the bucket name
+	 * @param mergedUrlLists
+	 *            the merged url lists
+	 * @param bucketName
+	 *            the bucket name
 	 * @return the string
-	 * @throws NoSuchAlgorithmException the no such algorithm exception
-	 * @throws JsonProcessingException the json processing exception
+	 * @throws NoSuchAlgorithmException
+	 *             the no such algorithm exception
+	 * @throws JsonProcessingException
+	 *             the json processing exception
 	 */
 	public String writeUrlLists(List<UrlList> mergedUrlLists, String bucketName)
 			throws NoSuchAlgorithmException, JsonProcessingException
@@ -252,8 +269,10 @@ public class PageRankS3Thread extends Thread
 	/**
 	 * Gets the url list.
 	 *
-	 * @param bucketName the bucket name
-	 * @param key the key
+	 * @param bucketName
+	 *            the bucket name
+	 * @param key
+	 *            the key
 	 * @return the url list
 	 */
 	public UrlList getUrlList(String bucketName, String key)

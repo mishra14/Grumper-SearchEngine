@@ -12,20 +12,20 @@ import java.util.Date;
  */
 public class WorkerStatus
 {
-	
+
 	/**
 	 * The Enum statusType.
 	 */
 	public static enum statusType
 	{
-		
+
 		/** The crawling. */
-		crawling, 
- /** The waiting. */
- // actively crawling
-		waiting, 
- /** The idle. */
- // no urls left to crawl
+		crawling,
+		/** The waiting. */
+		// actively crawling
+		waiting,
+		/** The idle. */
+		// no urls left to crawl
 		idle // started but crawler threads not spawned
 	};
 
@@ -50,10 +50,14 @@ public class WorkerStatus
 	/**
 	 * Instantiates a new worker status.
 	 *
-	 * @param port the port
-	 * @param lastCrawledUrl the last crawled url
-	 * @param pagesCrawled the pages crawled
-	 * @param status the status
+	 * @param port
+	 *            the port
+	 * @param lastCrawledUrl
+	 *            the last crawled url
+	 * @param pagesCrawled
+	 *            the pages crawled
+	 * @param status
+	 *            the status
 	 */
 	public WorkerStatus(String port, String lastCrawledUrl,
 			String pagesCrawled, statusType status)
@@ -80,7 +84,8 @@ public class WorkerStatus
 	/**
 	 * Sets the port.
 	 *
-	 * @param port the new port
+	 * @param port
+	 *            the new port
 	 */
 	public void setPort(String port)
 	{
@@ -100,7 +105,8 @@ public class WorkerStatus
 	/**
 	 * Sets the last crawled url.
 	 *
-	 * @param lastCrawledUrl the new last crawled url
+	 * @param lastCrawledUrl
+	 *            the new last crawled url
 	 */
 	public void setLastCrawledUrl(String lastCrawledUrl)
 	{
@@ -120,7 +126,8 @@ public class WorkerStatus
 	/**
 	 * Sets the pages crawled.
 	 *
-	 * @param pagesCrawled the new pages crawled
+	 * @param pagesCrawled
+	 *            the new pages crawled
 	 */
 	public void setPagesCrawled(String pagesCrawled)
 	{
@@ -140,7 +147,8 @@ public class WorkerStatus
 	/**
 	 * Sets the status.
 	 *
-	 * @param status the new status
+	 * @param status
+	 *            the new status
 	 */
 	public void setStatus(statusType status)
 	{
@@ -160,7 +168,8 @@ public class WorkerStatus
 	/**
 	 * Sets the timestamp.
 	 *
-	 * @param timestamp the new timestamp
+	 * @param timestamp
+	 *            the new timestamp
 	 */
 	public void setTimestamp(long timestamp)
 	{

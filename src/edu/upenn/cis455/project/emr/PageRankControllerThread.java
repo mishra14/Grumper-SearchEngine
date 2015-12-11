@@ -6,14 +6,15 @@ package edu.upenn.cis455.project.emr;
  */
 public class PageRankControllerThread extends Thread
 {
-	
+
 	/** The controller. */
 	private EmrController controller;
 
 	/**
 	 * Instantiates a new page rank controller thread.
 	 *
-	 * @param controller the controller
+	 * @param controller
+	 *            the controller
 	 */
 	public PageRankControllerThread(EmrController controller)
 	{

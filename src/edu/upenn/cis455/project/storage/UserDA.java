@@ -16,7 +16,8 @@ public class UserDA
 	/**
 	 * Gets the user.
 	 *
-	 * @param userName the user name
+	 * @param userName
+	 *            the user name
 	 * @return the user
 	 */
 	public static User getUser(String userName) // returns null if the entry
@@ -38,7 +39,8 @@ public class UserDA
 	/**
 	 * Put user.
 	 *
-	 * @param user the user
+	 * @param user
+	 *            the user
 	 * @return the user
 	 */
 	public static User putUser(User user) // returns null is the user did not
@@ -60,7 +62,8 @@ public class UserDA
 	/**
 	 * Removes the user.
 	 *
-	 * @param userName the user name
+	 * @param userName
+	 *            the user name
 	 * @return true, if successful
 	 */
 	public static boolean removeUser(String userName)

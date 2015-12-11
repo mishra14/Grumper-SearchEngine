@@ -6,21 +6,23 @@ package edu.upenn.cis455.project.bean;
  */
 public class EmrResult
 {
-	
+
 	/** The key. */
 	private String key;
-	
+
 	/** The value. */
 	private String value;
-	
+
 	/** The valid. */
 	private boolean valid;
 
 	/**
 	 * Instantiates a new emr result.
 	 *
-	 * @param key the key
-	 * @param value the value
+	 * @param key
+	 *            the key
+	 * @param value
+	 *            the value
 	 */
 	public EmrResult(String key, String value)
 	{
@@ -33,7 +35,8 @@ public class EmrResult
 	/**
 	 * Instantiates a new emr result.
 	 *
-	 * @param pairLine the pair line
+	 * @param pairLine
+	 *            the pair line
 	 */
 	public EmrResult(String pairLine)
 	{
@@ -63,7 +66,8 @@ public class EmrResult
 	/**
 	 * Sets the key.
 	 *
-	 * @param key the new key
+	 * @param key
+	 *            the new key
 	 */
 	public void setKey(String key)
 	{
@@ -83,7 +87,8 @@ public class EmrResult
 	/**
 	 * Sets the value.
 	 *
-	 * @param value the new value
+	 * @param value
+	 *            the new value
 	 */
 	public void setValue(String value)
 	{
@@ -103,7 +108,8 @@ public class EmrResult
 	/**
 	 * Sets the valid.
 	 *
-	 * @param valid the new valid
+	 * @param valid
+	 *            the new valid
 	 */
 	public void setValid(boolean valid)
 	{

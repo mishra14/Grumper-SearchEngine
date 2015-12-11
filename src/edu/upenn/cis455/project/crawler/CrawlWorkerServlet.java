@@ -30,25 +30,25 @@ public class CrawlWorkerServlet extends HttpServlet
 	/** The Constant max_size. */
 	// Max size in megabytes
 	public static final int max_size = 1;
-	
+
 	/** The Constant threshold. */
 	public static final int threshold = 5000;
 
 	/** The workers. */
 	private List<String> workers;
-	
+
 	/** The status. */
 	private WorkerStatus status;
-	
+
 	/** The ping thread. */
 	private WorkerPingThread pingThread;
-	
+
 	/** The url queue. */
 	private Queue<String> urlQueue;
-	
+
 	/** The port. */
 	private String port;
-	
+
 	/** The crawled docs. */
 	private ArrayList<DocumentRecord> crawledDocs;
 
@@ -198,7 +198,8 @@ public class CrawlWorkerServlet extends HttpServlet
 	/**
 	 * Gets the self id.
 	 *
-	 * @param ip the ip
+	 * @param ip
+	 *            the ip
 	 * @return the self id
 	 */
 	private int getSelfId(String ip)
@@ -218,7 +219,8 @@ public class CrawlWorkerServlet extends HttpServlet
 	/**
 	 * Adds the to queue.
 	 *
-	 * @param urlString the url string
+	 * @param urlString
+	 *            the url string
 	 */
 	private void addToQueue(String urlString)
 	{
@@ -229,7 +231,8 @@ public class CrawlWorkerServlet extends HttpServlet
 	/**
 	 * Update worker list.
 	 *
-	 * @param request the request
+	 * @param request
+	 *            the request
 	 */
 	private void updateWorkerList(HttpServletRequest request)
 	{

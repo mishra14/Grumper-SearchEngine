@@ -23,25 +23,28 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 /**
  * The Class DynamoDA.
  *
- * @param <T> the generic type
+ * @param <T>
+ *            the generic type
  */
 public class DynamoDA<T>
 {
 
 	/** The dynamo db. */
 	private DynamoDB dynamoDB;
-	
+
 	/** The table. */
 	private Table table;
-	
+
 	/** The type parameter class. */
 	private final Class<T> typeParameterClass;
 
 	/**
 	 * Instantiates a new dynamo da.
 	 *
-	 * @param tableName the table name
-	 * @param typeParameterClass the type parameter class
+	 * @param tableName
+	 *            the table name
+	 * @param typeParameterClass
+	 *            the type parameter class
 	 */
 	public DynamoDA(String tableName, Class<T> typeParameterClass)
 	{
@@ -89,8 +92,10 @@ public class DynamoDA<T>
 	/**
 	 * Gets the item.
 	 *
-	 * @param primaryKey the primary key
-	 * @param primaryKeyValue the primary key value
+	 * @param primaryKey
+	 *            the primary key
+	 * @param primaryKeyValue
+	 *            the primary key value
 	 * @return the item
 	 */
 	public Item getItem(String primaryKey, String primaryKeyValue)
@@ -112,9 +117,12 @@ public class DynamoDA<T>
 	/**
 	 * Gets the value.
 	 *
-	 * @param primaryKey the primary key
-	 * @param primaryKeyValue the primary key value
-	 * @param key the key
+	 * @param primaryKey
+	 *            the primary key
+	 * @param primaryKeyValue
+	 *            the primary key value
+	 * @param key
+	 *            the key
 	 * @return the value
 	 */
 	public T getValue(String primaryKey, String primaryKeyValue, String key)
@@ -144,9 +152,12 @@ public class DynamoDA<T>
 	/**
 	 * Put item.
 	 *
-	 * @param primaryKey the primary key
-	 * @param primaryKeyValue the primary key value
-	 * @param otherPairs the other pairs
+	 * @param primaryKey
+	 *            the primary key
+	 * @param primaryKeyValue
+	 *            the primary key value
+	 * @param otherPairs
+	 *            the other pairs
 	 */
 	public void putItem(String primaryKey, String primaryKeyValue,
 			Map<String, T> otherPairs)
@@ -176,10 +187,14 @@ public class DynamoDA<T>
 	/**
 	 * Put item.
 	 *
-	 * @param primaryKey the primary key
-	 * @param primaryKeyValue the primary key value
-	 * @param key the key
-	 * @param value the value
+	 * @param primaryKey
+	 *            the primary key
+	 * @param primaryKeyValue
+	 *            the primary key value
+	 * @param key
+	 *            the key
+	 * @param value
+	 *            the value
 	 */
 	public void putItem(String primaryKey, String primaryKeyValue, String key,
 			T value)
@@ -207,8 +222,10 @@ public class DynamoDA<T>
 	/**
 	 * Delete item.
 	 *
-	 * @param primaryKey the primary key
-	 * @param primaryKeyValue the primary key value
+	 * @param primaryKey
+	 *            the primary key
+	 * @param primaryKeyValue
+	 *            the primary key value
 	 */
 	public void deleteItem(String primaryKey, String primaryKeyValue)
 	{

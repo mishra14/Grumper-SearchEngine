@@ -10,7 +10,7 @@ import java.security.NoSuchAlgorithmException;
  */
 public class Hash
 {
-	
+
 	/** The max. */
 	private static BigInteger max = new BigInteger(
 			"1461501637330902918203684832716283019655932542975");
@@ -18,10 +18,13 @@ public class Hash
 	/**
 	 * Hash key.
 	 *
-	 * @param key the key
-	 * @param rangeSize the range size
+	 * @param key
+	 *            the key
+	 * @param rangeSize
+	 *            the range size
 	 * @return the int
-	 * @throws NoSuchAlgorithmException the no such algorithm exception
+	 * @throws NoSuchAlgorithmException
+	 *             the no such algorithm exception
 	 */
 	public static int hashKey(String key, int rangeSize)
 			throws NoSuchAlgorithmException
@@ -38,9 +41,11 @@ public class Hash
 	/**
 	 * Hash key.
 	 *
-	 * @param key the key
+	 * @param key
+	 *            the key
 	 * @return the string
-	 * @throws NoSuchAlgorithmException the no such algorithm exception
+	 * @throws NoSuchAlgorithmException
+	 *             the no such algorithm exception
 	 */
 	public static String hashKey(String key) throws NoSuchAlgorithmException
 	{

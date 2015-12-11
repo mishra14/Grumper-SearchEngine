@@ -22,15 +22,17 @@ public class DBWrapper
 
 	/** The env. */
 	private static Environment env;
-	
+
 	/** The store. */
 	private static EntityStore store;
 
 	/**
 	 * Open db wrapper.
 	 *
-	 * @param path the path
-	 * @throws Exception the exception
+	 * @param path
+	 *            the path
+	 * @throws Exception
+	 *             the exception
 	 */
 	public static void openDBWrapper(String path) throws Exception
 	{
@@ -57,7 +59,8 @@ public class DBWrapper
 	/**
 	 * Close db wrapper.
 	 *
-	 * @throws DatabaseException the database exception
+	 * @throws DatabaseException
+	 *             the database exception
 	 */
 	public static void closeDBWrapper() throws DatabaseException
 	{

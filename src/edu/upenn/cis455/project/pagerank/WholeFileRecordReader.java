@@ -21,16 +21,16 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 public class WholeFileRecordReader extends
 		RecordReader<NullWritable, BytesWritable>
 {
-	
+
 	/** The split. */
 	private FileSplit split;
-	
+
 	/** The conf. */
 	private Configuration conf;
-	
+
 	/** The fileread. */
 	private boolean fileread = false;
-	
+
 	/** The value. */
 	private BytesWritable value = new BytesWritable();
 

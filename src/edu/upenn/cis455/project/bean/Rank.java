@@ -14,7 +14,7 @@ public class Rank
 	/** The url. */
 	@PrimaryKey
 	private String url;
-	
+
 	/** The rank. */
 	private Float rank;
 
@@ -29,8 +29,10 @@ public class Rank
 	/**
 	 * Instantiates a new rank.
 	 *
-	 * @param url the url
-	 * @param rank the rank
+	 * @param url
+	 *            the url
+	 * @param rank
+	 *            the rank
 	 */
 	public Rank(String url, float rank)
 	{
@@ -51,7 +53,8 @@ public class Rank
 	/**
 	 * Sets the url.
 	 *
-	 * @param url the new url
+	 * @param url
+	 *            the new url
 	 */
 	public void setUrl(String url)
 	{
@@ -71,7 +74,8 @@ public class Rank
 	/**
 	 * Sets the rank.
 	 *
-	 * @param rank the new rank
+	 * @param rank
+	 *            the new rank
 	 */
 	public void setRank(Float rank)
 	{

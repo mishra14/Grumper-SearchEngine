@@ -224,10 +224,14 @@ public class CrawlMasterServlet extends HttpServlet
 	/**
 	 * Assign job.
 	 *
-	 * @param urls the urls
-	 * @param crawlThreads the crawl threads
-	 * @throws IOException Signals that an I/O exception has occurred.
-	 * @throws NoSuchAlgorithmException the no such algorithm exception
+	 * @param urls
+	 *            the urls
+	 * @param crawlThreads
+	 *            the crawl threads
+	 * @throws IOException
+	 *             Signals that an I/O exception has occurred.
+	 * @throws NoSuchAlgorithmException
+	 *             the no such algorithm exception
 	 */
 	private void assignJob(String[] urls, String crawlThreads)
 			throws IOException, NoSuchAlgorithmException
@@ -277,10 +281,14 @@ public class CrawlMasterServlet extends HttpServlet
 	/**
 	 * Send job.
 	 *
-	 * @param urlMapping the url mapping
-	 * @param activeWorkers the active workers
-	 * @param crawlThreads the crawl threads
-	 * @throws IOException Signals that an I/O exception has occurred.
+	 * @param urlMapping
+	 *            the url mapping
+	 * @param activeWorkers
+	 *            the active workers
+	 * @param crawlThreads
+	 *            the crawl threads
+	 * @throws IOException
+	 *             Signals that an I/O exception has occurred.
 	 */
 	private void sendJob(Map<String, StringBuilder> urlMapping,
 			ArrayList<String> activeWorkers, String crawlThreads)
@@ -309,10 +317,14 @@ public class CrawlMasterServlet extends HttpServlet
 	/**
 	 * Send job to worker.
 	 *
-	 * @param worker the worker
-	 * @param body the body
-	 * @throws UnknownHostException the unknown host exception
-	 * @throws IOException Signals that an I/O exception has occurred.
+	 * @param worker
+	 *            the worker
+	 * @param body
+	 *            the body
+	 * @throws UnknownHostException
+	 *             the unknown host exception
+	 * @throws IOException
+	 *             Signals that an I/O exception has occurred.
 	 */
 	private void sendJobToWorker(String worker, String body)
 			throws UnknownHostException, IOException

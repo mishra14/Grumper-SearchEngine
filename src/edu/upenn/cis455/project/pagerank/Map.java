@@ -67,7 +67,8 @@ public class Map extends Mapper<NullWritable, BytesWritable, Text, Text>
 	/**
 	 * Gets the url list.
 	 *
-	 * @param value the value
+	 * @param value
+	 *            the value
 	 * @return the url list
 	 */
 	private UrlList getUrlList(BytesWritable value)
@@ -91,7 +92,8 @@ public class Map extends Mapper<NullWritable, BytesWritable, Text, Text>
 	/**
 	 * Gets the url lists.
 	 *
-	 * @param value the value
+	 * @param value
+	 *            the value
 	 * @return the url lists
 	 */
 	private List<UrlList> getUrlLists(BytesWritable value)
