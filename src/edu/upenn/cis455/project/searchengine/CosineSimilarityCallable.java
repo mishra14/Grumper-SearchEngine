@@ -165,7 +165,7 @@ public class CosineSimilarityCallable implements Callable<HashMap<String, Float>
 	 */
 	private void setQueryNgrams(ArrayList<String> queryTerms, String tablename)
 	{	
-		if (tablename.equals("BigramIndex") && queryTerms.size() >= 2)
+		if (tablename.equals("Bigram") && queryTerms.size() >= 2)
 		{
 			System.out.println("Finding bigrams");
 			for (int i = 0; i < queryTerms.size() - 1; i++)
@@ -191,7 +191,7 @@ public class CosineSimilarityCallable implements Callable<HashMap<String, Float>
 			}
 		}
 		
-		else if (tablename.equals("UnigramIndex"))
+		else if (tablename.equals("Unigram"))
 		{
 			System.out.println("Finding unigrams");
 			this.query = queryTerms;

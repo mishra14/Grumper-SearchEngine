@@ -124,11 +124,10 @@ public class SearchEngine extends HttpServlet
 						System.out.println("including stop words");
 						queryTerms = getQueryTerms(searchQuery, true);
 						System.out.println("query terms are now: " + queryTerms);
-						//Callable<HashMap<String, Integer>>
 					}
 					
-					Callable<HashMap<String, Float>> callableCosineSimUnigrams = new CosineSimilarityCallable(queryTerms, "UnigramIndex");
-					//Callable<HashMap<String, Float>> callableCosineSimBigrams = new CosineSimilarityCallable(queryTerms, "BigramIndex");
+					Callable<HashMap<String, Float>> callableCosineSimUnigrams = new CosineSimilarityCallable(queryTerms, "Unigram");
+					//Callable<HashMap<String, Float>> callableCosineSimBigrams = new CosineSimilarityCallable(queryTerms, "Bigram");
 					//Callable<HashMap<String, Float>> callableCosineSimTrigrams = new CosineSimilarityCallable(queryTerms, "Trigram");
 					Callable<Heap> callableTitleAndMetaScores = new TitleAndMetaCallable(queryTerms);
 					
@@ -143,13 +142,17 @@ public class SearchEngine extends HttpServlet
 						//cosineSimilarityBigrams = bigramFuture.get();
 						//cosineSimilarityTrigrams = trigramFuture.get();	
 						urlTitleAndMetaScores = titleAndMetaFuture.get();
+						System.out.println("size of url and meta scores: " + urlTitleAndMetaScores.size());
 					}
 					catch (InterruptedException | ExecutionException e)
 					{
 						e.printStackTrace();
 					}
 					
-					computeScores();
+					computeTitleAndMetaScores();
+					
+					if (urlFinalScores.size() < maxResults)
+						computeContentScores();
 					getRankedResults();
 				}
 				
@@ -177,11 +180,11 @@ public class SearchEngine extends HttpServlet
 	/**
 	 * Compute scores for the matches.
 	 */
-	private void computeScores()
+	private void computeContentScores()
 	{
 		Float pageRank = new Float(1);
 		String hostname;
-		urlFinalScores = new Heap(100);
+		//urlFinalScores = new Heap(100);
 		DynamoDA<Float> pageRankDA = new DynamoDA<Float>("edu.upenn.cis455.project.pagerank", Float.class);
 		for (String url : cosineSimilarityUnigrams.keySet())
 		{
@@ -235,6 +238,59 @@ public class SearchEngine extends HttpServlet
 		}
 	}
 	
+	private void computeTitleAndMetaScores()
+	{
+		urlFinalScores = new Heap(100);
+		Float pageRank = new Float(1);
+		String hostname;
+		DynamoDA<Float> pageRankDA = new DynamoDA<Float>("edu.upenn.cis455.project.pagerank", Float.class);
+		
+		while (!urlTitleAndMetaScores.isEmpty())
+		{
+			SimpleEntry<String, Float> entry = urlTitleAndMetaScores.remove();
+			String url = entry.getKey();
+			
+			try
+			{
+				hostname = new URL(url).getHost();
+				if (pageRankMap.containsKey(hostname))
+				{
+					//System.out.println("getting pagerank from map: " + hostname);
+					pageRank = pageRankMap.get(hostname);
+				}
+				
+				else
+				{
+					//System.out.println("getting pagerank from db");
+					Item item = pageRankDA.getItem("hostName", hostname);
+					if (item != null)
+					{
+						pageRank = item.getFloat("rank");
+						pageRankMap.put(hostname, pageRank);
+						//System.out.println("pagerank of " + hostname + " = " + pageRank);
+					}
+				}
+			
+				if (cosineSimilarityUnigrams.containsKey(url))
+				{
+					urlFinalScores.add(url, (float) (0.8*cosineSimilarityUnigrams.get(url) + 0.2*pageRank));
+					cosineSimilarityUnigrams.remove(url);
+				}
+				
+				else
+				{
+					urlFinalScores.add(url, (float) (0.8*entry.getValue() + 0.2*pageRank));
+				}
+			}
+			
+			catch (MalformedURLException e)
+			{
+				System.out.println("Exception: Malformed Url " + url);
+				continue;
+			}
+		}
+	}
+	
 	/**
 	 * Gets the ranked results.
 	 *
@@ -244,7 +300,8 @@ public class SearchEngine extends HttpServlet
 	{
 		resultsForCache = new StringBuffer();
 		System.out.println("SEARCH RESULTS:");
-		
+		//System.out.println("size of results: " + urlFinalScores.size());
+		//System.out.println("result count: " + resultCount);
 		while (resultCount < maxResults && !urlFinalScores.isEmpty())
 		{
 			SimpleEntry<String, Float> finalScore = urlFinalScores.remove();
@@ -330,7 +387,7 @@ public class SearchEngine extends HttpServlet
 //		searchEngine.search("Adamson university"); 
 		//searchEngine.search("mark zuckerberg");
 		//searchEngine.search("ronaldo");
-		searchEngine.search("philadelphia");
+		searchEngine.search("adams family");
 		//searchEngine.search("university of pennsylvania");
 		//searchEngine.search("india");
 		//searchEngine.search("adamson university");
