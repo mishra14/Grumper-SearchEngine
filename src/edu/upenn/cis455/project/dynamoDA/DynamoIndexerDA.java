@@ -48,8 +48,8 @@ public class DynamoIndexerDA
 		this.tableName = tableName;
 		this.config = new DynamoDBMapperConfig(
 				new DynamoDBMapperConfig.TableNameOverride(this.tableName));
-		//db = new AmazonDynamoDBClient();
-		setupDB();
+		db = new AmazonDynamoDBClient();
+		//setupDB();
 		mapper = new DynamoDBMapper(db);
 	}
 
@@ -296,6 +296,7 @@ public class DynamoIndexerDA
 		InvertedIndex result = mapper.load(InvertedIndex.class, word,  config);
 		if (result != null)
 		{
+			System.out.println(result.toString());
 			String postingsList = result.getPostings();
 			return unmarshall(postingsList);
 		}
@@ -313,31 +314,40 @@ public class DynamoIndexerDA
 	}
 
 	private ArrayList<Postings> unmarshall(String postingsList){
-		try {
+		
 			ArrayList<Postings> list = new ArrayList<Postings>();
 			String[] allPostings = postingsList.split("\t");
-			for(String posting : allPostings){		
+			for(String posting : allPostings){	
+				String url = null;
+				try {
 				Postings postings = new Postings();
 				String[] pair = posting.trim().split(" ", 2);
 				postings.setPosting(pair[0]);
+				url = pair[0];
 				pair = pair[1].split(" ");
 				postings.setTfidf(Float.parseFloat(pair[0].trim()));
 				postings.setIdf(Float.parseFloat(pair[1].trim()));
 				list.add(postings);
+				} catch (Exception e){
+					//System.out.println("incorrect url: " + url);
+					//e.printStackTrace();
+				}
 			}
-			return list;
-		} catch (Exception e){
 			
-		}
-		return null;
+			if (!list.isEmpty())
+				return list;
+			else 
+				return null;
+		
 	}
 	
 	public static void main (String[] args){
 		DynamoIndexerDA dynamo = new DynamoIndexerDA("Unigram");
-		ArrayList<Postings> result = dynamo.loadIndex("barack");
+		ArrayList<Postings> result = dynamo.loadIndex("philadelphia");
+		System.out.println("\nnum of matches: " + result.size());
 		for (Postings index : result)
 			 {
-			 System.out.println("RESULT " + index.toString());
+			 //System.out.println("RESULT " + index.toString());
 			 }
 	}
 }

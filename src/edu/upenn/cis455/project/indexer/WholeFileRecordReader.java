@@ -21,29 +21,57 @@ import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class WholeFileRecordReader.
+ */
 public class WholeFileRecordReader  extends RecordReader<NullWritable, BytesWritable> {
+	
+	/** The split. */
 	private FileSplit split;
+	
+	/** The conf. */
 	private Configuration conf;
+	
+	/** The fileread. */
 	private boolean fileread = false;
+	
+	/** The value. */
 	private BytesWritable value = new BytesWritable();
+	
+	/** The bucket size. */
 	private int bucketSize;
+	
+	/** The Constant crawlerBucket. */
 	private static final String crawlerBucket = "test-indexer";//"edu.upenn.cis455.project.indexer.documents";
 	
+	/* (non-Javadoc)
+	 * @see org.apache.hadoop.mapreduce.RecordReader#getCurrentKey()
+	 */
 	@Override
 	public NullWritable getCurrentKey() throws IOException, InterruptedException {
 		return NullWritable.get();
 	}
 	  
 	  
+	/* (non-Javadoc)
+	 * @see org.apache.hadoop.mapreduce.RecordReader#getProgress()
+	 */
 	@Override
 	public float getProgress() throws IOException, InterruptedException {
         return 0;
 	}
 	
 	
+	/* (non-Javadoc)
+	 * @see org.apache.hadoop.mapreduce.RecordReader#close()
+	 */
 	@Override
 	public void close() throws IOException {}
 
+	/* (non-Javadoc)
+	 * @see org.apache.hadoop.mapreduce.RecordReader#initialize(org.apache.hadoop.mapreduce.InputSplit, org.apache.hadoop.mapreduce.TaskAttemptContext)
+	 */
 	@Override
     public void initialize(InputSplit split, TaskAttemptContext context)
                      throws IOException, InterruptedException {
@@ -54,6 +82,9 @@ public class WholeFileRecordReader  extends RecordReader<NullWritable, BytesWrit
              
      }
 	
+	/* (non-Javadoc)
+	 * @see org.apache.hadoop.mapreduce.RecordReader#nextKeyValue()
+	 */
 	@Override
 	public boolean nextKeyValue() throws IOException, InterruptedException{
 		if (fileread){
@@ -77,6 +108,9 @@ public class WholeFileRecordReader  extends RecordReader<NullWritable, BytesWrit
 		return true;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.apache.hadoop.mapreduce.RecordReader#getCurrentValue()
+	 */
 	@Override
 	public BytesWritable getCurrentValue() throws IOException, InterruptedException {
 		return value;

@@ -16,7 +16,6 @@ import edu.upenn.cis455.project.storage.DynamoDA;
 import edu.upenn.cis455.project.storage.DBWrapper;
 import edu.upenn.cis455.project.storage.SearchEngineCacheDA;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class SearchEngine.
  *
@@ -33,22 +32,11 @@ public class SearchEngine extends HttpServlet
 	/** The number of results found so far. */
 	private int resultCount;
 	
-	/** The cosine similarity of unigrams. */
 	private HashMap<String, Float> cosineSimilarityUnigrams;
-	
-	/** The cosine similarity of bigrams. */
 	private HashMap<String, Float> cosineSimilarityBigrams;
-	
-	/** The cosine similarity of trigrams. */
 	private HashMap<String, Float> cosineSimilarityTrigrams;
-	
-	/** The page rank map. */
 	private HashMap<String, Float> pageRankMap;
-	
-	/** The url final scores. */
-	private Heap urlTfidfScores, urlFinalScores;
-	
-	/** The results for cache. */
+	private Heap urlTfidfScores, urlTitleAndMetaScores, urlFinalScores;
 	private StringBuffer resultsForCache;
 	
 	/** The cache data accessor. */
@@ -99,7 +87,7 @@ public class SearchEngine extends HttpServlet
 	{
 		resultCount = 0;
 		String results = null;
-		ExecutorService pool = Executors.newFixedThreadPool(3);;
+		ExecutorService pool = Executors.newFixedThreadPool(4);
 		try {
 			String BDBStore = "/home/cis455/SeacheEngineCache";
 			DBWrapper.openDBWrapper(BDBStore);
@@ -108,7 +96,6 @@ public class SearchEngine extends HttpServlet
 			{
 				System.out.println("Query was cached");
 				results = getCachedResults(searchQuery);
-				
 			}
 			
 			else
@@ -119,6 +106,7 @@ public class SearchEngine extends HttpServlet
 				cosineSimilarityBigrams = new HashMap<String, Float>();
 				cosineSimilarityTrigrams = new HashMap<String, Float>();
 				urlTfidfScores = new Heap(100);
+				urlTitleAndMetaScores = new Heap(100);
 				pageRankMap = new HashMap<>();
 				
 				if (searchQuery.isEmpty())
@@ -139,19 +127,22 @@ public class SearchEngine extends HttpServlet
 						//Callable<HashMap<String, Integer>>
 					}
 					
-					Callable<HashMap<String, Float>> callableCosineSimUnigrams = new CosineSimilarityCallable(queryTerms, "Unigram");
+					Callable<HashMap<String, Float>> callableCosineSimUnigrams = new CosineSimilarityCallable(queryTerms, "UnigramIndex");
 					//Callable<HashMap<String, Float>> callableCosineSimBigrams = new CosineSimilarityCallable(queryTerms, "BigramIndex");
 					//Callable<HashMap<String, Float>> callableCosineSimTrigrams = new CosineSimilarityCallable(queryTerms, "Trigram");
+					Callable<Heap> callableTitleAndMetaScores = new TitleAndMetaCallable(queryTerms);
 					
 					Future<HashMap<String, Float>> cosSimUnigramsFuture = pool.submit(callableCosineSimUnigrams);
 					//Future<HashMap<String, Float>> bigramFuture = pool.submit(callableCosineSimBigrams);
 					//Future<HashMap<String, Float>> trigramFuture = pool.submit(callableCosineSimTrigrams);
+					Future<Heap> titleAndMetaFuture = pool.submit(callableTitleAndMetaScores);
 
 					try
 					{
 						cosineSimilarityUnigrams = cosSimUnigramsFuture.get();
 						//cosineSimilarityBigrams = bigramFuture.get();
-						//cosineSimilarityTrigrams = trigramFuture.get();						
+						//cosineSimilarityTrigrams = trigramFuture.get();	
+						urlTitleAndMetaScores = titleAndMetaFuture.get();
 					}
 					catch (InterruptedException | ExecutionException e)
 					{
@@ -338,7 +329,8 @@ public class SearchEngine extends HttpServlet
 //		searchEngine.search("pakistan");
 //		searchEngine.search("Adamson university"); 
 		//searchEngine.search("mark zuckerberg");
-		searchEngine.search("love new york");
+		//searchEngine.search("ronaldo");
+		searchEngine.search("philadelphia");
 		//searchEngine.search("university of pennsylvania");
 		//searchEngine.search("india");
 		//searchEngine.search("adamson university");

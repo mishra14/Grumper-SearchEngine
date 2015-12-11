@@ -21,12 +21,22 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.upenn.cis455.project.bean.DocumentRecord;
 import edu.upenn.cis455.project.scoring.Stemmer;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class Map_old.
+ */
 public class Map_old extends Mapper<NullWritable, BytesWritable, Text, Text>
 {
 
+	/** The url. */
 	private final Text url = new Text();
+	
+	/** The split on. */
 	private final String splitOn = " ,.?\"!-[({\t\"\'\\_";
 
+	/* (non-Javadoc)
+	 * @see org.apache.hadoop.mapreduce.Mapper#map(KEYIN, VALUEIN, org.apache.hadoop.mapreduce.Mapper.Context)
+	 */
 	@Override
 	public void map(NullWritable key, BytesWritable value, Context context)
 			throws IOException, InterruptedException
@@ -67,6 +77,12 @@ public class Map_old extends Mapper<NullWritable, BytesWritable, Text, Text>
 //		}
 	}
 
+	/**
+	 * Stem.
+	 *
+	 * @param word the word
+	 * @return the string
+	 */
 	public String stem(String word)
 	{
 		Stemmer stemmer = new Stemmer();
@@ -76,6 +92,13 @@ public class Map_old extends Mapper<NullWritable, BytesWritable, Text, Text>
 		String stemmedWord = stemmer.toString();
 		return stemmedWord;
 	}
+	
+	/**
+	 * Gets the html text.
+	 *
+	 * @param html the html
+	 * @return the html text
+	 */
 	private String getHtmlText(String html)
 	{
 		Document doc = Jsoup
@@ -84,6 +107,12 @@ public class Map_old extends Mapper<NullWritable, BytesWritable, Text, Text>
 		return textContent;
 	}
 
+	/**
+	 * Gets the document.
+	 *
+	 * @param value the value
+	 * @return the document
+	 */
 	private DocumentRecord getDocument(BytesWritable value){
 		ObjectMapper mapper = new ObjectMapper();
 		DocumentRecord doc = null;
@@ -101,6 +130,13 @@ public class Map_old extends Mapper<NullWritable, BytesWritable, Text, Text>
 		
 		return doc;
 	}
+	
+	/**
+	 * Gets the documents.
+	 *
+	 * @param value the value
+	 * @return the documents
+	 */
 	private List<DocumentRecord> getDocuments(BytesWritable value)
 	{
 		ObjectMapper mapper = new ObjectMapper();
@@ -121,6 +157,7 @@ public class Map_old extends Mapper<NullWritable, BytesWritable, Text, Text>
 		return docList;
 	}
 	
+	/** The stopwords. */
 	private static ArrayList<String> stopwords =
 			new ArrayList<String> (Arrays.asList(("a,about,above,"
 					+ "after,again,against,all,am,an,and,any,are,"

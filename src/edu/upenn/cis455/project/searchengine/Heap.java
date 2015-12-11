@@ -3,7 +3,6 @@ package edu.upenn.cis455.project.searchengine;
 import java.util.*;
 import java.util.AbstractMap.SimpleEntry;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Custom Class Heap.
  */
@@ -50,6 +49,11 @@ public class Heap
 	public void add(String key, Float value)
 	{
 		SimpleEntry<String, Float> entry = new SimpleEntry<String, Float>(key, value);
+		myHeap.add(entry);
+	}
+	
+	public void add(SimpleEntry<String, Float> entry)
+	{
 		myHeap.add(entry);
 	}
 	

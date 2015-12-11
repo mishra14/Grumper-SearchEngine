@@ -10,14 +10,29 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 import edu.upenn.cis455.project.storage.Postings;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class Reduce.
+ */
 public class Reduce extends Reducer<Text, Text, Text, Text>
 {
+	
+	/** The tf. */
 	private HashMap<String, Integer> tf = null;
+	
+	/** The Constant bucketSize. */
 	private final static int bucketSize = 119866;
+	
+	/** The Constant MAX_LIST. */
 	private final static int MAX_LIST = 2000;
+	
+	/** The df. */
 	private int df;
 	//private static final String tablename = "BigramIndex";
 
+	/* (non-Javadoc)
+	 * @see org.apache.hadoop.mapreduce.Reducer#reduce(KEYIN, java.lang.Iterable, org.apache.hadoop.mapreduce.Reducer.Context)
+	 */
 	@Override
 	protected void reduce(Text key, Iterable<Text> values, Context context)
 			throws IOException, InterruptedException
@@ -30,6 +45,12 @@ public class Reduce extends Reducer<Text, Text, Text, Text>
 		// dynamo.saveIndexWithBackOff (key.toString(), postingsList, context);
 	}
 
+	/**
+	 * Compute df.
+	 *
+	 * @param docIDs the doc i ds
+	 * @return the int
+	 */
 	private int computeDF(Iterable<Text> docIDs)
 	{
 		Set<String> docIDset = new HashSet<>();
@@ -53,6 +74,11 @@ public class Reduce extends Reducer<Text, Text, Text, Text>
 		return docIDset.size();
 	}
 
+	/**
+	 * Sort postings.
+	 *
+	 * @return the array list
+	 */
 	private ArrayList<Postings> sortPostings()
 	{
 
@@ -69,6 +95,11 @@ public class Reduce extends Reducer<Text, Text, Text, Text>
 		return postingsList;
 	}
 
+	/**
+	 * Creates the postings list.
+	 *
+	 * @return the string
+	 */
 	private String createPostingsList()
 	{
 		StringBuilder postings = new StringBuilder();
