@@ -57,36 +57,14 @@ public class CosineSimilarityCallable implements Callable<HashMap<String, Float>
 					System.out.println("accessed dynamo, result list size: " + postings.size());
 					System.out.println("found matching urls for ngram: " + term);
 					computeCosineSimilarity(term, postings);
-//					for (InvertedIndex result: resultList)
-//					{
-//						ArrayList<Postings> currPosting = result.getPostings();
-//						//System.out.println("Postings: " + currPosting);
-//						if (currPosting != null)
-//							postings.add(currPosting.get(0));
-//						if (postings.size() == 100)
-//						{
-//							computeCosineSimilarity(term, postings);
-//							postings = new ArrayList<Postings>();
-//						}
-//					}
-//					
-//					if (!postings.isEmpty())
-//					{
-//						computeCosineSimilarity(term, postings);
-//						postings = new ArrayList<Postings>();
-//					}
 				}	
 			}
-			
-			//queryDenominator = (float) Math.sqrt(queryDenominator);
-			
+						
 			for (String url: cosineSimilarity.keySet())
 			{
 				float tfidf = cosineSimilarity.get(url);
-				//System.out.println("tfidf: " + tfidf);
 				float denominator = seenUrlsDenominator.get(url);
 				float cosineSim = (float) (tfidf/(Math.sqrt(denominator + queryDenominator)));
-				//System.out.println("cosine sim: " + cosineSim);
 				cosineSimilarity.put(url, cosineSim);
 			}
 		}
@@ -165,7 +143,7 @@ public class CosineSimilarityCallable implements Callable<HashMap<String, Float>
 	 */
 	private void setQueryNgrams(ArrayList<String> queryTerms, String tablename)
 	{	
-		if (tablename.equals("BigramIndex") && queryTerms.size() >= 2)
+		if (tablename.equals("Bigram") && queryTerms.size() >= 2)
 		{
 			System.out.println("Finding bigrams");
 			for (int i = 0; i < queryTerms.size() - 1; i++)
@@ -191,7 +169,7 @@ public class CosineSimilarityCallable implements Callable<HashMap<String, Float>
 			}
 		}
 		
-		else if (tablename.equals("UnigramIndex"))
+		else if (tablename.equals("Unigram"))
 		{
 			System.out.println("Finding unigrams");
 			this.query = queryTerms;

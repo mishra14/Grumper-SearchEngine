@@ -16,12 +16,22 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.upenn.cis455.project.bean.DocumentRecord;
 import edu.upenn.cis455.project.scoring.Stemmer;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class Map.
+ */
 public class Map extends Mapper<LongWritable, Text, Text, Text>
 {
 
+	/** The url. */
 	private final Text url = new Text();
+	
+	/** The split on. */
 	private final String splitOn = "[ \t\n\r,\"\\_\\-?.:,;\'\\[\\(\\{\\!\\)\\}\\]]";
 
+	/* (non-Javadoc)
+	 * @see org.apache.hadoop.mapreduce.Mapper#map(KEYIN, VALUEIN, org.apache.hadoop.mapreduce.Mapper.Context)
+	 */
 	@Override
 	public void map(LongWritable key, Text value, Context context)
 			throws IOException, InterruptedException
@@ -54,6 +64,12 @@ public class Map extends Mapper<LongWritable, Text, Text, Text>
 		}
 	}
 
+	/**
+	 * Gets the metadata.
+	 *
+	 * @param html the html
+	 * @return the metadata
+	 */
 	public ArrayList<String> getMetadata(String html)
 	{
 		Document doc = Jsoup.parse(html);
@@ -80,6 +96,11 @@ public class Map extends Mapper<LongWritable, Text, Text, Text>
 
 	}
 	
+	/**
+	 * The main method.
+	 *
+	 * @param args the arguments
+	 */
 	public static void main(String[] args){
 		String a = " this is a smaple_sting. \"Look\". What is it?! (assked) This.is.no.cpre";
 		String[] b = a.split("[ \t\n\r,\"\\_\\-?.:,;\'\\[\\(\\{\\!\\)\\}\\]]");
@@ -91,6 +112,12 @@ public class Map extends Mapper<LongWritable, Text, Text, Text>
 	}
 	
 
+	/**
+	 * Gets the document.
+	 *
+	 * @param value the value
+	 * @return the document
+	 */
 	private DocumentRecord getDocument(Text value)
 	{
 		ObjectMapper mapper = new ObjectMapper();
@@ -109,6 +136,12 @@ public class Map extends Mapper<LongWritable, Text, Text, Text>
 		return doc;
 	}
 
+	/**
+	 * Stem.
+	 *
+	 * @param word the word
+	 * @return the string
+	 */
 	public String stem(String word)
 	{
 		Stemmer stemmer = new Stemmer();
@@ -119,6 +152,7 @@ public class Map extends Mapper<LongWritable, Text, Text, Text>
 		return stemmedWord;
 	}
 
+	/** The stopwords. */
 	private static ArrayList<String> stopwords = new ArrayList<String>(
 			Arrays.asList(("about,above,"
 					+ "after,again,against,all,am,an,and,any,are,"

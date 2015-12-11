@@ -53,34 +53,34 @@ public class DynamoIndexerDA
 		mapper = new DynamoDBMapper(db);
 	}
 
-//	private void setupDB()
-//	{
-//		File file = new File("credentials");
-//		FileReader reader;
-//		try
-//		{
-//			reader = new FileReader(file);
-//			BufferedReader br = new BufferedReader(reader);
-//			String line = br.readLine();
-//			AWSAccessKeyId = line.split("=")[1].trim();
-//			line = br.readLine();
-//			AWSSecretKey = line.split("=")[1].trim();
-//			db = new AmazonDynamoDBClient(
-//					new BasicAWSCredentials(AWSAccessKeyId, AWSSecretKey));
-//			br.close();
-//
-//		}
-//		catch (FileNotFoundException e)
-//		{
-//
-//			e.printStackTrace();
-//		}
-//		catch (IOException e)
-//		{
-//			e.printStackTrace();
-//		}
-//
-//	}
+	private void setupDB()
+	{
+		File file = new File("credentials");
+		FileReader reader;
+		try
+		{
+			reader = new FileReader(file);
+			BufferedReader br = new BufferedReader(reader);
+			String line = br.readLine();
+			AWSAccessKeyId = line.split("=")[1].trim();
+			line = br.readLine();
+			AWSSecretKey = line.split("=")[1].trim();
+			db = new AmazonDynamoDBClient(
+					new BasicAWSCredentials(AWSAccessKeyId, AWSSecretKey));
+			br.close();
+
+		}
+		catch (FileNotFoundException e)
+		{
+
+			e.printStackTrace();
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+
+	}
 
 	public void save(String word, String postings){
 		InvertedIndex index = new InvertedIndex();
@@ -97,7 +97,7 @@ public class DynamoIndexerDA
 		InvertedIndex result = mapper.load(InvertedIndex.class, word,  config);
 		if (result != null)
 		{
-			System.out.println(result.toString());
+			//System.out.println(result.toString());
 			String postingsList = result.getPostings();
 			return unmarshall(postingsList);
 		}
@@ -137,7 +137,7 @@ public class DynamoIndexerDA
 	public static void main (String[] args){
 		DynamoIndexerDA dynamo = new DynamoIndexerDA("Unigram");
 		ArrayList<Postings> result = dynamo.loadIndex("philadelphia");
-		System.out.println("\nnum of matches: " + result.size());
+		//System.out.println("\nnum of matches: " + result.size());
 		for (Postings index : result)
 			 {
 			 //System.out.println("RESULT " + index.toString());
