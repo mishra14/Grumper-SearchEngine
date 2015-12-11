@@ -1,4 +1,4 @@
-package edu.upenn.cis455.project.indexer.bigram;
+package edu.upenn.cis455.project.indexer.metadata;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -12,47 +12,25 @@ import org.apache.hadoop.mapreduce.Reducer;
 import edu.upenn.cis455.project.dynamoDA.DynamoIndexerDA;
 import edu.upenn.cis455.project.storage.Postings;
 
-// TODO: Auto-generated Javadoc
-/**
- * The Class Reduce.
- */
 public class Reduce extends Reducer<Text, Text, Text, Text>
 {
-	
-	/** The tf. */
 	private HashMap<String, Integer> tf = null;
-	
-	/** The Constant bucketSize. */
-	private final static int bucketSize = 119866;
-	
-	/** The Constant MAX_LIST. */
 	private final static int MAX_LIST = 2000;
-	
-	/** The df. */
-	private int df;
-	private static final String tablename = "Bigram";
+	private static final String tablename = "Metadata";
 
-	/* (non-Javadoc)
-	 * @see org.apache.hadoop.mapreduce.Reducer#reduce(KEYIN, java.lang.Iterable, org.apache.hadoop.mapreduce.Reducer.Context)
-	 */
 	@Override
 	protected void reduce(Text key, Iterable<Text> values, Context context)
 			throws IOException, InterruptedException
 	{
-		df = computeDF(values);
+		computeFrequecy(values);
+		// ArrayList<Postings> postingsList = createPostings();
 		String postingsList = createPostingsList();
-		//context.write(key, new Text(postingsList));
-		 DynamoIndexerDA dynamo = new DynamoIndexerDA(tablename);
-		 dynamo.save(key.toString(), postingsList);
+		// context.write(key, new Text(postingsList));
+		DynamoIndexerDA dynamo = new DynamoIndexerDA(tablename);
+		dynamo.save(key.toString(), postingsList);
 	}
 
-	/**
-	 * Compute df.
-	 *
-	 * @param docIDs the doc i ds
-	 * @return the int
-	 */
-	private int computeDF(Iterable<Text> docIDs)
+	private void computeFrequecy(Iterable<Text> docIDs)
 	{
 		Set<String> docIDset = new HashSet<>();
 		tf = new HashMap<>();
@@ -71,36 +49,21 @@ public class Reduce extends Reducer<Text, Text, Text, Text>
 				tf.put(docID, 1);
 			}
 		}
-
-		return docIDset.size();
 	}
 
-	/**
-	 * Sort postings.
-	 *
-	 * @return the array list
-	 */
 	private ArrayList<Postings> sortPostings()
 	{
 
 		ArrayList<Postings> postingsList = new ArrayList<Postings>();
 		for (String docID : tf.keySet())
 		{
-			float idf = (float) Math.log(bucketSize / df);// replace later with
-															// bucketsize
-			float tfidf = tf.get(docID) * idf;
-			Postings newPostings = new Postings(docID, tfidf, idf);
+			Postings newPostings = new Postings(docID, tf.get(docID), 0);
 			postingsList.add(newPostings);
 		}
 		Collections.sort(postingsList);
 		return postingsList;
 	}
 
-	/**
-	 * Creates the postings list.
-	 *
-	 * @return the string
-	 */
 	private String createPostingsList()
 	{
 		StringBuilder postings = new StringBuilder();
