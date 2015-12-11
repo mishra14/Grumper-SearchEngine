@@ -15,15 +15,34 @@ import org.apache.hadoop.mapreduce.Reducer;
 import edu.upenn.cis455.project.dynamoDA.DynamoIndexerDA;
 import edu.upenn.cis455.project.storage.Postings;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class Reduce.
+ */
 public class Reduce extends Reducer<Text, Text, Text, Text>
 {
+	
+	/** The log. */
 	private Log log = LogFactory.getLog(Reduce.class);
+	
+	/** The tf. */
 	private static HashMap<String, Integer> tf = null;
+	
+	/** The Constant bucketSize. */
 	private final static int bucketSize = 119866;
+	
+	/** The Constant MAX_LIST. */
 	private final static int MAX_LIST = 2000;
+	
+	/** The df. */
 	private int df;
+	
+	/** The Constant tablename. */
 	private static final String tablename = "Unigram";
 	
+	/* (non-Javadoc)
+	 * @see org.apache.hadoop.mapreduce.Reducer#reduce(KEYIN, java.lang.Iterable, org.apache.hadoop.mapreduce.Reducer.Context)
+	 */
 	@Override
 	protected void reduce(Text key, Iterable<Text> values, Context context) 
 			throws IOException, InterruptedException {
@@ -33,6 +52,12 @@ public class Reduce extends Reducer<Text, Text, Text, Text>
 		dynamo.save(key.toString(), postingsList);
     }
 	
+	/**
+	 * Compute df.
+	 *
+	 * @param docIDs the doc i ds
+	 * @return the int
+	 */
 	private int computeDF( Iterable<Text> docIDs){
 		 Set<String> docIDset = new HashSet<>();
 		 tf = new HashMap<>();
@@ -57,7 +82,12 @@ public class Reduce extends Reducer<Text, Text, Text, Text>
 	  }
 	  
 	  
-	  private ArrayList<Postings> sortPostings(){
+	  /**
+  	 * Sort postings.
+  	 *
+  	 * @return the array list
+  	 */
+  	private ArrayList<Postings> sortPostings(){
 			 
 		  ArrayList<Postings> postingsList = new ArrayList<Postings>();
 		  for(String docID: tf.keySet()){
@@ -69,7 +99,13 @@ public class Reduce extends Reducer<Text, Text, Text, Text>
 		  Collections.sort(postingsList);
 		  return postingsList; 
 	  }
-	  private String createPostingsList(){
+	  
+  	/**
+  	 * Creates the postings list.
+  	 *
+  	 * @return the string
+  	 */
+  	private String createPostingsList(){
 		  StringBuilder postings = new StringBuilder();
 		  ArrayList<Postings> postingsList = sortPostings();
 		  int size = postingsList.size() - 1;

@@ -47,6 +47,12 @@ function getSearchParameters(){
 		 var a = document.createElement('a');
 		 a.href = array[i];
 		 $(a).append(array[i]);
+		 $(a).hover(function(){
+		 	// alert("Calling hover: " +$(this).attr("href"));
+		 	// $('#preview').html('<object data="' +array[i] +'" />');
+		 	$('#box').attr('src', $(this).attr("href"));
+
+		 });
 		 // $(p).append("Result "+i);
 		// Append the anchor tag and paragraph with the description to the results div.
 		$('#searchresults').append(a,"<br><br>");
@@ -118,7 +124,7 @@ function go_to_page(page_num){
 
 <!--Google Fonts-->
 </head>
-<body>
+<body class="result_body">
 <!--search start here-->
 <div class="s-bar">
 	   <form method = "get" action="results.html">
@@ -130,9 +136,12 @@ function go_to_page(page_num){
 <!-- the input fields that will hold the variables we will use -->
 <input type='hidden' id='current_page' />
 <input type='hidden' id='show_per_page' />
-<div id="images"></div>
-<div id="searchresults"></div>
-<div id="results"></div> 
+<div class="main-container">
+<div id="searchresults" class="link-container"></div>
+<div id="preview" class="iframe-container">
+	<iframe id="box" class="iframe-preview"></iframe>
+</div>
+</div> 
 <div id='page_navigation'></div>
 
 </body>

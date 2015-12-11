@@ -6,23 +6,17 @@ import java.util.concurrent.*;
 import edu.upenn.cis455.project.dynamoDA.DynamoIndexerDA;
 import edu.upenn.cis455.project.storage.Postings;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class CosineSimilarityCallable.
  */
 public class CosineSimilarityCallable implements Callable<HashMap<String, Float>>
 {
 	
-	/** The query. */
 	private ArrayList<String> query;
-	
-	/** The  different maps used. */
 	private HashMap<String, Float> cosineSimilarity, queryTf, seenUrlsDenominator;
 	
 	/** The db accessor. */
 	private DynamoIndexerDA dbAccessor;
-	
-	/** The query denominator. */
 	private float queryDenominator;
 	
 	/**
@@ -36,7 +30,6 @@ public class CosineSimilarityCallable implements Callable<HashMap<String, Float>
 		this.query = new ArrayList<String>();
 		setQueryNgrams(query, tablename);
 		this.dbAccessor = new DynamoIndexerDA(tablename);
-
 	}	
 	
 	/* (non-Javadoc)
@@ -198,7 +191,7 @@ public class CosineSimilarityCallable implements Callable<HashMap<String, Float>
 			}
 		}
 		
-		else if (tablename.equals("Unigram"))
+		else if (tablename.equals("UnigramIndex"))
 		{
 			System.out.println("Finding unigrams");
 			this.query = queryTerms;

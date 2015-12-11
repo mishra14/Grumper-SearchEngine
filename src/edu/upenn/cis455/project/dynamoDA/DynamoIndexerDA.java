@@ -97,6 +97,7 @@ public class DynamoIndexerDA
 		InvertedIndex result = mapper.load(InvertedIndex.class, word,  config);
 		if (result != null)
 		{
+			System.out.println(result.toString());
 			String postingsList = result.getPostings();
 			return unmarshall(postingsList);
 		}
@@ -109,29 +110,37 @@ public class DynamoIndexerDA
 		
 			ArrayList<Postings> list = new ArrayList<Postings>();
 			String[] allPostings = postingsList.split("\t");
-			for(String posting : allPostings){		
+			for(String posting : allPostings){	
+				String url = null;
 				try {
 				Postings postings = new Postings();
 				String[] pair = posting.trim().split(" ", 2);
 				postings.setPosting(pair[0]);
+				url = pair[0];
 				pair = pair[1].split(" ");
 				postings.setTfidf(Float.parseFloat(pair[0].trim()));
 				postings.setIdf(Float.parseFloat(pair[1].trim()));
 				list.add(postings);
 				} catch (Exception e){
 					e.printStackTrace();
+				
 				}
-			}
-			return list;
+			}			
+			if (!list.isEmpty())
+				return list;
+			else 
+				return null;
 		
 	}
 	
-//	public static void main (String[] args){
-//		DynamoIndexerDA dynamo = new DynamoIndexerDA("Unigram");
-//		ArrayList<Postings> result = dynamo.loadIndex("barack");
-//		for (Postings index : result)
-//			 {
-//			 System.out.println("RESULT " + index.toString());
-//			 }
-//	}
+
+	public static void main (String[] args){
+		DynamoIndexerDA dynamo = new DynamoIndexerDA("Unigram");
+		ArrayList<Postings> result = dynamo.loadIndex("philadelphia");
+		System.out.println("\nnum of matches: " + result.size());
+		for (Postings index : result)
+			 {
+			 //System.out.println("RESULT " + index.toString());
+			 }
+	}
 }

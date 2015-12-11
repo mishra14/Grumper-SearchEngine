@@ -4,10 +4,19 @@ import com.sleepycat.je.DatabaseException;
 import com.sleepycat.persist.EntityStore;
 import com.sleepycat.persist.PrimaryIndex;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class SearchEngineCacheDA.
+ */
 public class SearchEngineCacheDA
 {
 	
 	
+	/**
+	 * Put cached results info.
+	 *
+	 * @param cacheInfo the cache info
+	 */
 	public void putCachedResultsInfo(CachedResultsInfo cacheInfo)
 	{
 		if (DBWrapper.getStore() != null)
@@ -21,6 +30,12 @@ public class SearchEngineCacheDA
 		}
 	}
 	
+	/**
+	 * Gets the cached results info.
+	 *
+	 * @param query the query
+	 * @return the cached results info
+	 */
 	public CachedResultsInfo getCachedResultsInfo(String query)
 	{
 		CachedResultsInfo cacheInfo = null;

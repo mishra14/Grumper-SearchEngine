@@ -23,13 +23,26 @@ import edu.upenn.cis455.project.bean.DocumentRecord;
 //import edu.upenn.cis455.project.indexer.Stemmer;
 import edu.upenn.cis455.project.scoring.Stemmer;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class Map.
+ */
 public class Map extends Mapper<LongWritable, Text, Text, Text>
 {
 
+	/** The url. */
 	private final Text url = new Text();
+	
+	/** The all words. */
 	private ArrayList<String> allWords = new ArrayList<String>();
+	
+	/** The split on. */
 	private final String splitOn = " ,.?\"!-[({\r\t\"\'\\_:;";
 
+	
+	/* (non-Javadoc)
+	 * @see org.apache.hadoop.mapreduce.Mapper#map(KEYIN, VALUEIN, org.apache.hadoop.mapreduce.Mapper.Context)
+	 */
 	@Override
 	public void map(LongWritable key, Text value, Context context)
 			throws IOException, InterruptedException
@@ -56,12 +69,23 @@ public class Map extends Mapper<LongWritable, Text, Text, Text>
 
 	}
 
+	/**
+	 * Sets the url.
+	 *
+	 * @param content the new url
+	 */
 	public void setUrl(String content)
 	{
 		this.url.set(content.trim());
 
 	}
 
+	/**
+	 * Gets the all words.
+	 *
+	 * @param content the content
+	 * @return the all words
+	 */
 	public void getAllWords(String content)
 	{
 		allWords.clear();
@@ -81,6 +105,12 @@ public class Map extends Mapper<LongWritable, Text, Text, Text>
 		}
 	}
 
+	/**
+	 * Gets the html text.
+	 *
+	 * @param html the html
+	 * @return the html text
+	 */
 	public String getHtmlText(String html)
 	{
 		html = html.replaceAll("<", " <");
@@ -91,6 +121,12 @@ public class Map extends Mapper<LongWritable, Text, Text, Text>
 		return textContent;
 	}
 
+	/**
+	 * Gets the document.
+	 *
+	 * @param value the value
+	 * @return the document
+	 */
 	private DocumentRecord getDocument(Text value)
 	{
 		ObjectMapper mapper = new ObjectMapper();
@@ -109,6 +145,12 @@ public class Map extends Mapper<LongWritable, Text, Text, Text>
 		return doc;
 	}
 
+	/**
+	 * Stem.
+	 *
+	 * @param word the word
+	 * @return the string
+	 */
 	public String stem(String word)
 	{
 		Stemmer stemmer = new Stemmer();
@@ -119,6 +161,7 @@ public class Map extends Mapper<LongWritable, Text, Text, Text>
 		return stemmedWord;
 	}
 
+	/** The stopwords. */
 	private static ArrayList<String> stopwords = new ArrayList<String>(
 			Arrays.asList(("a,about,above,"
 					+ "after,again,against,all,am,an,and,any,are,"

@@ -18,12 +18,22 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.upenn.cis455.project.bean.DocumentRecord;
 import edu.upenn.cis455.project.scoring.Stemmer;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class Map.
+ */
 public class Map extends Mapper<LongWritable, Text, Text, Text>
 {
 
+	/** The url. */
 	private final Text url = new Text();
+	
+	/** The split on. */
 	private final String splitOn = " ,.?!-[({\t\"\'\\_:;";
 
+	/* (non-Javadoc)
+	 * @see org.apache.hadoop.mapreduce.Mapper#map(KEYIN, VALUEIN, org.apache.hadoop.mapreduce.Mapper.Context)
+	 */
 	@Override
 	public void map(LongWritable key, Text value, Context context)
 			throws IOException, InterruptedException
@@ -65,6 +75,12 @@ public class Map extends Mapper<LongWritable, Text, Text, Text>
 
 	}
 
+	/**
+	 * Stem.
+	 *
+	 * @param word the word
+	 * @return the string
+	 */
 	public String stem(String word)
 	{
 		Stemmer stemmer = new Stemmer();
@@ -75,6 +91,12 @@ public class Map extends Mapper<LongWritable, Text, Text, Text>
 		return stemmedWord;
 	}
 
+	/**
+	 * Gets the html text.
+	 *
+	 * @param html the html
+	 * @return the html text
+	 */
 	private String getHtmlText(String html)
 	{
 		html = html.replaceAll("<", " <");
@@ -85,6 +107,12 @@ public class Map extends Mapper<LongWritable, Text, Text, Text>
 		return textContent;
 	}
 
+	/**
+	 * Gets the document.
+	 *
+	 * @param value the value
+	 * @return the document
+	 */
 	private DocumentRecord getDocument(Text value)
 	{
 		ObjectMapper mapper = new ObjectMapper();
@@ -103,6 +131,7 @@ public class Map extends Mapper<LongWritable, Text, Text, Text>
 		return doc;
 	}
 
+	/** The stopwords. */
 	private static ArrayList<String> stopwords = new ArrayList<String>(
 			Arrays.asList(("a,about,above,"
 					+ "after,again,against,all,am,an,and,any,are,"

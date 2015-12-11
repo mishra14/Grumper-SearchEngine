@@ -6,9 +6,16 @@ import java.util.HashMap;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMarshaller;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class PostingsMarshaller.
+ */
 public class PostingsMarshaller implements DynamoDBMarshaller<ArrayList<Postings>>
 {
 
+	/* (non-Javadoc)
+	 * @see com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMarshaller#marshall(java.lang.Object)
+	 */
 	@Override
 	public String marshall(ArrayList<Postings> postings)
 	{	
@@ -28,6 +35,9 @@ public class PostingsMarshaller implements DynamoDBMarshaller<ArrayList<Postings
 		return marshalled.toString();
 	}
 
+	/* (non-Javadoc)
+	 * @see com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMarshaller#unmarshall(java.lang.Class, java.lang.String)
+	 */
 	@Override
 	public ArrayList<Postings> unmarshall(Class<ArrayList<Postings>> clazz, String s)
 	{
