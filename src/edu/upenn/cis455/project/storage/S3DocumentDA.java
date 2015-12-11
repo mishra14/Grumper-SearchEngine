@@ -27,13 +27,28 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import edu.upenn.cis455.project.bean.DocumentRecord;
 import edu.upenn.cis455.project.crawler.Hash;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class S3DocumentDA.
+ */
 public class S3DocumentDA
 {
+	
+	/** The bucket name. */
 	private String bucketName;
+	
+	/** The table name. */
 	private String tableName;
+	
+	/** The dynamo. */
 	private DynamoDA<String> dynamo;
+	
+	/** The s3client. */
 	private AmazonS3 s3client;
 
+	/**
+	 * Instantiates a new s3 document da.
+	 */
 	public S3DocumentDA()
 	{
 		File file = new File("/usr/share/jetty/webapps/credentials");
@@ -79,6 +94,12 @@ public class S3DocumentDA
 		this.s3client = new AmazonS3Client(awsCreds);
 	}
 
+	/**
+	 * Document exists.
+	 *
+	 * @param doc the doc
+	 * @return true, if successful
+	 */
 	public boolean documentExists(DocumentRecord doc)
 	{
 		boolean result = true;
@@ -101,6 +122,12 @@ public class S3DocumentDA
 		return result;
 	}
 
+	/**
+	 * Gets the document.
+	 *
+	 * @param url the url
+	 * @return the document
+	 */
 	public DocumentRecord getDocument(String url)
 	{
 		DocumentRecord doc = null;
@@ -145,6 +172,11 @@ public class S3DocumentDA
 		return doc;
 	}
 
+	/**
+	 * Put document.
+	 *
+	 * @param doc the doc
+	 */
 	public void putDocument(DocumentRecord doc)
 	{
 		try
@@ -198,6 +230,11 @@ public class S3DocumentDA
 		}
 	}
 
+	/**
+	 * Delete document.
+	 *
+	 * @param doc the doc
+	 */
 	public void deleteDocument(DocumentRecord doc)
 	{
 
@@ -217,6 +254,11 @@ public class S3DocumentDA
 		}
 	}
 
+	/**
+	 * Delete document.
+	 *
+	 * @param url the url
+	 */
 	public void deleteDocument(String url)
 	{
 		// first get hash key from dynamo db
@@ -238,6 +280,12 @@ public class S3DocumentDA
 		}
 	}
 
+	/**
+	 * Gets the hash code from dynamo.
+	 *
+	 * @param url the url
+	 * @return the hash code from dynamo
+	 */
 	public String getHashCodeFromDynamo(String url)
 	{
 		// first get hash key from dynamo db
@@ -245,6 +293,11 @@ public class S3DocumentDA
 		return key;
 	}
 
+	/**
+	 * Delete document with hash code.
+	 *
+	 * @param hashCode the hash code
+	 */
 	public void deleteDocumentWithHashCode(String hashCode)
 	{
 		if (hashCode != null)

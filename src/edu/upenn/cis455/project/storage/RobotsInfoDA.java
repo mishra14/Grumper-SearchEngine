@@ -4,8 +4,18 @@ import com.sleepycat.persist.PrimaryIndex;
 
 import edu.upenn.cis455.project.bean.RobotsInfo;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class RobotsInfoDA.
+ */
 public class RobotsInfoDA{
 	
+	/**
+	 * Gets the info.
+	 *
+	 * @param domain the domain
+	 * @return the info
+	 */
 	public static RobotsInfo getInfo(String domain)
 	{
 		
@@ -24,6 +34,11 @@ public class RobotsInfoDA{
 	}
 	
 	
+	/**
+	 * Put info.
+	 *
+	 * @param info the info
+	 */
 	public static void putInfo(RobotsInfo info)
 	{
 		if (DBWrapper.getStore() != null)
@@ -37,6 +52,12 @@ public class RobotsInfoDA{
 		}
 	}
 	
+	/**
+	 * Contains.
+	 *
+	 * @param domain the domain
+	 * @return true, if successful
+	 */
 	public static boolean contains(String domain){
 		if(getInfo(domain)!=null)
 			return true;

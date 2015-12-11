@@ -19,6 +19,7 @@ import edu.upenn.cis455.project.http.Http;
 import edu.upenn.cis455.project.http.HttpResponse;
 import edu.upenn.cis455.project.storage.S3DocumentDA;
 
+// TODO: Auto-generated Javadoc
 /**
  * This class is master servlet class that is responsible for receiving jobs
  * from the user interface and pass the jobs to the workers.
@@ -29,23 +30,33 @@ import edu.upenn.cis455.project.storage.S3DocumentDA;
 public class CrawlMasterServlet extends HttpServlet
 {
 
+	/** The Constant serialVersionUID. */
 	static final long serialVersionUID = 455555001;
 
+	/** The socket. */
 	private Socket socket;
 
+	/** The Constant css. */
 	private static final String css = "<head>" + "<style>" + "table, th, td {"
 			+ "    border: 1px solid black;" + "    border-collapse: collapse;"
 			+ "}" + "th, td {" + "    padding: 5px;" + "}" + "</style>"
 			+ "</head>";
 
+	/** The workers. */
 	private Map<String, WorkerStatus> workers;
 
+	/** The worker list. */
 	private List<String> workerList;
 
+	/** The ping thread. */
 	private MasterPingThread pingThread;
 
+	/** The inactive interval. */
 	private static long INACTIVE_INTERVAL = 30000;
 
+	/* (non-Javadoc)
+	 * @see javax.servlet.GenericServlet#init()
+	 */
 	public void init()
 	{
 		System.out.println("Master servlet ready");
@@ -55,6 +66,9 @@ public class CrawlMasterServlet extends HttpServlet
 		pingThread.start();
 	}
 
+	/* (non-Javadoc)
+	 * @see javax.servlet.http.HttpServlet#doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+	 */
 	public void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws IOException
 	{
@@ -150,6 +164,11 @@ public class CrawlMasterServlet extends HttpServlet
 		response.flushBuffer();
 	}
 
+	/**
+	 * Gets the home page.
+	 *
+	 * @return the home page
+	 */
 	private String getHomePage()
 	{
 		return "<head><title>Master</title></head>"
@@ -159,6 +178,11 @@ public class CrawlMasterServlet extends HttpServlet
 				+ "</body>";
 	}
 
+	/**
+	 * Gets the status page.
+	 *
+	 * @return the status page
+	 */
 	private String getStatusPage()
 	{
 		StringBuilder pageContent = new StringBuilder();
@@ -200,6 +224,14 @@ public class CrawlMasterServlet extends HttpServlet
 		return pageContent.toString();
 	}
 
+	/**
+	 * Assign job.
+	 *
+	 * @param urls the urls
+	 * @param crawlThreads the crawl threads
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 * @throws NoSuchAlgorithmException the no such algorithm exception
+	 */
 	private void assignJob(String[] urls, String crawlThreads)
 			throws IOException, NoSuchAlgorithmException
 	{
@@ -250,6 +282,14 @@ public class CrawlMasterServlet extends HttpServlet
 		sendJob(urlMapping, activeWorkers, crawlThreads);
 	}
 
+	/**
+	 * Send job.
+	 *
+	 * @param urlMapping the url mapping
+	 * @param activeWorkers the active workers
+	 * @param crawlThreads the crawl threads
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	private void sendJob(Map<String, StringBuilder> urlMapping,
 			ArrayList<String> activeWorkers, String crawlThreads)
 			throws IOException
@@ -277,6 +317,14 @@ public class CrawlMasterServlet extends HttpServlet
 		}
 	}
 
+	/**
+	 * Send job to worker.
+	 *
+	 * @param worker the worker
+	 * @param body the body
+	 * @throws UnknownHostException the unknown host exception
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	private void sendJobToWorker(String worker, String body)
 			throws UnknownHostException, IOException
 	{

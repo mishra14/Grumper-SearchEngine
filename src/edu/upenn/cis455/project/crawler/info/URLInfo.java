@@ -1,17 +1,33 @@
 package edu.upenn.cis455.project.crawler.info;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class URLInfo.
+ */
 public class URLInfo
 {
+	
+	/** The host name. */
 	private String hostName;
+	
+	/** The port no. */
 	private int portNo;
+	
+	/** The file path. */
 	private String filePath;
+	
+	/** The protocol. */
 	private String protocol;
+	
+	/** The invalid. */
 	public boolean invalid;
 
 
 	/**
 	 * Constructor called with raw URL as input - parses URL to obtain host name
-	 * and file path
+	 * and file path.
+	 *
+	 * @param docURL the doc url
 	 */
 	public URLInfo(String docURL)
 	{	
@@ -75,6 +91,12 @@ public class URLInfo
 		}
 	}
 
+	/**
+	 * Instantiates a new URL info.
+	 *
+	 * @param hostName the host name
+	 * @param filePath the file path
+	 */
 	public URLInfo(String hostName, String filePath)
 	{
 		this.hostName = hostName;
@@ -82,6 +104,13 @@ public class URLInfo
 		this.portNo = 80;
 	}
 
+	/**
+	 * Instantiates a new URL info.
+	 *
+	 * @param hostName the host name
+	 * @param portNo the port no
+	 * @param filePath the file path
+	 */
 	public URLInfo(String hostName, int portNo, String filePath)
 	{
 		this.hostName = hostName;
@@ -89,36 +118,71 @@ public class URLInfo
 		this.filePath = filePath;
 	}
 
+	/**
+	 * Gets the host name.
+	 *
+	 * @return the host name
+	 */
 	public String getHostName()
 	{
 		return hostName;
 	}
 
+	/**
+	 * Sets the host name.
+	 *
+	 * @param s the new host name
+	 */
 	public void setHostName(String s)
 	{
 		hostName = s;
 	}
 
+	/**
+	 * Gets the port no.
+	 *
+	 * @return the port no
+	 */
 	public int getPortNo()
 	{
 		return portNo;
 	}
 
+	/**
+	 * Sets the port no.
+	 *
+	 * @param p the new port no
+	 */
 	public void setPortNo(int p)
 	{
 		portNo = p;
 	}
 
+	/**
+	 * Gets the file path.
+	 *
+	 * @return the file path
+	 */
 	public String getFilePath()
 	{
 		return filePath;
 	}
 
+	/**
+	 * Sets the file path.
+	 *
+	 * @param fp the new file path
+	 */
 	public void setFilePath(String fp)
 	{
 		filePath = fp;
 	}
 	
+	/**
+	 * Gets the protocol.
+	 *
+	 * @return the protocol
+	 */
 	public String getProtocol()
 	{
 		return protocol;

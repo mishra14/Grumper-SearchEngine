@@ -5,16 +5,34 @@ import java.util.regex.Pattern;
 
 import edu.upenn.cis455.project.crawler.info.RobotsTxtInfo;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class RobotParser.
+ */
 public class RobotParser
 {
+		
+		/** The comment. */
 		private Pattern comment = Pattern.compile("\\s*#.*");
+		
+		/** The info. */
 		private RobotsTxtInfo info;
 		
+		/**
+		 * Gets the info.
+		 *
+		 * @return the info
+		 */
 		public RobotsTxtInfo getInfo()
 		{
 			return info;
 		}
 
+		/**
+		 * Parses the.
+		 *
+		 * @param text the text
+		 */
 		public void parse(String text){
 			info = new RobotsTxtInfo();
 			String [] lines = text.split("\n");

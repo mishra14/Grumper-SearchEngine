@@ -9,8 +9,18 @@ import com.sleepycat.persist.PrimaryIndex;
 import edu.upenn.cis455.project.bean.Queue;
 import edu.upenn.cis455.project.bean.UrlRecord;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class UrlDA.
+ */
 public class UrlDA
 {
+	
+	/**
+	 * Gets the urls.
+	 *
+	 * @return the urls
+	 */
 	public static ArrayList<String> getURLS(){ //Return null if no queue exists
 		
 		ArrayList <String> urls = null;
@@ -50,6 +60,11 @@ public class UrlDA
 		
 	}
 	
+	/**
+	 * Put url.
+	 *
+	 * @param url the url
+	 */
 	public static void putUrl(String url){
 		
 		UrlRecord record = new UrlRecord(url);

@@ -17,15 +17,35 @@ import edu.upenn.cis455.project.bean.UrlList;
 import edu.upenn.cis455.project.storage.UrlDA;
 
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class HtmlParser.
+ */
 public class HtmlParser
 {
 	
+	/**
+	 * Parses the.
+	 *
+	 * @param content the content
+	 * @param url the url
+	 * @param urlQueue the url queue
+	 * @param urlMappings the url mappings
+	 */
 	public static void parse(String content, String url, Queue<String> urlQueue, ArrayList<UrlList> urlMappings){
 //		System.out.println("PARSING: "+url);
 		Document doc = Jsoup.parse(content, url, Parser.htmlParser());
 		extractLinks(url, doc, urlQueue, urlMappings);
 	}
 
+	/**
+	 * Extract links.
+	 *
+	 * @param parent_url the parent_url
+	 * @param doc the doc
+	 * @param urlQueue the url queue
+	 * @param urlMappings the url mappings
+	 */
 	private static void extractLinks(String parent_url, Document doc, Queue<String> urlQueue, ArrayList<UrlList> urlMappings){
 		HashSet <String> urls = new HashSet <String>();
 		Elements links = doc.select("a[href]");

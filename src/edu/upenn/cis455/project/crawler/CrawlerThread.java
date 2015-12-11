@@ -16,15 +16,39 @@ import edu.upenn.cis455.project.storage.RobotsInfoDA;
 import edu.upenn.cis455.project.storage.S3DocumentDA;
 import edu.upenn.cis455.project.storage.UrlDA;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class CrawlerThread.
+ */
 public class CrawlerThread implements Runnable{
 	
+	/** The url queue. */
 	private Queue<String> urlQueue;
+	
+	/** The status. */
 	private WorkerStatus status;
+	
+	/** The self_id. */
 	private int self_id;
+	
+	/** The num_workers. */
 	public static int num_workers;
+	
+	/** The crawled docs. */
 	private ArrayList<DocumentRecord> crawledDocs;
+	
+	/** The url mappings. */
 	private ArrayList<UrlList> urlMappings;
 	
+	/**
+	 * Instantiates a new crawler thread.
+	 *
+	 * @param urlQueue the url queue
+	 * @param status the status
+	 * @param self_id the self_id
+	 * @param crawledDocs the crawled docs
+	 * @param urlMappings the url mappings
+	 */
 	public CrawlerThread(Queue<String> urlQueue, WorkerStatus status, int self_id, ArrayList<DocumentRecord> crawledDocs, ArrayList<UrlList> urlMappings){
 		this.urlQueue = urlQueue;
 		this.status = status;
@@ -33,6 +57,9 @@ public class CrawlerThread implements Runnable{
 		this.urlMappings = urlMappings;
 	}
 	
+	/* (non-Javadoc)
+	 * @see java.lang.Runnable#run()
+	 */
 	@Override
 	public void run(){
 		

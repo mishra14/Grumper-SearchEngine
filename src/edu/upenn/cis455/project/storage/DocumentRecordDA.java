@@ -4,15 +4,21 @@ import com.sleepycat.persist.PrimaryIndex;
 
 import edu.upenn.cis455.project.bean.DocumentRecord;
 
+// TODO: Auto-generated Javadoc
 /**
- * Data Accessor class for the document entity class
- * 
- * @author cis455
+ * Data Accessor class for the document entity class.
  *
+ * @author cis455
  */
 public class DocumentRecordDA
 {
 
+	/**
+	 * Gets the document.
+	 *
+	 * @param documentId the document id
+	 * @return the document
+	 */
 	public static DocumentRecord getDocument(String documentId) // returns null
 																// if the
 	// entry wasn't
@@ -32,6 +38,12 @@ public class DocumentRecordDA
 		return document;
 	}
 
+	/**
+	 * Put document.
+	 *
+	 * @param document the document
+	 * @return the document record
+	 */
 	public static DocumentRecord putDocument(DocumentRecord document) // returns
 																		// null
 																		// is
@@ -53,6 +65,12 @@ public class DocumentRecordDA
 		return insertedDocument;
 	}
 
+	/**
+	 * Removes the document.
+	 *
+	 * @param documentId the document id
+	 * @return true, if successful
+	 */
 	public static boolean removeDocument(String documentId)
 	{
 		if (DBWrapper.getStore() != null)
@@ -68,6 +86,11 @@ public class DocumentRecordDA
 		return false;
 	}
 
+	/**
+	 * Gets the size.
+	 *
+	 * @return the size
+	 */
 	public static long getSize()
 	{
 		long result = -1;

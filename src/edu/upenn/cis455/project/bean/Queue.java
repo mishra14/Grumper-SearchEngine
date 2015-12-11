@@ -7,6 +7,7 @@ import com.sleepycat.persist.model.Persistent;
 import edu.upenn.cis455.project.crawler.FileIO;
 import edu.upenn.cis455.project.storage.UrlDA;
 
+// TODO: Auto-generated Javadoc
 /**
  * generic blocking queue implementation to hold different types of data.
  *
@@ -20,11 +21,12 @@ public class Queue<T>
 
 	/** The queue. */
 	private ArrayList<T> queue;
+	
+	/** The max. */
 	public static int MAX = 5000;
 
 	/**
 	 * Instantiates a new queue.
-	 * @param br 
 	 */
 	public Queue()
 	{
@@ -54,8 +56,8 @@ public class Queue<T>
 	/**
 	 * Enqueue.
 	 *
-	 * @param t
-	 *            the t
+	 * @param t            the t
+	 * @return true, if successful
 	 */
 	public synchronized boolean enqueue(T t)
 	{

@@ -5,8 +5,19 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class FileIO.
+ */
 public class FileIO
 {
+	
+	/**
+	 * Write url.
+	 *
+	 * @param url the url
+	 * @param idx the idx
+	 */
 	public static synchronized void writeURL(String url, int idx){
 		PrintWriter out;
 		try {

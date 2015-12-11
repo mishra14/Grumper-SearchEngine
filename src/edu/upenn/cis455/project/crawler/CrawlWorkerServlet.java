@@ -25,28 +25,57 @@ import edu.upenn.cis455.project.bean.UrlList;
 import edu.upenn.cis455.project.storage.DBWrapper;
 import edu.upenn.cis455.project.storage.QueueDA;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class CrawlWorkerServlet.
+ */
 public class CrawlWorkerServlet extends HttpServlet
 {
 
+	/** The Constant serialVersionUID. */
 	private static final long serialVersionUID = 1973672093393240348L;
 	
+	/** The Constant max_size. */
 	//Max size in megabytes
 	public static final int max_size = 1;
+	
+	/** The Constant threshold. */
 	public static final int threshold = 5000;
 	
 
+	/** The workers. */
 	private List<String> workers;
+	
+	/** The num workers. */
 	private int numWorkers;
+	
+	/** The status. */
 	private WorkerStatus status;
+	
+	/** The ping thread. */
 	private WorkerPingThread pingThread;
+	
+	/** The url queue. */
 	private Queue<String> urlQueue;
+	
+	/** The port. */
 	private String port;
+	
+	/** The crawled docs. */
 	private ArrayList<DocumentRecord> crawledDocs;
+	
+	/** The url mappings. */
 	private ArrayList<UrlList> urlMappings;
 	
+	/** The timer task. */
 	private TimerTask timerTask;
+	
+	/** The timer. */
 	private Timer timer;
 	
+	/* (non-Javadoc)
+	 * @see javax.servlet.GenericServlet#init()
+	 */
 	public void init()
 	{
 		System.out.println("crawl worker servlet started");
@@ -97,6 +126,9 @@ public class CrawlWorkerServlet extends HttpServlet
 		timer.scheduleAtFixedRate(timerTask, 0, 40000);
 	}
 	
+	/* (non-Javadoc)
+	 * @see javax.servlet.GenericServlet#destroy()
+	 */
 	public void destroy(){
 		
 		System.out.println("DESTROY METHOD CALLED!!!");
@@ -110,6 +142,9 @@ public class CrawlWorkerServlet extends HttpServlet
 		DBWrapper.closeDBWrapper();
 	}
 
+	/* (non-Javadoc)
+	 * @see javax.servlet.http.HttpServlet#doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+	 */
 	public void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws java.io.IOException
 	{
@@ -186,6 +221,12 @@ public class CrawlWorkerServlet extends HttpServlet
 		}
 	}
 
+	/**
+	 * Gets the self id.
+	 *
+	 * @param ip the ip
+	 * @return the self id
+	 */
 	private int getSelfId(String ip)
 	{
 		String local = ip+":"+this.port;
@@ -199,6 +240,11 @@ public class CrawlWorkerServlet extends HttpServlet
 		return i;
 	}
 
+	/**
+	 * Adds the to queue.
+	 *
+	 * @param urlString the url string
+	 */
 	private void addToQueue(String urlString)
 	{
 		if(urlString == null){
@@ -209,6 +255,11 @@ public class CrawlWorkerServlet extends HttpServlet
 		urlQueue.enqueueAll(new ArrayList<String>(Arrays.asList(urls)));
 	}
 
+	/**
+	 * Update worker list.
+	 *
+	 * @param request the request
+	 */
 	private void updateWorkerList(HttpServletRequest request)
 	{
 		numWorkers = Integer

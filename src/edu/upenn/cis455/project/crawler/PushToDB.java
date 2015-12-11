@@ -23,19 +23,38 @@ import edu.upenn.cis455.project.http.HttpResponse;
 import edu.upenn.cis455.project.storage.S3DocumentDA;
 import edu.upenn.cis455.project.storage.S3UrlListDA;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class PushToDB.
+ */
 public class PushToDB extends TimerTask
 {
 	
+	/** The crawled docs. */
 	private ArrayList<DocumentRecord> crawledDocs;
+	
+	/** The workers. */
 	private List<String>workers;
+	
+	/** The url mappings. */
 	private ArrayList<UrlList> urlMappings;
 	
+	/**
+	 * Instantiates a new push to db.
+	 *
+	 * @param workers the workers
+	 * @param crawledDocs the crawled docs
+	 * @param urlMappings the url mappings
+	 */
 	public PushToDB(List<String> workers, ArrayList<DocumentRecord> crawledDocs, ArrayList<UrlList> urlMappings){
 		this.crawledDocs = crawledDocs;
 		this.workers = workers;
 		this.urlMappings = urlMappings;
 	}
 	
+	/* (non-Javadoc)
+	 * @see java.util.TimerTask#run()
+	 */
 	@Override
 	public void run()
 	{

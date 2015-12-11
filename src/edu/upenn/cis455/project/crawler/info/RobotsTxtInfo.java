@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import com.sleepycat.persist.model.Persistent;
 
+// TODO: Auto-generated Javadoc
 /**
  * Class to hold information obtained by parsing robots.txt
  * 
@@ -15,14 +16,24 @@ import com.sleepycat.persist.model.Persistent;
 public class RobotsTxtInfo
 {
 
+	/** The disallowed links. */
 	private HashMap<String, ArrayList<String>> disallowedLinks;
+	
+	/** The allowed links. */
 	private HashMap<String, ArrayList<String>> allowedLinks;
 
+	/** The crawl delays. */
 	private HashMap<String, Integer> crawlDelays;
+	
+	/** The sitemap links. */
 	private ArrayList<String> sitemapLinks;
 	
+	/** The user agents. */
 	private ArrayList<String> userAgents;
 
+	/**
+	 * Instantiates a new robots txt info.
+	 */
 	public RobotsTxtInfo()
 	{
 		disallowedLinks = new HashMap<String, ArrayList<String>>();
@@ -32,6 +43,12 @@ public class RobotsTxtInfo
 		userAgents = new ArrayList<String>();
 	}
 
+	/**
+	 * Adds the disallowed link.
+	 *
+	 * @param key the key
+	 * @param value the value
+	 */
 	public void addDisallowedLink(String key, String value)
 	{
 		if (!disallowedLinks.containsKey(key))
@@ -50,6 +67,12 @@ public class RobotsTxtInfo
 		}
 	}
 
+	/**
+	 * Adds the allowed link.
+	 *
+	 * @param key the key
+	 * @param value the value
+	 */
 	public void addAllowedLink(String key, String value)
 	{
 		if (!allowedLinks.containsKey(key))
@@ -68,36 +91,76 @@ public class RobotsTxtInfo
 		}
 	}
 
+	/**
+	 * Adds the crawl delay.
+	 *
+	 * @param key the key
+	 * @param value the value
+	 */
 	public void addCrawlDelay(String key, Integer value)
 	{
 		crawlDelays.put(key, value);
 	}
 
+	/**
+	 * Adds the sitemap link.
+	 *
+	 * @param val the val
+	 */
 	public void addSitemapLink(String val)
 	{
 		sitemapLinks.add(val);
 	}
 
+	/**
+	 * Adds the user agent.
+	 *
+	 * @param key the key
+	 */
 	public void addUserAgent(String key)
 	{
 		userAgents.add(key);
 	}
 
+	/**
+	 * Contains user agent.
+	 *
+	 * @param key the key
+	 * @return true, if successful
+	 */
 	public boolean containsUserAgent(String key)
 	{
 		return userAgents.contains(key);
 	}
 
+	/**
+	 * Gets the disallowed links.
+	 *
+	 * @param key the key
+	 * @return the disallowed links
+	 */
 	public ArrayList<String> getDisallowedLinks(String key)
 	{
 		return disallowedLinks.get(key);
 	}
 
+	/**
+	 * Gets the allowed links.
+	 *
+	 * @param key the key
+	 * @return the allowed links
+	 */
 	public ArrayList<String> getAllowedLinks(String key)
 	{
 		return allowedLinks.get(key);
 	}
 
+	/**
+	 * Gets the crawl delay.
+	 *
+	 * @param key the key
+	 * @return the crawl delay
+	 */
 	public int getCrawlDelay(String key)
 	{
 		if(crawlDelays.get(key) == null){
@@ -107,6 +170,9 @@ public class RobotsTxtInfo
 		return crawlDelays.get(key);
 	}
 
+	/**
+	 * Prints the.
+	 */
 	public void print()
 	{
 		for (String userAgent : userAgents)
@@ -133,11 +199,24 @@ public class RobotsTxtInfo
 		}
 	}
 
+	/**
+	 * Crawl contain agent.
+	 *
+	 * @param key the key
+	 * @return true, if successful
+	 */
 	public boolean crawlContainAgent(String key)
 	{
 		return crawlDelays.containsKey(key);
 	}
 
+	/**
+	 * Parses the robots txt.
+	 *
+	 * @param robots the robots
+	 * @return the robots txt info
+	 * @throws NumberFormatException the number format exception
+	 */
 	public static RobotsTxtInfo parseRobotsTxt(String robots)
 			throws NumberFormatException
 	{
@@ -189,6 +268,9 @@ public class RobotsTxtInfo
 		return info;
 	}
 
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
 	@Override
 	public String toString()
 	{

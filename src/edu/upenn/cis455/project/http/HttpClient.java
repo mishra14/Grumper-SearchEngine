@@ -18,32 +18,60 @@ import edu.upenn.cis455.project.crawler.CrawlWorkerServlet;
 import edu.upenn.cis455.project.parsers.RobotParser;
 import edu.upenn.cis455.project.storage.RobotsInfoDA;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class HttpClient.
+ */
 public class HttpClient
 {
+	
+	/** The url queue. */
 	private Queue<String> urlQueue;
+	
+	/** The content_type. */
 	private String content_type = null;
+	
+	/** The response_code. */
 	public int response_code = 0;
 	
+	/**
+	 * Instantiates a new http client.
+	 *
+	 * @param urlQueue the url queue
+	 */
 	public HttpClient(Queue<String> urlQueue){
 		this.urlQueue = urlQueue;
 	}
 	
+	/**
+	 * Gets the content_type.
+	 *
+	 * @return the content_type
+	 */
 	public String getContent_type()
 	{
 		return content_type;
 	}
 
+	/**
+	 * Send head.
+	 *
+	 * @param url the url
+	 * @return true, if successful
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	public boolean sendHead(String url) throws IOException
 	{
 		return sendHead(url,null);
 	}
 	
 	/**
-	 * Sends HEAD request
-	 * @param url
+	 * Sends HEAD request.
+	 *
+	 * @param url the url
 	 * @param lastAccessed date
 	 * @return true if response code is 200
-	 * @throws IOException
+	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
 	public boolean sendHead(String url, Date lastAccessed) throws IOException
 	{
@@ -136,8 +164,10 @@ public class HttpClient
 	
 	/**
 	 * Fetch robots.txt and store in db
+	 *
 	 * @param robots url
-	 * @throws Exception 
+	 * @param domain the domain
+	 * @throws Exception the exception
 	 */
 	public void fetchRobots(String robots,String domain) throws Exception
 	{
@@ -159,11 +189,11 @@ public class HttpClient
 	}
 
 	/**
-	 * Fetches the requested document and parses the url
-	 * @param url
-	 * @param urlQueue 
+	 * Fetches the requested document and parses the url.
+	 *
+	 * @param url the url
 	 * @return the document in string format
-	 * @throws IOException
+	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
 	public String fetch(String url) throws IOException
 	{
