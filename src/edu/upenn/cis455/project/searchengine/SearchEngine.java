@@ -127,19 +127,19 @@ public class SearchEngine extends HttpServlet
 					}
 					
 					Callable<HashMap<String, Float>> callableCosineSimUnigrams = new CosineSimilarityCallable(queryTerms, "Unigram");
-					//Callable<HashMap<String, Float>> callableCosineSimBigrams = new CosineSimilarityCallable(queryTerms, "Bigram");
+					Callable<HashMap<String, Float>> callableCosineSimBigrams = new CosineSimilarityCallable(queryTerms, "Bigram");
 					//Callable<HashMap<String, Float>> callableCosineSimTrigrams = new CosineSimilarityCallable(queryTerms, "Trigram");
 					Callable<Heap> callableTitleAndMetaScores = new TitleAndMetaCallable(queryTerms);
 					
 					Future<HashMap<String, Float>> cosSimUnigramsFuture = pool.submit(callableCosineSimUnigrams);
-					//Future<HashMap<String, Float>> bigramFuture = pool.submit(callableCosineSimBigrams);
+					Future<HashMap<String, Float>> bigramFuture = pool.submit(callableCosineSimBigrams);
 					//Future<HashMap<String, Float>> trigramFuture = pool.submit(callableCosineSimTrigrams);
 					Future<Heap> titleAndMetaFuture = pool.submit(callableTitleAndMetaScores);
 
 					try
 					{
 						cosineSimilarityUnigrams = cosSimUnigramsFuture.get();
-						//cosineSimilarityBigrams = bigramFuture.get();
+						cosineSimilarityBigrams = bigramFuture.get();
 						//cosineSimilarityTrigrams = trigramFuture.get();	
 						urlTitleAndMetaScores = titleAndMetaFuture.get();
 						System.out.println("size of url and meta scores: " + urlTitleAndMetaScores.size());
@@ -395,7 +395,7 @@ public class SearchEngine extends HttpServlet
 //		searchEngine.search("Adamson university"); 
 		//searchEngine.search("mark zuckerberg");
 		//searchEngine.search("ronaldo");
-		searchEngine.search("barack obama");
+		searchEngine.search("philadelphia weather");
 		//searchEngine.search("university of pennsylvania");
 		//searchEngine.search("india");
 		//searchEngine.search("adamson university");

@@ -52,13 +52,15 @@ public class TitleAndMetaCallable implements Callable<Heap>
 		
 		for (String term : query)
 		{
-			ArrayList<Postings> postings = dbAccessor.loadIndex(term);
+			List<Postings> postings = dbAccessor.loadIndex(term);
 			if (postings == null)
 			{
 				System.out.println("No meta and title matches found for : " + term);
 				continue;
 			}
 			
+			if (postings.size() > 100)
+				postings = postings.subList(0, 100);
 			System.out.println("found title and meta matches for :" + term + " size: " + postings.size());
 			computeUrlWordMatches(postings);
 		}
@@ -77,7 +79,7 @@ public class TitleAndMetaCallable implements Callable<Heap>
 	 *
 	 * @param postings the postings
 	 */
-	private void computeUrlWordMatches(ArrayList<Postings> postings)
+	private void computeUrlWordMatches(List<Postings> postings)
 	{		
 		for (Postings posting: postings)
 		{

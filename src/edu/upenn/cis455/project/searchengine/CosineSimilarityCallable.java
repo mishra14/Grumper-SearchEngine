@@ -40,7 +40,7 @@ public class CosineSimilarityCallable implements Callable<HashMap<String, Float>
 	{
 		queryDenominator = 0;
 		System.out.println("in cosine sim callable");
-		ArrayList<Postings> postings;
+		List<Postings> postings;
 		cosineSimilarity = new HashMap<String, Float>();
 		seenUrlsDenominator = new HashMap<String, Float>();
 		
@@ -54,6 +54,8 @@ public class CosineSimilarityCallable implements Callable<HashMap<String, Float>
 				postings = dbAccessor.loadIndex(term);
 				if (postings != null)
 				{
+					if (postings.size() > 500)
+						postings = postings.subList(0, 500);
 					System.out.println("accessed dynamo, result list size: " + postings.size());
 					System.out.println("found matching urls for ngram: " + term);
 					computeCosineSimilarity(term, postings);
@@ -106,7 +108,7 @@ public class CosineSimilarityCallable implements Callable<HashMap<String, Float>
 	 * @param term the term
 	 * @param postings the postings
 	 */
-	private void computeCosineSimilarity(String term, ArrayList<Postings> postings)
+	private void computeCosineSimilarity(String term, List<Postings> postings)
 	{
 		String url;
 		float postingTfidf;
