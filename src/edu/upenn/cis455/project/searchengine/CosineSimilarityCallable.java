@@ -57,36 +57,14 @@ public class CosineSimilarityCallable implements Callable<HashMap<String, Float>
 					System.out.println("accessed dynamo, result list size: " + postings.size());
 					System.out.println("found matching urls for ngram: " + term);
 					computeCosineSimilarity(term, postings);
-//					for (InvertedIndex result: resultList)
-//					{
-//						ArrayList<Postings> currPosting = result.getPostings();
-//						//System.out.println("Postings: " + currPosting);
-//						if (currPosting != null)
-//							postings.add(currPosting.get(0));
-//						if (postings.size() == 100)
-//						{
-//							computeCosineSimilarity(term, postings);
-//							postings = new ArrayList<Postings>();
-//						}
-//					}
-//					
-//					if (!postings.isEmpty())
-//					{
-//						computeCosineSimilarity(term, postings);
-//						postings = new ArrayList<Postings>();
-//					}
 				}	
 			}
-			
-			//queryDenominator = (float) Math.sqrt(queryDenominator);
-			
+						
 			for (String url: cosineSimilarity.keySet())
 			{
 				float tfidf = cosineSimilarity.get(url);
-				//System.out.println("tfidf: " + tfidf);
 				float denominator = seenUrlsDenominator.get(url);
 				float cosineSim = (float) (tfidf/(Math.sqrt(denominator + queryDenominator)));
-				//System.out.println("cosine sim: " + cosineSim);
 				cosineSimilarity.put(url, cosineSim);
 			}
 		}

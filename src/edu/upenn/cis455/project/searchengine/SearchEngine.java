@@ -36,7 +36,7 @@ public class SearchEngine extends HttpServlet
 	private HashMap<String, Float> cosineSimilarityBigrams;
 	private HashMap<String, Float> cosineSimilarityTrigrams;
 	private HashMap<String, Float> pageRankMap;
-	private Heap urlTfidfScores, urlTitleAndMetaScores, urlFinalScores;
+	private Heap urlTfidfScores, urlTitleAndMetaScores, urlFinalScoresMeta, urlFinalScoresContent;
 	private StringBuffer resultsForCache;
 	
 	/** The cache data accessor. */
@@ -151,7 +151,7 @@ public class SearchEngine extends HttpServlet
 					
 					computeTitleAndMetaScores();
 					
-					if (urlFinalScores.size() < maxResults)
+					if (urlFinalScoresMeta.size() < maxResults)
 						computeContentScores();
 					getRankedResults();
 				}
@@ -184,7 +184,7 @@ public class SearchEngine extends HttpServlet
 	{
 		Float pageRank = new Float(1);
 		String hostname;
-		//urlFinalScores = new Heap(100);
+		urlFinalScoresContent = new Heap(100);
 		DynamoDA<Float> pageRankDA = new DynamoDA<Float>("edu.upenn.cis455.project.pagerank", Float.class);
 		for (String url : cosineSimilarityUnigrams.keySet())
 		{
@@ -228,7 +228,7 @@ public class SearchEngine extends HttpServlet
 					}
 				}
 				
-				urlFinalScores.add(url, (float) (0.8*cosineSim + 0.2*pageRank));
+				urlFinalScoresContent.add(url, (float) (0.8*cosineSim + 0.2*pageRank));
 			}
 			catch (MalformedURLException e)
 			{
@@ -240,7 +240,7 @@ public class SearchEngine extends HttpServlet
 	
 	private void computeTitleAndMetaScores()
 	{
-		urlFinalScores = new Heap(100);
+		urlFinalScoresMeta = new Heap(100);
 		Float pageRank = new Float(1);
 		String hostname;
 		DynamoDA<Float> pageRankDA = new DynamoDA<Float>("edu.upenn.cis455.project.pagerank", Float.class);
@@ -273,13 +273,13 @@ public class SearchEngine extends HttpServlet
 			
 				if (cosineSimilarityUnigrams.containsKey(url))
 				{
-					urlFinalScores.add(url, (float) (0.8*cosineSimilarityUnigrams.get(url) + 0.2*pageRank));
+					urlFinalScoresMeta.add(url, (float) (0.8*cosineSimilarityUnigrams.get(url) + 0.2*pageRank));
 					cosineSimilarityUnigrams.remove(url);
 				}
 				
 				else
 				{
-					urlFinalScores.add(url, (float) (0.8*entry.getValue() + 0.2*pageRank));
+					urlFinalScoresMeta.add(url, (float) (0.8*entry.getValue() + 0.2*pageRank));
 				}
 			}
 			
@@ -302,9 +302,17 @@ public class SearchEngine extends HttpServlet
 		System.out.println("SEARCH RESULTS:");
 		//System.out.println("size of results: " + urlFinalScores.size());
 		//System.out.println("result count: " + resultCount);
-		while (resultCount < maxResults && !urlFinalScores.isEmpty())
+		while (resultCount < maxResults && !urlFinalScoresMeta.isEmpty())
 		{
-			SimpleEntry<String, Float> finalScore = urlFinalScores.remove();
+			SimpleEntry<String, Float> finalScore = urlFinalScoresMeta.remove();
+			resultsForCache.append(finalScore.getKey() + " ");
+			System.out.println(finalScore.getKey() + ": " + String.valueOf(finalScore.getValue()));
+			resultCount++;
+		}
+		
+		while (resultCount < maxResults && !urlFinalScoresContent.isEmpty())
+		{
+			SimpleEntry<String, Float> finalScore = urlFinalScoresContent.remove();
 			resultsForCache.append(finalScore.getKey() + " ");
 			System.out.println(finalScore.getKey() + ": " + String.valueOf(finalScore.getValue()));
 			resultCount++;
@@ -387,7 +395,7 @@ public class SearchEngine extends HttpServlet
 //		searchEngine.search("Adamson university"); 
 		//searchEngine.search("mark zuckerberg");
 		//searchEngine.search("ronaldo");
-		searchEngine.search("adams family");
+		searchEngine.search("barack obama");
 		//searchEngine.search("university of pennsylvania");
 		//searchEngine.search("india");
 		//searchEngine.search("adamson university");
