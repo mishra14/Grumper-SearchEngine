@@ -27,17 +27,10 @@ public class Reduce extends Reducer<Text, Text, Text, Text>
 	@Override
 	protected void reduce(Text key, Iterable<Text> values, Context context) 
 			throws IOException, InterruptedException {
-		//setFieldsFromKey(key);
 		df = computeDF(values);
-		
 		String postingsList = createPostingsList();  
-		//context.write(key, new Text(postingsList));
-		
-//		ArrayList<Postings> postingsList = createPostings();
 		DynamoIndexerDA dynamo = new DynamoIndexerDA(tablename);
 		dynamo.save(key.toString(), postingsList);
-		//dynamo.saveIndexWithBackOff	(key.toString(), postingsList, context);
-//		dynamo.saveMultipleIndex(key.toString(), postingsList, context);
     }
 	
 	private int computeDF( Iterable<Text> docIDs){
@@ -68,7 +61,7 @@ public class Reduce extends Reducer<Text, Text, Text, Text>
 			 
 		  ArrayList<Postings> postingsList = new ArrayList<Postings>();
 		  for(String docID: tf.keySet()){
-			  float idf = (float) Math.log(bucketSize /df);// replace later with bucketsize
+			  float idf = (float) Math.log(bucketSize /df);
 			  float tfidf = tf.get(docID) * idf ;
 			  Postings newPostings = new Postings(docID, tfidf, idf);
 			  postingsList.add(newPostings);

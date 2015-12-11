@@ -28,7 +28,7 @@ public class Map extends Mapper<LongWritable, Text, Text, Text>
 
 	private final Text url = new Text();
 	private ArrayList<String> allWords = new ArrayList<String>();
-	private final String splitOn = " ,.?\"!-[({\r\t\"\'\\_:";
+	private final String splitOn = " ,.?\"!-[({\r\t\'\\_:;";
 
 	@Override
 	public void map(LongWritable key, Text value, Context context)

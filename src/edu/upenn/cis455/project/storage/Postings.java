@@ -1,7 +1,5 @@
 package edu.upenn.cis455.project.storage;
 
-import edu.upenn.cis455.project.scoring.URLTFIDF;
-
 public class Postings implements Comparable<Postings>
 {
 	String posting;

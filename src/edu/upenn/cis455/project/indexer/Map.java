@@ -22,7 +22,7 @@ public class Map extends Mapper<LongWritable, Text, Text, Text>
 {
 
 	private final Text url = new Text();
-	private final String splitOn = " ,.?\"!-[({\t\"\'\\_";
+	private final String splitOn = " ,.?!-[({\t\"\'\\_:;";
 
 	@Override
 	public void map(LongWritable key, Text value, Context context)
