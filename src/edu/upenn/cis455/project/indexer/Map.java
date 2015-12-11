@@ -29,7 +29,7 @@ public class Map extends Mapper<LongWritable, Text, Text, Text>
 	private final Text url = new Text();
 	
 	/** The split on. */
-	private final String splitOn = " ,.?\"!-[({\t\"\'\\_";
+	private final String splitOn = " ,.?!-[({\t\"\'\\_:;";
 
 	/* (non-Javadoc)
 	 * @see org.apache.hadoop.mapreduce.Mapper#map(KEYIN, VALUEIN, org.apache.hadoop.mapreduce.Mapper.Context)

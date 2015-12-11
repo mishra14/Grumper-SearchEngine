@@ -20,6 +20,7 @@ public class Map extends Mapper<LongWritable, Text, Text, Text>
 {
 
 	private final Text url = new Text();
+	private final String splitOn = "[ \t\n\r,\"\\_\\-?.:,;\'\\[\\(\\{\\!\\)\\}\\]]";
 
 	@Override
 	public void map(LongWritable key, Text value, Context context)
@@ -69,16 +70,25 @@ public class Map extends Mapper<LongWritable, Text, Text, Text>
 		ArrayList<String> metadata = new ArrayList<String>();
 
 		if (!title.isEmpty())
-			metadata.addAll(Arrays.asList(title.split("[ \t\n\r,\\-?.:,\'\"]")));
+			metadata.addAll(Arrays.asList(title.split(splitOn)));
 		if(!keywords.isEmpty())
-			metadata.addAll(Arrays.asList(keywords.split("[ \t\n\r,\\-?.:,\'\"]")));
+			metadata.addAll(Arrays.asList(keywords.split(splitOn)));
 		if (!description.isEmpty())
-			metadata.addAll(Arrays.asList(description.split("[ \t\n\r,\\-?.:,\"\']")));
+			metadata.addAll(Arrays.asList(description.split(splitOn)));
 
 		return metadata;
 
 	}
 	
+	public static void main(String[] args){
+		String a = " this is a smaple_sting. \"Look\". What is it?! (assked) This.is.no.cpre";
+		String[] b = a.split("[ \t\n\r,\"\\_\\-?.:,;\'\\[\\(\\{\\!\\)\\}\\]]");
+		
+		for(String x : b ){
+			System.out.println(x);
+		}
+		
+	}
 	
 
 	private DocumentRecord getDocument(Text value)

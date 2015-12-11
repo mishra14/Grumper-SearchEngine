@@ -6,6 +6,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
@@ -18,7 +21,6 @@ import edu.upenn.cis455.project.storage.Postings;
  */
 public class Reduce extends Reducer<Text, Text, Text, Text>
 {
-	
 	/** The tf. */
 	private HashMap<String, Integer> tf = null;
 	
@@ -30,22 +32,22 @@ public class Reduce extends Reducer<Text, Text, Text, Text>
 	
 	/** The df. */
 	private int df;
+
 	private static final String tablename = "Bigram";
 
 	/* (non-Javadoc)
 	 * @see org.apache.hadoop.mapreduce.Reducer#reduce(KEYIN, java.lang.Iterable, org.apache.hadoop.mapreduce.Reducer.Context)
 	 */
 	@Override
-	protected void reduce(Text key, Iterable<Text> values, Context context)
-			throws IOException, InterruptedException
-	{
+	protected void reduce(Text key, Iterable<Text> values, Context context) 
+			throws IOException, InterruptedException {
 		df = computeDF(values);
-		String postingsList = createPostingsList();
-		//context.write(key, new Text(postingsList));
-		 DynamoIndexerDA dynamo = new DynamoIndexerDA(tablename);
-		 dynamo.save(key.toString(), postingsList);
-	}
-
+		String postingsList = createPostingsList();  
+		DynamoIndexerDA dynamo = new DynamoIndexerDA(tablename);
+		dynamo.save(key.toString(), postingsList);
+    }
+	
+	
 	/**
 	 * Compute df.
 	 *

@@ -37,7 +37,7 @@ public class Map extends Mapper<LongWritable, Text, Text, Text>
 	private ArrayList<String> allWords = new ArrayList<String>();
 	
 	/** The split on. */
-	private final String splitOn = " ,.?\"!-[({\r\t\"\'\\_:";
+	private final String splitOn = " ,.?\"!-[({\r\t\'\\_:;";
 
 	/* (non-Javadoc)
 	 * @see org.apache.hadoop.mapreduce.Mapper#map(KEYIN, VALUEIN, org.apache.hadoop.mapreduce.Mapper.Context)

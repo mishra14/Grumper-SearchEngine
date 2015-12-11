@@ -23,9 +23,7 @@ public class Reduce extends Reducer<Text, Text, Text, Text>
 			throws IOException, InterruptedException
 	{
 		computeFrequecy(values);
-		// ArrayList<Postings> postingsList = createPostings();
 		String postingsList = createPostingsList();
-		// context.write(key, new Text(postingsList));
 		DynamoIndexerDA dynamo = new DynamoIndexerDA(tablename);
 		dynamo.save(key.toString(), postingsList);
 	}
