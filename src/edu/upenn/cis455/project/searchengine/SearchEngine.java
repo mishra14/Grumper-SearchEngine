@@ -27,7 +27,7 @@ public class SearchEngine extends HttpServlet
 	private static final long serialVersionUID = 1L;
 	
 	/** The max number of results that will be displayed. */
-	private int maxResults = 20;
+	private int maxResults = 50;
 	
 	/** The number of results found so far. */
 	private int resultCount;
