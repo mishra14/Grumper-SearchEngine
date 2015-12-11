@@ -30,6 +30,13 @@ function getSearchParameters(){
 		var array = data.split(" ");
 	
 		var arrayLength = array.length;
+
+		if (array[0]===""){
+			var img = document.createElement('img');
+			// $(p).append("Sorry! No results found! :(");
+			$(img).attr('src',"/images/deadpsy.gif")
+			$('#noresults').append(img);
+		}
 		// alert(arrayLength);
 		//how much items per page to show
 		var show_per_page = 30; 
@@ -137,6 +144,7 @@ function go_to_page(page_num){
 <input type='hidden' id='current_page' />
 <input type='hidden' id='show_per_page' />
 <div class="main-container">
+<div id="noresults"></div>
 <div id="searchresults" class="link-container"></div>
 <div id="preview" class="iframe-container">
 	<iframe id="box" class="iframe-preview"></iframe>

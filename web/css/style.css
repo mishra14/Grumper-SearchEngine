@@ -229,9 +229,17 @@ a:hover{
   text-decoration:none
 }
 
+#noresults{
+  text-align: center;
+}
+
 .link-container a{
   padding: 15px;
   width: 70%;
+}
+
+.link-container img{
+  text-align: center;
 }
 
 .main-container {
