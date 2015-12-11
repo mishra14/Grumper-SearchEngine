@@ -1,8 +1,6 @@
 package edu.upenn.cis455.project.emr;
 
 import java.util.ArrayList;
-
-import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Table;
@@ -45,7 +43,7 @@ public class PageRankDynamoThread extends Thread
 	{
 		String primaryKeyName = "hostName";
 		DynamoDB dynamoDB = new DynamoDB(new AmazonDynamoDBClient(
-				new ProfileCredentialsProvider()));
+				EmrController.getCredentials()));
 
 		ArrayList<AttributeDefinition> attributeDefinitions = new ArrayList<AttributeDefinition>();
 		attributeDefinitions.add(new AttributeDefinition().withAttributeName(
@@ -72,7 +70,7 @@ public class PageRankDynamoThread extends Thread
 	private void deleteOldTable() throws InterruptedException
 	{
 		DynamoDB dynamoDB = new DynamoDB(new AmazonDynamoDBClient(
-				new ProfileCredentialsProvider()));
+				EmrController.getCredentials()));
 		Table table = dynamoDB.getTable(tableName);
 		table.delete();
 		table.waitForDelete();
@@ -82,7 +80,7 @@ public class PageRankDynamoThread extends Thread
 			throws InterruptedException
 	{
 		DynamoDB dynamoDB = new DynamoDB(new AmazonDynamoDBClient(
-				new ProfileCredentialsProvider()));
+				EmrController.getCredentials()));
 
 		Table table = dynamoDB.getTable(tableName);
 

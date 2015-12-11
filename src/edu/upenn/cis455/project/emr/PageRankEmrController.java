@@ -15,7 +15,7 @@ public class PageRankEmrController
 	private static String emrJarPath = "s3://" + pageRankBucket
 			+ "/jar/pagerank.jar";
 	private static String emrStepName = "pagerank";
-	private static String clusterId = "j-115AWJCL45F9H";
+	//private static String clusterId = "j-115AWJCL45F9H";
 	private static String clusterName = "page rank cluster";
 	private static String ec2AccessKeyName = "test";
 	private static String tableName = pageRankBucket;

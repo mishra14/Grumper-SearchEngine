@@ -17,7 +17,6 @@ import com.amazonaws.services.dynamodbv2.document.TableWriteItems;
 import com.amazonaws.services.dynamodbv2.model.WriteRequest;
 
 import edu.upenn.cis455.project.bean.EmrResult;
-import edu.upenn.cis455.project.crawler.Hash;
 
 public class ResultUploaderThread extends Thread
 {

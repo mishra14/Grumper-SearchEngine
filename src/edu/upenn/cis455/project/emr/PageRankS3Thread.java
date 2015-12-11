@@ -32,7 +32,8 @@ import edu.upenn.cis455.project.crawler.Hash;
 public class PageRankS3Thread extends Thread
 {
 	private static final int URLS_TO_MERGE = 150;
-	private static AmazonS3Client s3Client = new AmazonS3Client();
+	private static AmazonS3Client s3Client = new AmazonS3Client(
+			EmrController.getCredentials());
 	private String projectUrlBucket = "edu.upenn.cis455.project.urls";
 	private String pageRankUrlBucket = "edu.upenn.cis455.project.pagerank.urls";
 	private String pageRankBucket = "edu.upenn.cis455.project.pagerank";
@@ -98,7 +99,7 @@ public class PageRankS3Thread extends Thread
 	{
 		List<String> oldMergedUrls = getObjectNamesForBucket(pageRankUrlBucket,
 				"");
-		//System.out.println(oldMergedUrls);
+		// System.out.println(oldMergedUrls);
 		for (String mergedUrl : oldMergedUrls)
 		{
 			deleteObject(pageRankUrlBucket, mergedUrl);
@@ -109,7 +110,7 @@ public class PageRankS3Thread extends Thread
 	{
 		List<String> results = getObjectNamesForBucket(emrOutputBucketName,
 				emrOutputPrefix);
-		//System.out.println(results);
+		// System.out.println(results);
 		for (String result : results)
 		{
 			deleteObject(emrOutputBucketName, result);

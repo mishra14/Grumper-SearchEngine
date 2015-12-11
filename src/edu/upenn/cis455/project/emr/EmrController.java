@@ -236,7 +236,7 @@ public class EmrController
 		return success;
 	}
 
-	private AWSCredentials getCredentials()
+	public static AWSCredentials getCredentials()
 	{
 		File file = new File("/usr/share/jetty/webapps/credentials");
 		String accessKey = null;
